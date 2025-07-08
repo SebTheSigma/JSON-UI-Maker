@@ -244,6 +244,7 @@ export class DraggableCanvas {
         this.canvasHolder.style.width = `${imageData.width}px`;
         this.canvasHolder.style.height = `${imageData.height}px`;
         this.canvasHolder.className = "draggable-canvas";
+        this.canvasHolder.style.zIndex = String(i * 2);
 
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
@@ -402,25 +403,36 @@ export class DraggableCanvas {
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         const widthChange: number = e.clientX - this.resizeStartX!;
+        const heightChange: number = e.clientY - this.resizeStartY!;
 
-        let newWidth: number = this.resizeStartWidth! + widthChange;
-        let newHeight: number = newWidth / this.aspectRatio;
+        let newWidth: number;
+        let newHeight: number;
 
-        if (config["boundary_constraints"]) {
-            // Determine the maximum possible width while maintaining aspect ratio
-            const maxWidth: number = containerRect.width - parseFloat(this.canvasHolder.style.left);
-            const maxHeight: number = containerRect.height - parseFloat(this.canvasHolder.style.top);
+        // If shift key is pressed, maintain aspect ratio,
+        // only if the image is a 9-slice
+        if (keyboardEvent?.shiftKey || !this.nineSlice) {
+            newWidth = this.resizeStartWidth! + widthChange;
+            newHeight = newWidth / this.aspectRatio;
 
-            // Adjust width and height proportionally
-            if (newWidth > maxWidth || newHeight > maxHeight) {
-                if (newWidth / maxWidth > newHeight / maxHeight) {
-                    newWidth = maxWidth;
-                    newHeight = newWidth / this.aspectRatio;
-                } else {
-                    newHeight = maxHeight;
-                    newWidth = newHeight * this.aspectRatio;
+            if (config["boundary_constraints"]) {
+                // Determine the maximum possible width while maintaining aspect ratio
+                const maxWidth: number = containerRect.width - parseFloat(this.canvasHolder.style.left);
+                const maxHeight: number = containerRect.height - parseFloat(this.canvasHolder.style.top);
+
+                // Adjust width and height proportionally
+                if (newWidth > maxWidth || newHeight > maxHeight) {
+                    if (newWidth / maxWidth > newHeight / maxHeight) {
+                        newWidth = maxWidth;
+                        newHeight = newWidth / this.aspectRatio;
+                    } else {
+                        newHeight = maxHeight;
+                        newWidth = newHeight * this.aspectRatio;
+                    }
                 }
             }
+        } else {
+            newWidth = this.resizeStartWidth! + widthChange;
+            newHeight = this.resizeStartHeight! + heightChange;
         }
 
         this.drawImage(newWidth, newHeight);
