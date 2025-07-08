@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON-UI Builder</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <input title="Import Pack" type="file" id="pack_importer" onchange="handleImageUpload()" webkitdirectory directory multiple/>
+    <input title="Boundary Constraints" type="checkbox" onclick="Builder.changeSettingToggle('boundary_constraints')">Boudary Constraints
+
+    <div class="main_window" id="main_window">
+        <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">
+
+        </img>
+    </div>
+
+    <div class="buttons">
+        <button type="button" onclick="Builder.addPanel()">Add panel as child to selected</button>
+        <button type="button" class="addImage">Add image
+            <div class="addImageDropdown" id="addImageDropdown">
+            </div>
+        </button>
+        <button type="button" onclick="Builder.reset()">Reset</button>
+        <button type="button" onclick="Builder.deleteSelected()">Delete Selected</button>
+    </div>
+
+    <div id="properties">
+        Width <input title="Width" type="text" id="properties_width"><br>
+        Height <input title="Height" type="text" id="properties_height"><br>
+        Left <input title="Left" type="text" id="properties_left"><br>
+        Top <input title="Top" type="text" id="properties_top"><br>
+        Layer <input title="Layer" type="text" id="properties_zIndex"><br>
+    </div>
+    
+    <script src="./dist/index.js" type="module"></script>
+</body>
+</html>

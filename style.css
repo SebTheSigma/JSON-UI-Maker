@@ -1,0 +1,101 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}  
+
+.main_window {
+    overflow: hidden;
+    position: relative;
+    width: 100vw;
+    height: calc(100vw / 1.7777777);
+}
+
+.draggable-panel {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background-color: rgb(0, 0, 255);
+    border: 2px solid black;
+    cursor: grab;
+    z-index: 100;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.draggable-canvas {
+    position: relative;
+    background-color: rgba(255, 255, 255, 0);
+    border: 2px solid black;
+    cursor: grab;
+    z-index: 100;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    image-rendering: pixelated;
+}
+
+
+.resize-handle {
+    width: 15px;
+    height: 15px;
+    background-color: rgb(128, 128, 128);
+    position: relative;
+    bottom: 0;
+    right: 0;
+    left: calc(100% - 15px);
+    top: calc(100% - 15px);
+    cursor: nwse-resize;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: column; /* Arrange elements vertically */
+    align-items: start; /* Align buttons to the left */
+    gap: 10px; /* Add spacing between buttons */
+}
+
+.addImageDropdown {
+    position: relative;
+    width: 0px; /* Start with zero width */
+    border-radius: 4px;
+    max-height: 0px;
+    overflow: hidden;
+    background-color: rgba(73, 73, 73, 0);
+    transform-origin: center right; /* Resize from the center to the right */
+    transition: width 0.5s ease, max-height 0.5s ease, background-color 0.5s ease;
+}
+
+.addImage:hover .addImageDropdown {
+    position: relative;
+    width: 150px; /* Expands outward from the center-right */
+    max-height: 250px;
+    background-color: rgba(73, 73, 73, 0.532);
+}
+
+.addImage:hover .dropdownContent {
+    visibility: visible;
+    gap: 5px;
+    text-align: left;
+    position: relative;
+    margin: 4px;
+    left: 5px;
+    top: 0px;
+    transition: left 0.5s ease;
+}
+
+.addImage:hover .dropdownContent:hover {
+    visibility: visible;
+    gap: 5px;
+    text-align: left;
+    position: relative;
+    margin: 4px;
+    left: 10px;
+    top: 0px;
+}
+
+.dropdownContent {
+    visibility: hidden;
+}

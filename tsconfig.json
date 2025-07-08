@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "target": "ES2022",
+        "module": "es2022",
+        "moduleResolution": "node",
+        "outDir": "./dist",
+        "rootDir": "./src",
+        "declaration": true,
+        "declarationDir": "./dist",
+        "sourceMap": true,
+        "declarationMap": false,
+        "lib": ["ES2022", "DOM"],
+        "allowSyntheticDefaultImports": true,
+        "noUncheckedSideEffectImports": true,
+        "forceConsistentCasingInFileNames": true,
+        "strict": true,
+        "noUncheckedIndexedAccess": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true
+    }
+}
