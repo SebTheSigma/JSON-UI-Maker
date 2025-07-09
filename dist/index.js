@@ -1,8 +1,7 @@
-"use strict";
 /**
  * @type {KeyboardEvent}
  */
-let keyboardEvent = new KeyboardEvent("keypress");
+export let keyboardEvent = new KeyboardEvent("keypress");
 window.addEventListener("keydown", (e) => {
     keyboardEvent = e;
 });
@@ -12,11 +11,11 @@ window.addEventListener("keypress", (e) => {
 window.addEventListener("keyup", (e) => {
     keyboardEvent = e;
 });
-let selectedElement = undefined;
-const config = {
+export let selectedElement = undefined;
+export const config = {
     boundary_constraints: false,
 };
-class DraggablePanel {
+export class DraggablePanel {
     container;
     panel;
     resizeHandle;
@@ -164,7 +163,7 @@ class DraggablePanel {
         this.isResizing = false;
     }
 }
-class DraggableCanvas {
+export class DraggableCanvas {
     imageData;
     nineSlice;
     container;
@@ -202,6 +201,7 @@ class DraggableCanvas {
         this.canvasHolder.style.width = `${imageData.width}px`;
         this.canvasHolder.style.height = `${imageData.height}px`;
         this.canvasHolder.className = "draggable-canvas";
+        this.canvasHolder.style.zIndex = String(i * 2);
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
         const rect = container.getBoundingClientRect();
@@ -331,23 +331,35 @@ class DraggableCanvas {
         e.stopPropagation(); // Prevent event from bubbling to parent
         const containerRect = this.container.getBoundingClientRect();
         const widthChange = e.clientX - this.resizeStartX;
-        let newWidth = this.resizeStartWidth + widthChange;
-        let newHeight = newWidth / this.aspectRatio;
-        if (config["boundary_constraints"]) {
-            // Determine the maximum possible width while maintaining aspect ratio
-            const maxWidth = containerRect.width - parseFloat(this.canvasHolder.style.left);
-            const maxHeight = containerRect.height - parseFloat(this.canvasHolder.style.top);
-            // Adjust width and height proportionally
-            if (newWidth > maxWidth || newHeight > maxHeight) {
-                if (newWidth / maxWidth > newHeight / maxHeight) {
-                    newWidth = maxWidth;
-                    newHeight = newWidth / this.aspectRatio;
-                }
-                else {
-                    newHeight = maxHeight;
-                    newWidth = newHeight * this.aspectRatio;
+        const heightChange = e.clientY - this.resizeStartY;
+        let newWidth;
+        let newHeight;
+        // If shift key is pressed, maintain aspect ratio,
+        // only if the image is a 9-slice
+        if (keyboardEvent?.shiftKey || !this.nineSlice) {
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = newWidth / this.aspectRatio;
+            if (config["boundary_constraints"]) {
+                // Determine the maximum possible width while maintaining aspect ratio
+                const maxWidth = containerRect.width - parseFloat(this.canvasHolder.style.left);
+                const maxHeight = containerRect.height - parseFloat(this.canvasHolder.style.top);
+                // Adjust width and height proportionally
+                if (newWidth > maxWidth || newHeight > maxHeight) {
+                    if (newWidth / maxWidth > newHeight / maxHeight) {
+                        newWidth = maxWidth;
+                        newHeight = newWidth / this.aspectRatio;
+                    }
+                    else {
+                        newHeight = maxHeight;
+                        newWidth = newHeight * this.aspectRatio;
+                    }
                 }
             }
+        }
+        else {
+            console.log(1);
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = this.resizeStartHeight + heightChange;
         }
         this.drawImage(newWidth, newHeight);
     }
@@ -379,7 +391,7 @@ class DraggableCanvas {
         this.canvasHolder.style.height = `${height}px`;
     }
 }
-class Nineslice {
+export class Nineslice {
     static ninesliceResize({ nineslice_size, base_size }, pixelArray, newWidth, newHeight) {
         const [left, top, right, bottom] = nineslice_size;
         const [baseWidth, baseHeight] = base_size;
@@ -398,7 +410,7 @@ class Nineslice {
                 output[idx + i] = rgba[i];
             }
         }
-        const stretch = (srcX, srcY, srcW, srcH, destX, destY, destW, destH) => {
+        function stretch(srcX, srcY, srcW, srcH, destX, destY, destW, destH) {
             for (let y = 0; y < destH; y++) {
                 const sampleY = srcH === 1 ? srcY : srcY + Math.floor((y * srcH) / destH);
                 for (let x = 0; x < destW; x++) {
@@ -407,7 +419,7 @@ class Nineslice {
                     setPixel(destX + x, destY + y, pixel);
                 }
             }
-        };
+        }
         // Calculate middle region sizes
         const midSrcW = baseWidth - left - right;
         const midSrcH = baseHeight - top - bottom;
@@ -434,8 +446,8 @@ class Nineslice {
         return output;
     }
 }
-const panelContainer = document.getElementById("main_window");
-class Builder {
+export const panelContainer = document.getElementById("main_window");
+export class Builder {
     static addPanel() {
         new DraggablePanel(selectedElement ?? panelContainer);
     }
@@ -455,7 +467,6 @@ class Builder {
         console.log(`Settings: ${JSON.stringify(config)}`);
     }
     static addImage(imageName) {
-        /** @type {{ png?: ImageData, json?: NinesliceData }} */
         const imageData = images.get(imageName);
         // Checks if the image is there
         if (!imageData?.png)
@@ -464,7 +475,7 @@ class Builder {
         this.addCanvas(imageData.png, imageData.json);
     }
 }
-function initProperties() {
+export function initProperties() {
     const properties = document.getElementById("properties");
     let changingNode;
     for (let node of Array.from(properties.childNodes)) {
@@ -503,13 +514,13 @@ function initProperties() {
     }, 50);
 }
 initProperties();
-var images = new Map();
-function updateImageDropdown() {
+export var images = new Map();
+export function updateImageDropdown() {
     const dropdown = document.getElementById("addImageDropdown");
     // Removes all dropdown options
     dropdown.innerHTML = "";
     // Adds the dropdown options
-    for (let [fileName, data] of images.entries()) {
+    for (const [fileName, data] of images.entries()) {
         console.log(fileName);
         const fileNameText = document.createElement("div");
         fileNameText.className = "dropdownContent";
@@ -520,7 +531,7 @@ function updateImageDropdown() {
         dropdown.appendChild(fileNameText);
     }
 }
-function handleImageUpload() {
+export function handleImageUpload() {
     const fileInput = document.getElementById("pack_importer");
     if (!fileInput?.files)
         return;

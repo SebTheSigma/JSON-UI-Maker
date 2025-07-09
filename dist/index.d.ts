@@ -1,12 +1,12 @@
 /**
  * @type {KeyboardEvent}
  */
-declare let keyboardEvent: KeyboardEvent;
-declare let selectedElement: HTMLElement | undefined;
-declare const config: {
+export declare let keyboardEvent: KeyboardEvent;
+export declare let selectedElement: HTMLElement | undefined;
+export declare const config: {
     boundary_constraints: boolean;
 };
-declare class DraggablePanel {
+export declare class DraggablePanel {
     container: HTMLElement;
     panel: HTMLElement;
     resizeHandle: HTMLElement;
@@ -33,11 +33,11 @@ declare class DraggablePanel {
     resize(e: MouseEvent): void;
     stopResize(): void;
 }
-interface NinesliceData {
+export interface NinesliceData {
     nineslice_size: [left: number, top: number, right: number, bottom: number];
     base_size: [width: number, height: number];
 }
-declare class DraggableCanvas {
+export declare class DraggableCanvas {
     imageData: ImageData;
     nineSlice?: NinesliceData;
     container: HTMLElement;
@@ -74,11 +74,11 @@ declare class DraggableCanvas {
      */
     drawImage(width: number, height: number): void;
 }
-declare class Nineslice {
+export declare class Nineslice {
     static ninesliceResize({ nineslice_size, base_size }: NinesliceData, pixelArray: Uint8ClampedArray<ArrayBufferLike>, newWidth: number, newHeight: number): Uint8ClampedArray<ArrayBuffer>;
 }
-declare const panelContainer: HTMLElement | null;
-declare class Builder {
+export declare const panelContainer: HTMLElement | null;
+export declare class Builder {
     static addPanel(): void;
     static addCanvas(imageData: ImageData, nineSlice?: NinesliceData): void;
     static reset(): void;
@@ -86,10 +86,15 @@ declare class Builder {
     static changeSettingToggle(setting: keyof typeof config): void;
     static addImage(imageName: string): void;
 }
-declare function initProperties(): void;
-declare var images: Map<string, {
+export declare function initProperties(): void;
+export declare var images: Map<string, {
     png?: ImageData;
     json?: NinesliceData;
 }>;
-declare function updateImageDropdown(): void;
-declare function handleImageUpload(): void;
+export declare function updateImageDropdown(): void;
+export declare function handleImageUpload(): void;
+declare global {
+    namespace globalThis {
+        function handleImageUpload(): void;
+    }
+}

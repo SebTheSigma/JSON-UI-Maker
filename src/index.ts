@@ -431,6 +431,7 @@ export class DraggableCanvas {
                 }
             }
         } else {
+            console.log(1)
             newWidth = this.resizeStartWidth! + widthChange;
             newHeight = this.resizeStartHeight! + heightChange;
         }
