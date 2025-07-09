@@ -1,3 +1,5 @@
+import { Converter } from "./converter.js";
+console.log('Script Loaded');
 /**
  * @type {KeyboardEvent}
  */
@@ -372,10 +374,10 @@ export class DraggableCanvas {
      * @param {number} height
      */
     drawImage(width, height) {
-        this.canvas.width = Math.floor(width);
-        this.canvas.height = Math.floor(height);
         if (this.nineSlice) {
             const pixels = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, Math.floor(width), Math.floor(height));
+            this.canvas.width = Math.floor(width);
+            this.canvas.height = Math.floor(height);
             const newImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
             // Draws the image
             const ctx = this.canvas.getContext("2d");
@@ -597,4 +599,6 @@ export function handleImageUpload() {
     }
 }
 window.handleImageUpload = handleImageUpload;
+window.Builder = Builder;
+window.Converter = Converter;
 //# sourceMappingURL=index.js.map

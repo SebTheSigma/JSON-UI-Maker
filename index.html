@@ -24,6 +24,7 @@
         </button>
         <button type="button" onclick="Builder.reset()">Reset</button>
         <button type="button" onclick="Builder.deleteSelected()">Delete Selected</button>
+        <button type="button" onclick="console.log(JSON.stringify(Converter.test(document.getElementById('main_window')), null, 2))">Test Button</button>
     </div>
 
     <div id="properties">
@@ -35,5 +36,6 @@
     </div>
     
     <script src="./dist/index.js" type="module"></script>
+    <script src="./dist/converter.js" type="module"></script>
 </body>
 </html>

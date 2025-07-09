@@ -1,3 +1,7 @@
+import { Converter } from "./converter.js";
+console.log('Script Loaded')
+
+
 /**
  * @type {KeyboardEvent}
  */
@@ -449,8 +453,6 @@ export class DraggableCanvas {
      * @param {number} height
      */
     public drawImage(width: number, height: number): void {
-        this.canvas.width = Math.floor(width);
-        this.canvas.height = Math.floor(height);
 
         if (this.nineSlice) {
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
@@ -459,6 +461,8 @@ export class DraggableCanvas {
                 Math.floor(width),
                 Math.floor(height)
             );
+            this.canvas.width = Math.floor(width);
+            this.canvas.height = Math.floor(height);
             const newImageData: ImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
 
             // Draws the image
@@ -741,9 +745,14 @@ export function handleImageUpload(): void {
 }
 
 declare global {
-    namespace globalThis {
-        function handleImageUpload(): void;
+    interface Window {
+        Builder: typeof Builder;
+        Converter: typeof Converter;
+        handleImageUpload: () => void;
     }
 }
 
+
 window.handleImageUpload = handleImageUpload;
+window.Builder = Builder;
+window.Converter = Converter;

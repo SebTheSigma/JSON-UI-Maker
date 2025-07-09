@@ -1,3 +1,4 @@
+import { Converter } from "./converter.js";
 /**
  * @type {KeyboardEvent}
  */
@@ -94,7 +95,9 @@ export declare var images: Map<string, {
 export declare function updateImageDropdown(): void;
 export declare function handleImageUpload(): void;
 declare global {
-    namespace globalThis {
-        function handleImageUpload(): void;
+    interface Window {
+        Builder: typeof Builder;
+        Converter: typeof Converter;
+        handleImageUpload: () => void;
     }
 }
