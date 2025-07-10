@@ -8,7 +8,8 @@
 </head>
 <body>
     <input title="Import Pack" type="file" id="pack_importer" onchange="handlePackUpload()" webkitdirectory directory multiple/>
-    <input title="Boundary Constraints" type="checkbox" onclick="Builder.changeSettingToggle('boundary_constraints')">Boudary Constraints
+    <input title="Boundary Constraints" type="checkbox" onclick="Builder.setSettingToggle('boundary_constraints', this.checked)">Boudary Constraints
+    <input title="Boundary Constraints" type="number" oninput="Builder.setSettingToggle('arrow_key_move_amount', this.value)">Arrow Move Amount
 
     <div class="main_window" id="main_window">
         <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">
