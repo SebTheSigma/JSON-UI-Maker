@@ -228,7 +228,7 @@ export class DraggableCanvas {
     /**
      * @param {HTMLElement} container
      */
-    public constructor(container: HTMLElement, imageData: ImageData, nineSlice?: NinesliceData) {
+    public constructor(container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData) {
         console.log(`Dimensions: ${imageData.width} ${imageData.height}`);
 
         let lastParent: HTMLElement | null = container;
@@ -260,6 +260,9 @@ export class DraggableCanvas {
         this.canvas.style.height = `${imageData.height}px`;
         this.canvas.width = imageData.width;
         this.canvas.height = imageData.height;
+
+        // Gives it a filename that can be read later while converting
+        (this.canvas as any).imageName = imageName;
 
         // Draws the image
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
@@ -561,8 +564,8 @@ export class Builder {
         new DraggablePanel(selectedElement ?? panelContainer!);
     }
 
-    public static addCanvas(imageData: ImageData, nineSlice?: NinesliceData): void {
-        new DraggableCanvas(selectedElement ?? panelContainer!, imageData, nineSlice);
+    public static addCanvas(imageData: ImageData, nineSlice?: NinesliceData, imageName: string): void {
+        new DraggableCanvas(selectedElement ?? panelContainer!, imageData, imageName, nineSlice);
     }
 
     public static reset(): void {
@@ -588,7 +591,7 @@ export class Builder {
         if (!imageData?.png) return;
 
         // Checks if the image is a nineslice
-        this.addCanvas(imageData.png, imageData.json);
+        this.addCanvas(imageData.png, imageData.json, imageName);
     }
 }
 

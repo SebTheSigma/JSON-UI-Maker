@@ -58,7 +58,7 @@ export declare class DraggableCanvas {
     /**
      * @param {HTMLElement} container
      */
-    constructor(container: HTMLElement, imageData: ImageData, nineSlice?: NinesliceData);
+    constructor(container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData);
     initEvents(): void;
     select(e: MouseEvent): void;
     unSelect(_e?: MouseEvent): void;
@@ -81,7 +81,7 @@ export declare class Nineslice {
 export declare const panelContainer: HTMLElement | null;
 export declare class Builder {
     static addPanel(): void;
-    static addCanvas(imageData: ImageData, nineSlice?: NinesliceData): void;
+    static addCanvas(imageData: ImageData, nineSlice?: NinesliceData, imageName: string): void;
     static reset(): void;
     static deleteSelected(): void;
     static changeSettingToggle(setting: keyof typeof config): void;
