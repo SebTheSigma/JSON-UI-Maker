@@ -214,7 +214,7 @@ export class DraggableCanvas {
         this.canvas.width = imageData.width;
         this.canvas.height = imageData.height;
         // Gives it a filename that can be read later while converting
-        this.canvas.imageName = imageName;
+        this.canvasHolder.dataset.imageName = imageName;
         // Draws the image
         const ctx = this.canvas.getContext("2d");
         ctx.putImageData(this.imageData, 0, 0);

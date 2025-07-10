@@ -78,7 +78,7 @@ export declare class DraggableCanvas {
 export declare class Nineslice {
     static ninesliceResize({ nineslice_size, base_size }: NinesliceData, pixelArray: Uint8ClampedArray<ArrayBufferLike>, newWidth: number, newHeight: number): Uint8ClampedArray<ArrayBuffer>;
 }
-export declare const panelContainer: HTMLElement | null;
+export declare const panelContainer: HTMLElement;
 export declare class Builder {
     static addPanel(): void;
     static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void;

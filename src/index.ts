@@ -263,7 +263,7 @@ export class DraggableCanvas {
         this.canvas.height = imageData.height;
 
         // Gives it a filename that can be read later while converting
-        (this.canvas as any).imageName = imageName;
+        this.canvasHolder.dataset.imageName = imageName;
 
         // Draws the image
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
@@ -563,20 +563,20 @@ export class Nineslice {
     }
 }
 
-export const panelContainer: HTMLElement | null = document.getElementById("main_window");
+export const panelContainer: HTMLElement = document.getElementById("main_window")!;
 
 export class Builder {
     public static addPanel(): void {
-        new DraggablePanel(selectedElement ?? panelContainer!);
+        new DraggablePanel(selectedElement ?? panelContainer);
     }
 
     public static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void {
-        new DraggableCanvas(selectedElement ?? panelContainer!, imageData, imageName, nineSlice);
+        new DraggableCanvas(selectedElement ?? panelContainer, imageData, imageName, nineSlice);
     }
 
     public static reset(): void {
         selectedElement = undefined;
-        panelContainer!.innerHTML = `<img src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">`;
+        panelContainer.innerHTML = `<img src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">`;
     }
 
     public static deleteSelected(): void {

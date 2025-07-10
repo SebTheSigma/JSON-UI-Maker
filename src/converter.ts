@@ -1,95 +1,143 @@
-interface CanvasWithImageName extends HTMLCanvasElement {
-    imageName: string;
+import { panelContainer } from "./index.js";
+
+class StringUtil {
+    /**
+     * Converts a string representing a css dimension into a number.
+     * @example "100px" => 100
+     * @param {string} value
+     * @returns {number}
+     */
+    public static cssDimToNumber(value: string): number {
+        return Number(value.replace("px", ""));
+    }
 }
 
-const keysConversionMap: Map<(element: any) => any, [string, (dim: string) => any]> = new Map([
-    [
-        (element: HTMLElement) => element?.style?.zIndex,
-        ["layer", (dim) => Number(dim)]
-    ],
-    [
-        (element: HTMLElement) => element?.style?.width,
-        ["size", (dim) => Number(dim.replace("px", ""))]
-    ],
-    [
-        (element: HTMLElement) => element?.style?.height,
-        ["size", (dim) => Number(dim.replace("px", ""))]
-    ],
-    [
-        (element: HTMLElement) => element?.style?.left,
-        ["offset", (dim) => Number(dim.replace("px", ""))]
-    ],
-    [
-        (element: HTMLElement) => element?.style?.top,
-        ["offset", (dim) => Number(dim.replace("px", ""))]
-    ],
-    [
-        (element: HTMLElement) => element?.className,
-        ["type", (dim) => classNameToTypeMap.get(dim)!]
-    ],
-    [
-        (element: CanvasWithImageName) => element?.imageName,
-        ["texture", (dim) => `textures/ui/${dim}.png`]
-    ],
-]);
 
-const classNameToTypeMap: Map<string, string> = new Map([
+const typeToChnageFunc: Map<string, (element: HTMLElement) => JsonUIElement> = new Map([
     [
-        "draggable-panel",
-        "panel"
+        'draggable-panel',
+        (element: HTMLElement): JsonUIElement => {
+            const parent = element.parentElement!;
+            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
+            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+
+            const offset: [number, number] = [
+                StringUtil.cssDimToNumber(element.style.left),
+                StringUtil.cssDimToNumber(element.style.top),
+            ];
+
+            if (parent?.className == 'main_window') {
+                offset[0] = - processedWidth / 2;
+                offset[1] = - processedHeight / 2;
+            }
+
+            return {
+                offset: offset,
+                size: [processedWidth, processedHeight],
+                layer: Number(element.style.zIndex),
+                type: 'panel',
+                anchor_from: "top_left",
+                anchor_to: "top_left",
+            }
+        }
     ],
     [
-        "draggable-canvas",
-        "image"
+        'draggable-canvas',
+        (element: HTMLElement): JsonUIElement => {
+            const parent = element.parentElement!;
+            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
+            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+
+            const offset: [number, number] = [
+                StringUtil.cssDimToNumber(element.style.left),
+                StringUtil.cssDimToNumber(element.style.top),
+            ];
+
+            if (parent?.className == 'main_window') {
+                offset[0] = - processedWidth / 2;
+                offset[1] = - processedHeight / 2;
+            }
+
+            return {
+                offset: offset,
+                size: [processedWidth, processedHeight],
+                layer: Number(element.style.zIndex),
+                type: 'image',
+                texture: `textures/ui/${element.dataset.imageName!}`,
+                anchor_from: "top_left",
+                anchor_to: "top_left",
+            }
+        }
     ]
 ])
 
+interface StringObjectMap {
+    [key: string]: object | string;
+}
+
+
+interface JsonUIElement {
+    [key: string]: any;
+    controls?: object[];
+}
+
 
 export class Converter {
+    /**
+     * Gets all of the nodes currently in the main window
+     * @returns An array of all the nodes in the main window
+     */
     public static getAllNodes(): Node[] {
-        const container = document.getElementById("main_window")!;
-        const children = container.children;
+        const container: HTMLElement = document.getElementById("main_window")!;
+        const children: HTMLCollection = container.children;
         return Array.from(children);
     }
 
-    public static nodeToJsonUI(node: HTMLElement): object {
-        const keys = keysConversionMap.keys();
+    /**
+     * Goes down the tree of nodes to develop the json-ui file
+     * @param startNodeTree The node to start generating the json-ui from
+     * @returns A JSON object with the json-ui
+     */
+    public static nodeToJsonUI(node: HTMLElement): JsonUIElement | undefined {
 
-        const jsonUI: { [key: string]: string } = {};
-        for (let key of keys) {
-            let value = key(node);
+        try {
+            let jsonUI: JsonUIElement = {};
+            const tranformationFunc: ((element: HTMLElement) => JsonUIElement) = typeToChnageFunc.get(node.className)!;
 
-            if (value) {
-                const jsonUIData: [string, (dim: string) => string] = keysConversionMap.get(key)!;
-
-                // Format the value
-                const formatFunc = jsonUIData[1];
-                value = formatFunc(value);
-                if (!jsonUIData) continue;
-
-                // Update the jsonUI
-                const oldProperty = jsonUI[jsonUIData[0] as string];
-                if (oldProperty) {
-                    value = [oldProperty, value];
-                }
-
-                jsonUI[jsonUIData[0] as any] = value;
+            if (tranformationFunc) {
+                jsonUI = tranformationFunc(node);
             }
-        }
 
-        return jsonUI;
+            return jsonUI;
+        } catch (e) {
+            return undefined;
+        }
     }
 
-    public static test(startNodeTree: Node): StringObjectMap {
+    /**
+     * Goes down the tree of nodes to develop the json-ui file
+     * @param startNodeTree The node to start generating the json-ui from
+     * @returns A JSON object with the json-ui
+     */
+    public static test(startNodeTree: Node, depth: number = 0, nameSpace: string = "main"): StringObjectMap {
         
         // Goes down the tree of nodes to develop the json-ui file
-        const jsonNodes: StringObjectMap = {};
+        let jsonNodes: StringObjectMap = {};
+        if (depth == 0) {
+            jsonNodes = { "namespace": nameSpace };
+        }
+        else {
+            jsonNodes = {};
+        }
+
+        
         for (let node of Array.from(startNodeTree.childNodes)) {
-            const jsonUI: any = Converter.nodeToJsonUI(node as HTMLElement);
+            const jsonUI: JsonUIElement = Converter.nodeToJsonUI(node as HTMLElement)!;
             if (!jsonUI.type) continue;
 
+
             // Recursively goes down the tree
-            const nextNodes: StringObjectMap = Converter.test(node);
+            const nextNodes: StringObjectMap = Converter.test(node, depth + 1);
 
             // Adds the JSON-UI controls
             jsonUI["controls"] = [];
@@ -101,12 +149,19 @@ export class Converter {
 
 
             // Adds the node to the jsonUI
-            if (jsonUI) jsonNodes[Converter.generateRandomString(8)] = jsonUI;
+            if (jsonUI) jsonNodes[depth == 0 ? nameSpace : Converter.generateRandomString(8)] = jsonUI;
         }
 
         return jsonNodes;
     }
 
+    /**
+     * Generates a random string of a specified length.
+     * The string consists of lowercase letters and digits.
+     * 
+     * @param length The desired length of the generated string.
+     * @returns A random string of the specified length.
+     */
     public static generateRandomString(length: number): string {
         let result = "";
         const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -116,9 +171,4 @@ export class Converter {
         }
         return result;
     }
-}
-
-
-interface StringObjectMap {
-    [key: string]: object;
 }
