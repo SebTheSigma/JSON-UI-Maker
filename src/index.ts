@@ -457,11 +457,11 @@ export class DraggableCanvas {
      */
     public drawImage(width: number, height: number): void {
 
-        if (this.nineSlice) {
+        // Stops the canvas from being too small
+        if (width <= 1) width = 1;
+        if (height <= 1) height = 1;
 
-            // Stops the canvas from being too small
-            if (width <= 1) width = 1;
-            if (height <= 1) height = 1;
+        if (this.nineSlice) {
 
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
                 this.nineSlice,

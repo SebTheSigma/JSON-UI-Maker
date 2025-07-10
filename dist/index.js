@@ -376,12 +376,12 @@ export class DraggableCanvas {
      * @param {number} height
      */
     drawImage(width, height) {
+        // Stops the canvas from being too small
+        if (width <= 1)
+            width = 1;
+        if (height <= 1)
+            height = 1;
         if (this.nineSlice) {
-            // Stops the canvas from being too small
-            if (width <= 1)
-                width = 1;
-            if (height <= 1)
-                height = 1;
             const pixels = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, Math.floor(width), Math.floor(height));
             this.canvas.width = Math.floor(width);
             this.canvas.height = Math.floor(height);
