@@ -1,4 +1,5 @@
 import { Converter } from "./converter.js";
+import "./arrowKeyElementMovement.js";
 /**
  * @type {KeyboardEvent}
  */
@@ -6,6 +7,7 @@ export declare let keyboardEvent: KeyboardEvent;
 export declare let selectedElement: HTMLElement | undefined;
 export declare const config: {
     boundary_constraints: boolean;
+    arrow_key_move_amount: number;
 };
 export declare class DraggablePanel {
     container: HTMLElement;
@@ -84,7 +86,7 @@ export declare class Builder {
     static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void;
     static reset(): void;
     static deleteSelected(): void;
-    static changeSettingToggle(setting: keyof typeof config): void;
+    static setSettingToggle<K extends keyof typeof config>(setting: K, value: (typeof config)[K]): void;
     static addImage(imageName: string): void;
 }
 export declare function initProperties(): void;

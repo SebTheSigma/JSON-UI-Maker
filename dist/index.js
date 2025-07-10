@@ -1,6 +1,7 @@
 import { Converter } from "./converter.js";
 import { handlePackUpload } from "./files/openFiles.js";
-console.log('Script Loaded');
+import "./arrowKeyElementMovement.js";
+console.log("Script Loaded");
 /**
  * @type {KeyboardEvent}
  */
@@ -17,6 +18,7 @@ window.addEventListener("keyup", (e) => {
 export let selectedElement = undefined;
 export const config = {
     boundary_constraints: false,
+    arrow_key_move_amount: 1,
 };
 export class DraggablePanel {
     container;
@@ -471,9 +473,9 @@ export class Builder {
         selectedElement.remove();
         selectedElement = undefined;
     }
-    static changeSettingToggle(setting) {
-        config[setting] = !config[setting];
-        console.log(`Settings: ${JSON.stringify(config)}`);
+    static setSettingToggle(setting, value) {
+        config[setting] = value;
+        console.log(`Settings: ${JSON.stringify(config)}`, value, setting);
     }
     static addImage(imageName) {
         const imageData = images.get(imageName);

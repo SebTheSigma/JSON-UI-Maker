@@ -1,7 +1,7 @@
 import { Converter } from "./converter.js";
 import { handlePackUpload } from "./files/openFiles.js";
-console.log('Script Loaded');
-
+import "./arrowKeyElementMovement.js";
+console.log("Script Loaded");
 
 /**
  * @type {KeyboardEvent}
@@ -24,6 +24,7 @@ export let selectedElement: HTMLElement | undefined = undefined;
 
 export const config = {
     boundary_constraints: false,
+    arrow_key_move_amount: 1,
 };
 
 export class DraggablePanel {
@@ -456,13 +457,11 @@ export class DraggableCanvas {
      * @param {number} height
      */
     public drawImage(width: number, height: number): void {
-
         // Stops the canvas from being too small
         if (width <= 1) width = 1;
         if (height <= 1) height = 1;
 
         if (this.nineSlice) {
-
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
                 this.nineSlice,
                 this.imageData.data,
@@ -584,10 +583,9 @@ export class Builder {
         selectedElement = undefined;
     }
 
-    public static changeSettingToggle(setting: keyof typeof config): void {
-        config[setting] = !config[setting];
-
-        console.log(`Settings: ${JSON.stringify(config)}`);
+    public static setSettingToggle<K extends keyof typeof config>(setting: K, value: (typeof config)[K]): void {
+        config[setting] = value;
+        console.log(`Settings: ${JSON.stringify(config)}`, value, setting);
     }
 
     public static addImage(imageName: string): void {
@@ -675,7 +673,6 @@ declare global {
         handlePackUpload: () => void;
     }
 }
-
 
 window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;
