@@ -25,7 +25,7 @@ const keysConversionMap = new Map([
     ],
     [
         (element) => element?.imageName,
-        ["type", (dim) => classNameToTypeMap.get(dim)]
+        ["texture", (dim) => `textures/ui/${dim}.png`]
     ],
 ]);
 const classNameToTypeMap = new Map([

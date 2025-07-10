@@ -29,7 +29,7 @@ const keysConversionMap: Map<(element: any) => any, [string, (dim: string) => an
     ],
     [
         (element: CanvasWithImageName) => element?.imageName,
-        ["type", (dim) => classNameToTypeMap.get(dim)!]
+        ["texture", (dim) => `textures/ui/${dim}.png`]
     ],
 ]);
 

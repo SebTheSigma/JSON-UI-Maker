@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <input title="Import Pack" type="file" id="pack_importer" onchange="handleImageUpload()" webkitdirectory directory multiple/>
+    <input title="Import Pack" type="file" id="pack_importer" onchange="handlePackUpload()" webkitdirectory directory multiple/>
     <input title="Boundary Constraints" type="checkbox" onclick="Builder.changeSettingToggle('boundary_constraints')">Boudary Constraints
 
     <div class="main_window" id="main_window">
@@ -37,5 +37,6 @@
     
     <script src="./dist/index.js" type="module"></script>
     <script src="./dist/converter.js" type="module"></script>
+    <script src="./dist/files/openFiles.js" type="module"></script>
 </body>
 </html>

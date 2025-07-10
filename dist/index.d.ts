@@ -81,7 +81,7 @@ export declare class Nineslice {
 export declare const panelContainer: HTMLElement | null;
 export declare class Builder {
     static addPanel(): void;
-    static addCanvas(imageData: ImageData, nineSlice?: NinesliceData, imageName: string): void;
+    static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void;
     static reset(): void;
     static deleteSelected(): void;
     static changeSettingToggle(setting: keyof typeof config): void;
@@ -93,11 +93,10 @@ export declare var images: Map<string, {
     json?: NinesliceData;
 }>;
 export declare function updateImageDropdown(): void;
-export declare function handleImageUpload(): void;
 declare global {
     interface Window {
         Builder: typeof Builder;
         Converter: typeof Converter;
-        handleImageUpload: () => void;
+        handlePackUpload: () => void;
     }
 }

@@ -1,5 +1,6 @@
 import { Converter } from "./converter.js";
-console.log('Script Loaded')
+import { handlePackUpload } from "./files/openFiles.js";
+console.log('Script Loaded');
 
 
 /**
@@ -438,7 +439,6 @@ export class DraggableCanvas {
                 }
             }
         } else {
-            console.log(1)
             newWidth = this.resizeStartWidth! + widthChange;
             newHeight = this.resizeStartHeight! + heightChange;
         }
@@ -458,6 +458,11 @@ export class DraggableCanvas {
     public drawImage(width: number, height: number): void {
 
         if (this.nineSlice) {
+
+            // Stops the canvas from being too small
+            if (width <= 1) width = 1;
+            if (height <= 1) height = 1;
+
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
                 this.nineSlice,
                 this.imageData.data,
@@ -466,6 +471,7 @@ export class DraggableCanvas {
             );
             this.canvas.width = Math.floor(width);
             this.canvas.height = Math.floor(height);
+
             const newImageData: ImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
 
             // Draws the image
@@ -564,7 +570,7 @@ export class Builder {
         new DraggablePanel(selectedElement ?? panelContainer!);
     }
 
-    public static addCanvas(imageData: ImageData, nineSlice?: NinesliceData, imageName: string): void {
+    public static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void {
         new DraggableCanvas(selectedElement ?? panelContainer!, imageData, imageName, nineSlice);
     }
 
@@ -591,7 +597,7 @@ export class Builder {
         if (!imageData?.png) return;
 
         // Checks if the image is a nineslice
-        this.addCanvas(imageData.png, imageData.json, imageName);
+        this.addCanvas(imageData.png, imageName, imageData.json);
     }
 }
 
@@ -662,100 +668,15 @@ export function updateImageDropdown(): void {
     }
 }
 
-export function handleImageUpload(): void {
-    const fileInput: HTMLInputElement | null = document.getElementById("pack_importer") as HTMLInputElement | null;
-    if (!fileInput?.files) return;
-    const files: File[] = Array.from(fileInput.files);
-
-    for (let file of files) {
-        console.log(file.name);
-    }
-
-    for (let file of files.filter((img) => img.name.endsWith(".png"))) {
-        /*Removes the file extension */
-        const fileNameNoExtension: string = file.name.replace(/\.[^.]*$/, "");
-
-        // Looks for a json file
-        const jsonFile: File | undefined = files.filter((json) => json.name == `${fileNameNoExtension}.json`)[0];
-
-        const imgReader: FileReader = new FileReader();
-
-        if (jsonFile) {
-            // Gets the text from the json file
-            const jsonReader: FileReader = new FileReader();
-
-            jsonReader.onload = function (e) {
-                const text: string = jsonReader.result as string;
-                console.log(`Json: ${JSON.stringify(text)}`);
-
-                // Adds the json data to the images map
-                const nineSliceData: ReturnType<typeof images.get> = images.get(fileNameNoExtension);
-                if (nineSliceData) {
-                    nineSliceData.json = JSON.parse(text);
-
-                    images.set(fileNameNoExtension, nineSliceData);
-                }
-
-                // If the image hasnt loaded yet it creates the nineslice data
-                else {
-                    images.set(fileNameNoExtension, { json: JSON.parse(text) });
-                }
-
-                updateImageDropdown();
-            };
-
-            jsonReader.readAsText(jsonFile);
-        }
-
-        imgReader.onload = function (e: ProgressEvent<FileReader>): void {
-            const img: HTMLImageElement = new Image();
-            img.onload = function (): void {
-                // Create canvas to draw image on
-                const canvas: HTMLCanvasElement = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-
-                const ctx: CanvasRenderingContext2D = canvas.getContext("2d")!;
-                ctx.drawImage(img, 0, 0);
-
-                // Get pixel data
-                const imageData: ImageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-                // Adds the img data to the images map
-                const nineSliceData: ReturnType<typeof images.get> = images.get(fileNameNoExtension);
-                if (nineSliceData) {
-                    nineSliceData.png = imageData;
-
-                    images.set(fileNameNoExtension, nineSliceData);
-                }
-
-                // If the json hasnt loaded yet it creates the nineslice data
-                else {
-                    images.set(fileNameNoExtension, {
-                        png: imageData,
-                    });
-                }
-
-                updateImageDropdown();
-                console.log(JSON.stringify(images.get("melt")));
-            };
-
-            img.src = e.target!.result as string;
-        };
-
-        imgReader.readAsDataURL(file);
-    }
-}
-
 declare global {
     interface Window {
         Builder: typeof Builder;
         Converter: typeof Converter;
-        handleImageUpload: () => void;
+        handlePackUpload: () => void;
     }
 }
 
 
-window.handleImageUpload = handleImageUpload;
+window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;
 window.Converter = Converter;

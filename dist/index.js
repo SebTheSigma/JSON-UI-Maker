@@ -1,4 +1,5 @@
 import { Converter } from "./converter.js";
+import { handlePackUpload } from "./files/openFiles.js";
 console.log('Script Loaded');
 /**
  * @type {KeyboardEvent}
@@ -361,7 +362,6 @@ export class DraggableCanvas {
             }
         }
         else {
-            console.log(1);
             newWidth = this.resizeStartWidth + widthChange;
             newHeight = this.resizeStartHeight + heightChange;
         }
@@ -377,6 +377,11 @@ export class DraggableCanvas {
      */
     drawImage(width, height) {
         if (this.nineSlice) {
+            // Stops the canvas from being too small
+            if (width <= 1)
+                width = 1;
+            if (height <= 1)
+                height = 1;
             const pixels = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, Math.floor(width), Math.floor(height));
             this.canvas.width = Math.floor(width);
             this.canvas.height = Math.floor(height);
@@ -455,7 +460,7 @@ export class Builder {
     static addPanel() {
         new DraggablePanel(selectedElement ?? panelContainer);
     }
-    static addCanvas(imageData, nineSlice, imageName) {
+    static addCanvas(imageData, imageName, nineSlice) {
         new DraggableCanvas(selectedElement ?? panelContainer, imageData, imageName, nineSlice);
     }
     static reset() {
@@ -476,7 +481,7 @@ export class Builder {
         if (!imageData?.png)
             return;
         // Checks if the image is a nineslice
-        this.addCanvas(imageData.png, imageData.json, imageName);
+        this.addCanvas(imageData.png, imageName, imageData.json);
     }
 }
 export function initProperties() {
@@ -535,72 +540,7 @@ export function updateImageDropdown() {
         dropdown.appendChild(fileNameText);
     }
 }
-export function handleImageUpload() {
-    const fileInput = document.getElementById("pack_importer");
-    if (!fileInput?.files)
-        return;
-    const files = Array.from(fileInput.files);
-    for (let file of files) {
-        console.log(file.name);
-    }
-    for (let file of files.filter((img) => img.name.endsWith(".png"))) {
-        /*Removes the file extension */
-        const fileNameNoExtension = file.name.replace(/\.[^.]*$/, "");
-        // Looks for a json file
-        const jsonFile = files.filter((json) => json.name == `${fileNameNoExtension}.json`)[0];
-        const imgReader = new FileReader();
-        if (jsonFile) {
-            // Gets the text from the json file
-            const jsonReader = new FileReader();
-            jsonReader.onload = function (e) {
-                const text = jsonReader.result;
-                console.log(`Json: ${JSON.stringify(text)}`);
-                // Adds the json data to the images map
-                const nineSliceData = images.get(fileNameNoExtension);
-                if (nineSliceData) {
-                    nineSliceData.json = JSON.parse(text);
-                    images.set(fileNameNoExtension, nineSliceData);
-                }
-                // If the image hasnt loaded yet it creates the nineslice data
-                else {
-                    images.set(fileNameNoExtension, { json: JSON.parse(text) });
-                }
-                updateImageDropdown();
-            };
-            jsonReader.readAsText(jsonFile);
-        }
-        imgReader.onload = function (e) {
-            const img = new Image();
-            img.onload = function () {
-                // Create canvas to draw image on
-                const canvas = document.createElement("canvas");
-                canvas.width = img.width;
-                canvas.height = img.height;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0);
-                // Get pixel data
-                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-                // Adds the img data to the images map
-                const nineSliceData = images.get(fileNameNoExtension);
-                if (nineSliceData) {
-                    nineSliceData.png = imageData;
-                    images.set(fileNameNoExtension, nineSliceData);
-                }
-                // If the json hasnt loaded yet it creates the nineslice data
-                else {
-                    images.set(fileNameNoExtension, {
-                        png: imageData,
-                    });
-                }
-                updateImageDropdown();
-                console.log(JSON.stringify(images.get("melt")));
-            };
-            img.src = e.target.result;
-        };
-        imgReader.readAsDataURL(file);
-    }
-}
-window.handleImageUpload = handleImageUpload;
+window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;
 window.Converter = Converter;
 //# sourceMappingURL=index.js.map
