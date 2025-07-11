@@ -1,4 +1,4 @@
-import { selectedElement } from "..";
+import { selectedElement } from "../index.js";
 export function initProperties() {
     const properties = document.getElementById("properties");
     let changingNode;

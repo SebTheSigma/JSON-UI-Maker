@@ -1,4 +1,4 @@
-import { triggerArrowMovement } from "./arrowKeyElementMovement";
+import { triggerArrowMovement } from "./arrowKeyElementMovement.js";
 
 /**
  * @type {KeyboardEvent}

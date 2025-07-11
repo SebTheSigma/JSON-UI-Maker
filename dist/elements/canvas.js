@@ -1,7 +1,7 @@
-import { selectedElement, setSelectedElement } from "..";
-import { Nineslice } from "../nineslice";
+import { selectedElement, setSelectedElement } from "../index.js";
+import { Nineslice } from "../nineslice.js";
 import { config } from "../CONFIG.js";
-import { keyboardEvent } from "../keyboard/eventListeners";
+import { keyboardEvent } from "../keyboard/eventListeners.js";
 export class DraggableCanvas {
     imageData;
     nineSlice;

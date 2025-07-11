@@ -1,4 +1,4 @@
-import { NinesliceData } from "../nineslice";
+import { NinesliceData } from "../nineslice.js";
 export declare class DraggableCanvas {
     imageData: ImageData;
     nineSlice?: NinesliceData;

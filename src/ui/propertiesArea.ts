@@ -1,4 +1,4 @@
-import { selectedElement } from "..";
+import { selectedElement } from "../index.js";
 
 export function initProperties(): void {
     const properties: HTMLElement = document.getElementById("properties")!;
