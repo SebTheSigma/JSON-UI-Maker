@@ -1,84 +1,12 @@
-import { panelContainer } from "./index.js";
+import { classToJsonUI, JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
+import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 
-class StringUtil {
-    /**
-     * Converts a string representing a css dimension into a number.
-     * @example "100px" => 100
-     * @param {string} value
-     * @returns {number}
-     */
-    public static cssDimToNumber(value: string): number {
-        return Number(value.replace("px", ""));
-    }
+interface TreeInstructions {
+    
 }
-
-
-const typeToChnageFunc: Map<string, (element: HTMLElement) => JsonUIElement> = new Map([
-    [
-        'draggable-panel',
-        (element: HTMLElement): JsonUIElement => {
-            const parent = element.parentElement!;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-
-            const offset: [number, number] = [
-                StringUtil.cssDimToNumber(element.style.left),
-                StringUtil.cssDimToNumber(element.style.top),
-            ];
-
-            if (parent?.className == 'main_window') {
-                offset[0] = - processedWidth / 2;
-                offset[1] = - processedHeight / 2;
-            }
-
-            return {
-                offset: offset,
-                size: [processedWidth, processedHeight],
-                layer: Number(element.style.zIndex),
-                type: 'panel',
-                anchor_from: "top_left",
-                anchor_to: "top_left",
-            }
-        }
-    ],
-    [
-        'draggable-canvas',
-        (element: HTMLElement): JsonUIElement => {
-            const parent = element.parentElement!;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-
-            const offset: [number, number] = [
-                StringUtil.cssDimToNumber(element.style.left),
-                StringUtil.cssDimToNumber(element.style.top),
-            ];
-
-            if (parent?.className == 'main_window') {
-                offset[0] = - processedWidth / 2;
-                offset[1] = - processedHeight / 2;
-            }
-
-            return {
-                offset: offset,
-                size: [processedWidth, processedHeight],
-                layer: Number(element.style.zIndex),
-                type: 'image',
-                texture: `textures/ui/${element.dataset.imageName!}`,
-                anchor_from: "top_left",
-                anchor_to: "top_left",
-            }
-        }
-    ]
-])
 
 interface StringObjectMap {
     [key: string]: object | string;
-}
-
-
-interface JsonUIElement {
-    [key: string]: any;
-    controls?: object[];
 }
 
 
@@ -98,11 +26,11 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    public static nodeToJsonUI(node: HTMLElement): JsonUIElement | undefined {
+    public static nodeToJsonUI(node: HTMLElement): JsonUISimpleElement | undefined {
 
         try {
-            let jsonUI: JsonUIElement = {};
-            const tranformationFunc: ((element: HTMLElement) => JsonUIElement) = typeToChnageFunc.get(node.className)!;
+            let jsonUI: JsonUISimpleElement = {};
+            const tranformationFunc: ((element: HTMLElement) => JsonUISimpleElement) = classToJsonUI.get(node.className)!;
 
             if (tranformationFunc) {
                 jsonUI = tranformationFunc(node);
@@ -119,12 +47,12 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    public static test(startNodeTree: Node, depth: number = 0, nameSpace: string = "main"): StringObjectMap {
+    public static startTree(startNodeTree: Node, depth: number = 0, nameSpace: string = "main"): StringObjectMap {
         
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes: StringObjectMap = {};
         if (depth == 0) {
-            jsonNodes = { "namespace": nameSpace };
+            jsonNodes = { "namespace": nameSpace, custom_button: JSON_TYPES.get('buttonWithHoverText')! };
         }
         else {
             jsonNodes = {};
@@ -132,7 +60,7 @@ export class Converter {
 
         
         for (let node of Array.from(startNodeTree.childNodes)) {
-            const jsonUI: JsonUIElement = Converter.nodeToJsonUI(node as HTMLElement)!;
+            const jsonUI: JsonUISimpleElement = Converter.nodeToJsonUI(node as HTMLElement)!;
             if (!jsonUI.type) continue;
 
 
@@ -153,6 +81,17 @@ export class Converter {
         }
 
         return jsonNodes;
+    }
+
+    /**
+     * Recursively traverses the tree of nodes to generate the json-ui structure.
+     * @param node The starting node for generating the json-ui structure.
+     * @param depth The current depth of the node in the tree, defaults to 0.
+     * @returns A JSON object representing the json-ui structure.
+     */
+
+    public static test(node: Node, depth: number = 0): StringObjectMap {
+        return Converter.startTree(node, depth);
     }
 
     /**

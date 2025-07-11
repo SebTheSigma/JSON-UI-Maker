@@ -1,7 +1,7 @@
 interface StringObjectMap {
     [key: string]: object | string;
 }
-interface JsonUIElement {
+export interface JsonUISimpleElement {
     [key: string]: any;
     controls?: object[];
 }
@@ -16,7 +16,7 @@ export declare class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static nodeToJsonUI(node: HTMLElement): JsonUIElement | undefined;
+    static nodeToJsonUI(node: HTMLElement): JsonUISimpleElement | undefined;
     /**
      * Goes down the tree of nodes to develop the json-ui file
      * @param startNodeTree The node to start generating the json-ui from

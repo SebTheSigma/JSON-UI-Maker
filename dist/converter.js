@@ -1,3 +1,4 @@
+import { JSON_TYPES } from "./converterTypes.ts/jsonUITypes.js";
 class StringUtil {
     /**
      * Converts a string representing a css dimension into a number.
@@ -97,7 +98,7 @@ export class Converter {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {
-            jsonNodes = { "namespace": nameSpace };
+            jsonNodes = { "namespace": nameSpace, custom_button: JSON_TYPES.get('buttonWithHoverText') };
         }
         else {
             jsonNodes = {};
