@@ -12,6 +12,12 @@ html, body {
     height: calc(100vw / 1.7777777);
 }
 
+.addElements {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
 .draggable-panel {
     position: relative;
     width: 150px;
@@ -72,6 +78,7 @@ html, body {
     position: relative;
     width: 150px; /* Expands outward from the center-right */
     max-height: 250px;
+    overflow: auto;
     background-color: rgba(73, 73, 73, 0.532);
 }
 

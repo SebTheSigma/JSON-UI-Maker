@@ -1,4 +1,5 @@
-import { images, updateImageDropdown } from "../index.js";
+import { images } from "../index.js";
+import { updateImageDropdown } from "./imageDropdown.js";
 export function handlePackUpload() {
     const fileInput = document.getElementById("pack_importer");
     if (!fileInput?.files)

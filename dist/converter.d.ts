@@ -1,9 +1,6 @@
+import { JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
 interface StringObjectMap {
     [key: string]: object | string;
-}
-export interface JsonUISimpleElement {
-    [key: string]: any;
-    controls?: object[];
 }
 export declare class Converter {
     /**
@@ -22,7 +19,14 @@ export declare class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static test(startNodeTree: Node, depth?: number, nameSpace?: string): StringObjectMap;
+    static startTree(startNodeTree: Node, depth?: number, nameSpace?: string): StringObjectMap;
+    /**
+     * Recursively traverses the tree of nodes to generate the json-ui structure.
+     * @param node The starting node for generating the json-ui structure.
+     * @param depth The current depth of the node in the tree, defaults to 0.
+     * @returns A JSON object representing the json-ui structure.
+     */
+    static test(node: Node, depth?: number): StringObjectMap;
     /**
      * Generates a random string of a specified length.
      * The string consists of lowercase letters and digits.

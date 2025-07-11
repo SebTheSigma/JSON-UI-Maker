@@ -1,5 +1,5 @@
-import { config, selectedElement } from "../index.js";
-
+import { selectedElement } from "../index.js";
+import { config } from '../CONFIG.js'
 
 /**
  * Triggers movement of the selected element based on the arrow keys.

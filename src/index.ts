@@ -3,7 +3,8 @@ import { handlePackUpload } from "./files/openFiles.js";
 import { DraggablePanel } from "./elements/panel.js";
 import { DraggableCanvas } from "./elements/canvas.js";
 import { NinesliceData } from "./nineslice.js";
-import "./keyboard/arrowKeyElementMovement.js";
+import { initProperties } from "./ui/propertiesArea.js";
+import { config } from "./CONFIG.js";
 console.log("Script Loaded");
 
 
@@ -12,10 +13,7 @@ export function setSelectedElement(element: HTMLElement | undefined): void {
 }
 export let selectedElement: HTMLElement | undefined = undefined;
 
-export const config = {
-    boundary_constraints: false,
-    arrow_key_move_amount: 1,
-};
+
 
 
 export const panelContainer: HTMLElement = document.getElementById("main_window")!;
@@ -55,72 +53,7 @@ export class Builder {
     }
 }
 
-export function initProperties(): void {
-    const properties: HTMLElement = document.getElementById("properties")!;
-
-    let changingNode: Node | undefined;
-
-    for (let node of Array.from(properties.childNodes)) {
-        if (node instanceof HTMLInputElement) {
-            node.addEventListener("input", function () {
-                // Makes sure there is a selected element
-                if (selectedElement) {
-                    changingNode = node;
-
-                    // Assigns the typed value the the style value
-                    selectedElement.style[node.id.replace("properties_", "") as any] = node.value;
-                }
-            });
-
-            // Resets the changingNode when the user leaves the text box
-            node.addEventListener("blur", function () {
-                // Makes sure there is a selected element
-                if (selectedElement) {
-                    changingNode = undefined;
-                }
-            });
-        }
-    }
-
-    // Keeps the values of the selected element synced with the text box values
-    setInterval(() => {
-        for (let node of Array.from(properties.childNodes)) {
-            if (node instanceof HTMLInputElement) {
-                if (changingNode == node) continue;
-                try {
-                    node.value = (selectedElement?.style[node.id.replace("properties_", "") as keyof CSSStyleDeclaration] as string | undefined) ?? "None";
-                } catch {
-                    node.value = "None";
-                }
-            }
-        }
-    }, 50);
-}
-
-initProperties();
-
 export var images: Map<string, { png?: ImageData; json?: NinesliceData }> = new Map();
-
-export function updateImageDropdown(): void {
-    const dropdown: HTMLElement = document.getElementById("addImageDropdown")!;
-
-    // Removes all dropdown options
-    dropdown.innerHTML = "";
-
-    // Adds the dropdown options
-    for (const [fileName, data] of images.entries()) {
-        console.log(fileName);
-
-        const fileNameText: HTMLDivElement = document.createElement("div");
-        fileNameText.className = "dropdownContent";
-        fileNameText.textContent = fileName;
-        fileNameText.onclick = function () {
-            Builder.addImage(fileName);
-        };
-
-        dropdown.appendChild(fileNameText);
-    }
-}
 
 declare global {
     interface Window {
@@ -129,6 +62,8 @@ declare global {
         handlePackUpload: () => void;
     }
 }
+
+initProperties();
 
 window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;

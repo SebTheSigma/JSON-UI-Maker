@@ -1,66 +1,5 @@
-import { JSON_TYPES } from "./converterTypes.ts/jsonUITypes.js";
-class StringUtil {
-    /**
-     * Converts a string representing a css dimension into a number.
-     * @example "100px" => 100
-     * @param {string} value
-     * @returns {number}
-     */
-    static cssDimToNumber(value) {
-        return Number(value.replace("px", ""));
-    }
-}
-const typeToChnageFunc = new Map([
-    [
-        'draggable-panel',
-        (element) => {
-            const parent = element.parentElement;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-            const offset = [
-                StringUtil.cssDimToNumber(element.style.left),
-                StringUtil.cssDimToNumber(element.style.top),
-            ];
-            if (parent?.className == 'main_window') {
-                offset[0] = -processedWidth / 2;
-                offset[1] = -processedHeight / 2;
-            }
-            return {
-                offset: offset,
-                size: [processedWidth, processedHeight],
-                layer: Number(element.style.zIndex),
-                type: 'panel',
-                anchor_from: "top_left",
-                anchor_to: "top_left",
-            };
-        }
-    ],
-    [
-        'draggable-canvas',
-        (element) => {
-            const parent = element.parentElement;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-            const offset = [
-                StringUtil.cssDimToNumber(element.style.left),
-                StringUtil.cssDimToNumber(element.style.top),
-            ];
-            if (parent?.className == 'main_window') {
-                offset[0] = -processedWidth / 2;
-                offset[1] = -processedHeight / 2;
-            }
-            return {
-                offset: offset,
-                size: [processedWidth, processedHeight],
-                layer: Number(element.style.zIndex),
-                type: 'image',
-                texture: `textures/ui/${element.dataset.imageName}`,
-                anchor_from: "top_left",
-                anchor_to: "top_left",
-            };
-        }
-    ]
-]);
+import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
+import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 export class Converter {
     /**
      * Gets all of the nodes currently in the main window
@@ -79,7 +18,7 @@ export class Converter {
     static nodeToJsonUI(node) {
         try {
             let jsonUI = {};
-            const tranformationFunc = typeToChnageFunc.get(node.className);
+            const tranformationFunc = classToJsonUI.get(node.className);
             if (tranformationFunc) {
                 jsonUI = tranformationFunc(node);
             }
@@ -94,7 +33,7 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static test(startNodeTree, depth = 0, nameSpace = "main") {
+    static startTree(startNodeTree, depth = 0, nameSpace = "main") {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {
@@ -120,6 +59,15 @@ export class Converter {
                 jsonNodes[depth == 0 ? nameSpace : Converter.generateRandomString(8)] = jsonUI;
         }
         return jsonNodes;
+    }
+    /**
+     * Recursively traverses the tree of nodes to generate the json-ui structure.
+     * @param node The starting node for generating the json-ui structure.
+     * @param depth The current depth of the node in the tree, defaults to 0.
+     * @returns A JSON object representing the json-ui structure.
+     */
+    static test(node, depth = 0) {
+        return Converter.startTree(node, depth);
     }
     /**
      * Generates a random string of a specified length.
