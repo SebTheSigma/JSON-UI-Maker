@@ -1,9 +1,17 @@
 import { classToJsonUI, JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
 import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 
-interface TreeInstructions {
-    
+export interface TreeInstructions {
+    ContinuePath: boolean;
+    CommonElementLink?: string,
+    NewTreeFromBaseNode?: boolean; // Might use later
 }
+
+export interface TreeData {
+    element?: JsonUISimpleElement;
+    instructions?: TreeInstructions;
+}
+
 
 interface StringObjectMap {
     [key: string]: object | string;
@@ -26,18 +34,19 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    public static nodeToJsonUI(node: HTMLElement): JsonUISimpleElement | undefined {
+    public static nodeToJsonUI(node: HTMLElement, nameSpace: string): TreeData | undefined {
 
         try {
-            let jsonUI: JsonUISimpleElement = {};
-            const tranformationFunc: ((element: HTMLElement) => JsonUISimpleElement) = classToJsonUI.get(node.className)!;
+            let treeData: TreeData = {};
+            const getTreeData: ((element: HTMLElement, nameSpace: string) => TreeData) = classToJsonUI.get(node.className)!;
 
-            if (tranformationFunc) {
-                jsonUI = tranformationFunc(node);
+            if (getTreeData) {
+                treeData = getTreeData(node, nameSpace);
             }
 
-            return jsonUI;
+            return treeData;
         } catch (e) {
+            console.warn(`Error converting node to json-ui: ${e}`);
             return undefined;
         }
     }
@@ -47,7 +56,7 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    public static startTree(startNodeTree: Node, depth: number = 0, nameSpace: string = "main"): StringObjectMap {
+    public static tree(startNodeTree: Node, depth: number = 0, baseNode: Node, nameSpace: string = "main"): StringObjectMap {
         
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes: StringObjectMap = {};
@@ -58,14 +67,17 @@ export class Converter {
             jsonNodes = {};
         }
 
-        
         for (let node of Array.from(startNodeTree.childNodes)) {
-            const jsonUI: JsonUISimpleElement = Converter.nodeToJsonUI(node as HTMLElement)!;
-            if (!jsonUI.type) continue;
+            const treeData: TreeData = Converter.nodeToJsonUI(node as HTMLElement, nameSpace)!;
 
+            // Checks if the node should be ignored
+            if (!treeData.instructions) continue;
+            if (!treeData.instructions!.ContinuePath) continue;
+
+            const jsonUI: JsonUISimpleElement = treeData.element!;
 
             // Recursively goes down the tree
-            const nextNodes: StringObjectMap = Converter.test(node, depth + 1);
+            const nextNodes: StringObjectMap = Converter.tree(node, depth + 1, baseNode);
 
             // Adds the JSON-UI controls
             jsonUI["controls"] = [];
@@ -75,9 +87,11 @@ export class Converter {
                 jsonUI.controls.push({ [nextNode]: nextNodes[nextNode] });
             }
 
+            const randomString: string = Converter.generateRandomString(8);
+            const link = treeData.instructions?.CommonElementLink ?? '';
 
             // Adds the node to the jsonUI
-            if (jsonUI) jsonNodes[depth == 0 ? nameSpace : Converter.generateRandomString(8)] = jsonUI;
+            if (jsonUI) jsonNodes[depth == 0 ? `${nameSpace}${link}` : `${randomString}${link}`] = jsonUI;
         }
 
         return jsonNodes;
@@ -91,7 +105,7 @@ export class Converter {
      */
 
     public static test(node: Node, depth: number = 0): StringObjectMap {
-        return Converter.startTree(node, depth);
+        return Converter.tree(node, depth, node);
     }
 
     /**

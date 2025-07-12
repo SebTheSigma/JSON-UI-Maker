@@ -1,4 +1,13 @@
 import { JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
+export interface TreeInstructions {
+    ContinuePath: boolean;
+    CommonElementLink?: string;
+    NewTreeFromBaseNode?: boolean;
+}
+export interface TreeData {
+    element?: JsonUISimpleElement;
+    instructions?: TreeInstructions;
+}
 interface StringObjectMap {
     [key: string]: object | string;
 }
@@ -13,13 +22,13 @@ export declare class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static nodeToJsonUI(node: HTMLElement): JsonUISimpleElement | undefined;
+    static nodeToJsonUI(node: HTMLElement, nameSpace: string): TreeData | undefined;
     /**
      * Goes down the tree of nodes to develop the json-ui file
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static startTree(startNodeTree: Node, depth?: number, nameSpace?: string): StringObjectMap;
+    static tree(startNodeTree: Node, depth: number | undefined, baseNode: Node, nameSpace?: string): StringObjectMap;
     /**
      * Recursively traverses the tree of nodes to generate the json-ui structure.
      * @param node The starting node for generating the json-ui structure.

@@ -5,6 +5,10 @@ import { DraggableCanvas } from "./elements/canvas.js";
 import { NinesliceData } from "./nineslice.js";
 import { initProperties } from "./ui/propertiesArea.js";
 import { config } from "./CONFIG.js";
+import { DraggableButton } from "./elements/button.js";
+import './ui/modals/settings.js';
+import { addButtonModal } from "./ui/modals/addButton.js";
+
 console.log("Script Loaded");
 
 
@@ -27,6 +31,12 @@ export class Builder {
         new DraggableCanvas(selectedElement ?? panelContainer, imageData, imageName, nineSlice);
     }
 
+    public static async addButton(): Promise<void> {
+
+        const formFields = await addButtonModal();
+        new DraggableButton(selectedElement ?? panelContainer, { defaultTexture: formFields.defaultTexture, hoverTexture: formFields.hoverTexture, pressedTexture: formFields.pressedTexture });
+    }
+
     public static reset(): void {
         selectedElement = undefined;
         panelContainer.innerHTML = `<img src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">`;
@@ -37,9 +47,9 @@ export class Builder {
         selectedElement = undefined;
     }
 
-    public static setSettingToggle<K extends keyof typeof config>(setting: K, value: (typeof config)[K]): void {
-        config[setting] = value;
-        console.log(`Settings: ${JSON.stringify(config)}`, value, setting);
+    public static setSettingToggle(setting: keyof typeof config.settings, value: any): void {
+        config.settings[setting]!.value = value;
+        console.log(config.settings);
     }
 
     public static addImage(imageName: string): void {
@@ -53,7 +63,12 @@ export class Builder {
     }
 }
 
-export var images: Map<string, { png?: ImageData; json?: NinesliceData }> = new Map();
+export interface ImageDataState {
+    png?: ImageData,
+    json?: NinesliceData
+};
+
+export var images: Map<string, ImageDataState> = new Map();
 
 declare global {
     interface Window {

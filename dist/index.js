@@ -4,6 +4,9 @@ import { DraggablePanel } from "./elements/panel.js";
 import { DraggableCanvas } from "./elements/canvas.js";
 import { initProperties } from "./ui/propertiesArea.js";
 import { config } from "./CONFIG.js";
+import { DraggableButton } from "./elements/button.js";
+import './ui/modals/settings.js';
+import { addButtonModal } from "./ui/modals/addButton.js";
 console.log("Script Loaded");
 export function setSelectedElement(element) {
     selectedElement = element;
@@ -17,6 +20,10 @@ export class Builder {
     static addCanvas(imageData, imageName, nineSlice) {
         new DraggableCanvas(selectedElement ?? panelContainer, imageData, imageName, nineSlice);
     }
+    static async addButton() {
+        const formFields = await addButtonModal();
+        new DraggableButton(selectedElement ?? panelContainer, { defaultTexture: formFields.defaultTexture, hoverTexture: formFields.hoverTexture, pressedTexture: formFields.pressedTexture });
+    }
     static reset() {
         selectedElement = undefined;
         panelContainer.innerHTML = `<img src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">`;
@@ -26,8 +33,8 @@ export class Builder {
         selectedElement = undefined;
     }
     static setSettingToggle(setting, value) {
-        config[setting] = value;
-        console.log(`Settings: ${JSON.stringify(config)}`, value, setting);
+        config.settings[setting].value = value;
+        console.log(config.settings);
     }
     static addImage(imageName) {
         const imageData = images.get(imageName);
@@ -38,6 +45,7 @@ export class Builder {
         this.addCanvas(imageData.png, imageName, imageData.json);
     }
 }
+;
 export var images = new Map();
 initProperties();
 window.handlePackUpload = handlePackUpload;

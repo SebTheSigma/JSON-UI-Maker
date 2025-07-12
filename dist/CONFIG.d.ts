@@ -1,4 +1,12 @@
+interface Setting {
+    type: string;
+    editable: boolean;
+    value: any;
+    displayName?: string;
+}
 export declare const config: {
-    boundary_constraints: boolean;
-    arrow_key_move_amount: number;
+    settings: {
+        [key: string]: Setting;
+    };
 };
+export {};

@@ -104,7 +104,7 @@ export class DraggablePanel {
         if (!this.isDragging || this.isResizing)
             return;
         const containerRect = this.container.getBoundingClientRect();
-        if (config["boundary_constraints"]) {
+        if (config.settings.boundary_constraints.value) {
             console.log("Boudary");
             let newLeft = e.clientX - containerRect.left - this.offsetX;
             let newTop = e.clientY - containerRect.top - this.offsetY;

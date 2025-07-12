@@ -24,12 +24,16 @@ export const JSON_TYPES: Map<string, JsonUISimpleElement> = new Map([
                     main_ui: {
                         type: "panel",
                         size: "$button_size",
+                        anchor_from: "top_left",
+                        anchor_to: "top_left",
                         controls: [
                             {
                                 panel_name: {
                                     type: "panel",
                                     size: "$button_size",
                                     offset: "$offset_test",
+                                    anchor_from: "top_left",
+                                    anchor_to: "top_left",
                                     bindings: [
                                         {
                                             binding_type: "view",
@@ -108,7 +112,7 @@ export const JSON_TYPES: Map<string, JsonUISimpleElement> = new Map([
                                     variables: [
                                         {
                                             requires: "($hover_text)",
-                                            $button_content: "mines.hover_text_panel",
+                                            $button_content: "main.hover_text_panel",
                                         },
                                     ],
                                     bindings: [

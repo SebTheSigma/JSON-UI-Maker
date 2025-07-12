@@ -11,10 +11,32 @@
 <body>
     <input title="Import Pack" type="file" id="pack_importer" onchange="handlePackUpload()" webkitdirectory directory
         multiple />
-    <input title="Boundary Constraints" type="checkbox"
-        onclick="Builder.setSettingToggle('boundary_constraints', this.checked)">Boudary Constraints
-    <input title="Boundary Constraints" type="number"
-        oninput="Builder.setSettingToggle('arrow_key_move_amount', this.value)">Arrow Move Amount
+
+    <!-- The Settings Modal -->
+    <button id="modalSettingsBtn">Settings</button>
+
+    <div id="modalSettings" class="modal">
+        <div class="modal-content">
+            <span id="modalSettingsClose" class="modalClose">&times;</span>
+            <h2>Settings</h2>
+            <div class="modalSettingsForm">
+                
+            </div>
+        </div>
+    </div>
+    <!--------------->
+
+    <!-- The Add Button Modal -->
+    <div id="modalAddButton" class="modal">
+        <div class="modal-content">
+            <span id="modalAddButtonClose" class="modalClose">&times;</span>
+            <h2>Add Button</h2>
+            <div class="modalAddButtonForm">
+                
+            </div>
+        </div>
+    </div>
+    <!--------------->
 
     <div class="main_window" id="main_window">
         <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">
@@ -24,14 +46,15 @@
 
     <div class="buttons">
         <div class="addElements">
-            Elements: 
-            <button type="button" onclick="Builder.addPanel()">Add panel as child to selected</button>
+            Elements:
+            <button type="button" onclick="Builder.addPanel()">Add panel</button>
+
             <button type="button" class="addImage">Add image
                 <div class="addImageDropdown" id="addImageDropdown">
                 </div>
             </button>
 
-            <button type="button" onclick="Builder.addButton()">Add panel as child to selected</button>
+            <button type="button" onclick="Builder.addButton()">Add button</button>
         </div>
 
         <button type="button" onclick="Builder.reset()">Reset</button>
@@ -50,7 +73,7 @@
     </div>
 
     <script src="./dist/index.js" type="module"></script>
-    
+
 </body>
 
 </html>
