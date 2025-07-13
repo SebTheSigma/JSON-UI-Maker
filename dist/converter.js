@@ -1,5 +1,6 @@
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
 import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
+import { StringUtil } from "./util/stringUtil.js";
 export class Converter {
     /**
      * Gets all of the nodes currently in the main window
@@ -38,7 +39,7 @@ export class Converter {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {
-            jsonNodes = { "namespace": nameSpace, custom_button: JSON_TYPES.get('buttonWithHoverText') };
+            jsonNodes = { namespace: nameSpace, custom_button: JSON_TYPES.get("buttonWithHoverText") };
         }
         else {
             jsonNodes = {};
@@ -48,19 +49,19 @@ export class Converter {
             // Checks if the node should be ignored
             if (!treeData.instructions)
                 continue;
-            if (!treeData.instructions.ContinuePath)
-                continue;
             const jsonUI = treeData.element;
             // Recursively goes down the tree
             const nextNodes = Converter.tree(node, depth + 1, baseNode);
-            // Adds the JSON-UI controls
-            jsonUI["controls"] = [];
-            // Adds the nodes to the jsonUI
-            for (let nextNode of Object.keys(nextNodes)) {
-                jsonUI.controls.push({ [nextNode]: nextNodes[nextNode] });
+            if (treeData.instructions.ContinuePath) {
+                // Adds the JSON-UI controls
+                jsonUI.controls = [];
+                // Adds the nodes to the jsonUI
+                for (let nextNode of Object.keys(nextNodes)) {
+                    jsonUI.controls.push({ [nextNode]: nextNodes[nextNode] });
+                }
             }
-            const randomString = Converter.generateRandomString(8);
-            const link = treeData.instructions?.CommonElementLink ?? '';
+            const randomString = StringUtil.generateRandomString(8);
+            const link = treeData.instructions?.CommonElementLink ?? "";
             // Adds the node to the jsonUI
             if (jsonUI)
                 jsonNodes[depth == 0 ? `${nameSpace}${link}` : `${randomString}${link}`] = jsonUI;
@@ -75,22 +76,6 @@ export class Converter {
      */
     static test(node, depth = 0) {
         return Converter.tree(node, depth, node);
-    }
-    /**
-     * Generates a random string of a specified length.
-     * The string consists of lowercase letters and digits.
-     *
-     * @param length The desired length of the generated string.
-     * @returns A random string of the specified length.
-     */
-    static generateRandomString(length) {
-        let result = "";
-        const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
-        const charactersLength = characters.length;
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * charactersLength));
-        }
-        return result;
     }
 }
 //# sourceMappingURL=converter.js.map

@@ -1,5 +1,3 @@
-import { Builder } from "../../index.js";
-import { config } from "../../CONFIG.js";
 import { ButtonOptions } from "../../elements/button.js";
 
 const modal: HTMLElement = document.getElementById("modalAddButton")!;

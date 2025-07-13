@@ -3,6 +3,8 @@ import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { images } from "../index.js";
+import { updatePropertiesArea } from "../ui/propertiesArea.js";
+import { AllJsonUIElements } from "./elements.js";
 export class DraggableButton {
     imageDataDefault;
     imageDataHover;
@@ -27,8 +29,8 @@ export class DraggableButton {
     /**
      * @param {HTMLElement} container
      */
-    constructor(container, buttonOptions) {
-        const { defaultTexture, hoverTexture, pressedTexture } = buttonOptions ?? {};
+    constructor(ID, container, buttonOptions) {
+        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex } = buttonOptions ?? {};
         const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
         const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "";
         const pressedTex = pressedTexture ?? hoverTexture ?? defaultTexture ?? "";
@@ -55,7 +57,9 @@ export class DraggableButton {
         this.button.dataset.defaultImageName = defaultTex;
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
-        this.button.dataset.collectionIndex = buttonOptions?.collectionIndex?.toFixed() ?? '0';
+        this.button.dataset.id = ID;
+        console.log(collectionIndex, typeof collectionIndex);
+        this.button.dataset.collectionIndex = collectionIndex ?? "0";
         //-------------------------
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
@@ -96,10 +100,10 @@ export class DraggableButton {
         this.offsetX = 0;
         this.offsetY = 0;
         this.initEvents();
-        this.button.addEventListener('mouseenter', this.startHover.bind(this));
-        this.button.addEventListener('mouseleave', this.stopHover.bind(this));
-        this.button.addEventListener('mousedown', this.startPress.bind(this));
-        this.button.addEventListener('mouseup', this.stopPress.bind(this));
+        this.button.addEventListener("mouseenter", this.startHover.bind(this));
+        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
+        this.button.addEventListener("mousedown", this.startPress.bind(this));
+        this.button.addEventListener("mouseup", this.stopPress.bind(this));
     }
     initEvents() {
         this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -119,6 +123,7 @@ export class DraggableButton {
                 this.selected = true;
                 setSelectedElement(this.button);
                 this.button.style.border = "2px solid blue";
+                updatePropertiesArea();
                 return;
             }
         }
@@ -129,18 +134,22 @@ export class DraggableButton {
         this.selected = true;
         setSelectedElement(this.button);
         this.button.style.border = "2px solid blue";
+        updatePropertiesArea();
     }
     unSelect(_e) {
         this.selected = false;
         setSelectedElement(undefined);
         this.button.style.border = "2px solid black";
+        updatePropertiesArea();
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
             return;
-        // Stop propagation for nested canvass
-        if (this.container.classList.contains("draggable-canvas") || this.container.classList.contains("draggable-panel")) {
-            e.stopPropagation();
+        // Stop propagation for nested elements
+        for (let elementName of AllJsonUIElements) {
+            if (this.container.classList.contains(elementName)) {
+                e.stopPropagation();
+            }
         }
         this.isDragging = true;
         // Get position relative to parent container

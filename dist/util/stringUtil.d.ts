@@ -6,4 +6,12 @@ export declare class StringUtil {
      * @returns {number}
      */
     static cssDimToNumber(value: string): number;
+    /**
+     * Generates a random string of a specified length.
+     * The string consists of lowercase letters and digits.
+     *
+     * @param length The desired length of the generated string.
+     * @returns A random string of the specified length.
+     */
+    static generateRandomString(length: number): string;
 }

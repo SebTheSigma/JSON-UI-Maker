@@ -1,7 +1,9 @@
-import { selectedElement, setSelectedElement } from "../index.js";
+import { images, selectedElement, setSelectedElement } from "../index.js";
 import { Nineslice, NinesliceData } from "../nineslice.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
+import { updatePropertiesArea } from "../ui/propertiesArea.js";
+import { AllJsonUIElements } from "./elements.js";
 
 export class DraggableCanvas {
     public imageData: ImageData;
@@ -23,7 +25,7 @@ export class DraggableCanvas {
     /**
      * @param {HTMLElement} container
      */
-    public constructor(container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData) {
+    public constructor(ID: string, container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData) {
         console.log(`Dimensions: ${imageData.width} ${imageData.height}`);
 
         let lastParent: HTMLElement | null = container;
@@ -58,6 +60,7 @@ export class DraggableCanvas {
 
         // Gives it a filename that can be read later while converting
         this.canvasHolder.dataset.imageName = imageName;
+        this.canvasHolder.dataset.id = ID;
 
         // Draws the image
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
@@ -121,6 +124,7 @@ export class DraggableCanvas {
                 this.selected = true;
                 setSelectedElement(this.canvasHolder);
                 this.canvasHolder.style.border = "2px solid blue";
+                updatePropertiesArea();
                 return;
             }
         }
@@ -133,20 +137,25 @@ export class DraggableCanvas {
         this.selected = true;
         setSelectedElement(this.canvasHolder);
         this.canvasHolder.style.border = "2px solid blue";
+
+        updatePropertiesArea();
     }
 
     public unSelect(_e?: MouseEvent): void {
         this.selected = false;
         setSelectedElement(undefined);
         this.canvasHolder.style.border = "2px solid black";
+        updatePropertiesArea();
     }
 
     public startDrag(e: MouseEvent): void {
         if (e.target === this.resizeHandle) return;
 
-        // Stop propagation for nested canvass
-        if (this.container.classList.contains("draggable-canvas") || this.container.classList.contains("draggable-panel")) {
-            e.stopPropagation();
+        // Stop propagation for nested elements
+        for (let elementName of AllJsonUIElements) {
+             if (this.container.classList.contains(elementName)) {
+                e.stopPropagation();
+            }
         }
 
         this.isDragging = true;
@@ -281,5 +290,22 @@ export class DraggableCanvas {
 
         this.canvasHolder.style.width = `${width}px`;
         this.canvasHolder.style.height = `${height}px`;
+    }
+
+    public changeImage(imageName: string): void {
+        const data = images.get(imageName);
+
+        // Checks if the image is there
+        if (!data || !data.png) return;
+
+        // Sets pixel data
+        this.imageData = data.png;
+
+        // Sets nineslice
+        if (data.json) this.nineSlice = data.json;
+        else this.nineSlice = undefined;
+
+        this.canvasHolder.dataset.imageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height);
     }
 }

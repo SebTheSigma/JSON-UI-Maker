@@ -3,14 +3,15 @@ import { config } from "../CONFIG.js";
 import { Nineslice, NinesliceData } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { images, ImageDataState } from "../index.js";
-
+import { updatePropertiesArea } from "../ui/propertiesArea.js";
+import { AllJsonUIElements } from "./elements.js";
 
 export interface ButtonOptions {
-    collectionIndex?: number,
-    hoverTexture?: string,
-    defaultTexture?: string,
-    pressedTexture?: string,
-    [key: string]: any
+    collectionIndex?: string;
+    hoverTexture?: string;
+    defaultTexture?: string;
+    pressedTexture?: string;
+    [key: string]: any;
 }
 
 export class DraggableButton {
@@ -37,13 +38,8 @@ export class DraggableButton {
     /**
      * @param {HTMLElement} container
      */
-    public constructor(container: HTMLElement, buttonOptions?: ButtonOptions) {
-
-        const {
-            defaultTexture,
-            hoverTexture,
-            pressedTexture
-        } = buttonOptions ?? {};
+    public constructor(ID: string, container: HTMLElement, buttonOptions?: ButtonOptions) {
+        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex } = buttonOptions ?? {};
 
         const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
         const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "";
@@ -77,9 +73,12 @@ export class DraggableButton {
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
 
-        this.button.dataset.collectionIndex = buttonOptions?.collectionIndex?.toFixed() ?? '0';
+        this.button.dataset.id = ID;
+
+        console.log(collectionIndex, typeof collectionIndex);
+        this.button.dataset.collectionIndex = collectionIndex ?? "0";
         //-------------------------
-        
+
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
 
@@ -93,11 +92,11 @@ export class DraggableButton {
 
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
-            console.log(10000)
+            console.log(10000);
             const scaledHeight: number = rect.height * 0.8;
             this.drawImage(scaledHeight * this.aspectRatio, scaledHeight);
         } else if (rect.width <= rect.height) {
-            console.log(20000)
+            console.log(20000);
             const scaledWidth: number = rect.width * 0.8;
             this.drawImage(scaledWidth, scaledWidth / this.aspectRatio);
         }
@@ -128,11 +127,11 @@ export class DraggableButton {
 
         this.initEvents();
 
-        this.button.addEventListener('mouseenter', this.startHover.bind(this));
-        this.button.addEventListener('mouseleave', this.stopHover.bind(this));
+        this.button.addEventListener("mouseenter", this.startHover.bind(this));
+        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
 
-        this.button.addEventListener('mousedown', this.startPress.bind(this));
-        this.button.addEventListener('mouseup', this.stopPress.bind(this));
+        this.button.addEventListener("mousedown", this.startPress.bind(this));
+        this.button.addEventListener("mouseup", this.stopPress.bind(this));
     }
 
     public initEvents(): void {
@@ -157,6 +156,7 @@ export class DraggableButton {
                 this.selected = true;
                 setSelectedElement(this.button);
                 this.button.style.border = "2px solid blue";
+                updatePropertiesArea();
                 return;
             }
         }
@@ -169,20 +169,25 @@ export class DraggableButton {
         this.selected = true;
         setSelectedElement(this.button);
         this.button.style.border = "2px solid blue";
+
+        updatePropertiesArea();
     }
 
     public unSelect(_e?: MouseEvent): void {
         this.selected = false;
         setSelectedElement(undefined);
         this.button.style.border = "2px solid black";
+        updatePropertiesArea();
     }
 
     public startDrag(e: MouseEvent): void {
         if (e.target === this.resizeHandle) return;
 
-        // Stop propagation for nested canvass
-        if (this.container.classList.contains("draggable-canvas") || this.container.classList.contains("draggable-panel")) {
-            e.stopPropagation();
+        // Stop propagation for nested elements
+        for (let elementName of AllJsonUIElements) {
+            if (this.container.classList.contains(elementName)) {
+                e.stopPropagation();
+            }
         }
 
         this.isDragging = true;
@@ -283,7 +288,7 @@ export class DraggableButton {
     public startHover() {
         this.canvas.style.cursor = "pointer";
         this.isHovering = true;
-        console.log(`Start-Hover: hover-${this.isHovering}, press-${this.isPressing}`)
+        console.log(`Start-Hover: hover-${this.isHovering}, press-${this.isPressing}`);
 
         this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
     }
@@ -329,7 +334,6 @@ export class DraggableButton {
         if (height <= 1) height = 1;
 
         if (imageDataState.json) {
-
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
                 imageDataState.json!,
                 imageDataState.png?.data!,

@@ -3,7 +3,7 @@ import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 
-export class DraggablePanel {
+export class DraggableCollectionPanel {
     public container: HTMLElement;
     public panel: HTMLElement;
     public resizeHandle: HTMLElement;
@@ -19,7 +19,7 @@ export class DraggablePanel {
     /**
      * @param {HTMLElement} container
      */
-    public constructor(ID: string, container: HTMLElement) {
+    public constructor(ID: string, container: HTMLElement, collectionName: string = "form_buttons") {
         let lastParent: HTMLElement | null = container;
         let i: number = 0;
         parent_loop: while (true) {
@@ -30,9 +30,10 @@ export class DraggablePanel {
 
         this.container = container;
         this.panel = document.createElement("div");
-        this.panel.className = "draggable-panel";
+        this.panel.className = "draggable-collection_panel";
 
-        // Custom data
+        // Saves the collection name
+        this.panel.dataset.collectionName = collectionName;
         this.panel.dataset.id = ID;
 
         const rect: DOMRect = container.getBoundingClientRect();
@@ -133,7 +134,6 @@ export class DraggablePanel {
     }
 
     public drag(e: MouseEvent): void {
-        e.stopPropagation();
         if (!this.isDragging || this.isResizing) return;
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 

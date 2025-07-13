@@ -1,7 +1,7 @@
 import { NinesliceData } from "../nineslice.js";
 import { ImageDataState } from "../index.js";
 export interface ButtonOptions {
-    collectionIndex?: number;
+    collectionIndex?: string;
     hoverTexture?: string;
     defaultTexture?: string;
     pressedTexture?: string;
@@ -31,7 +31,7 @@ export declare class DraggableButton {
     /**
      * @param {HTMLElement} container
      */
-    constructor(container: HTMLElement, buttonOptions?: ButtonOptions);
+    constructor(ID: string, container: HTMLElement, buttonOptions?: ButtonOptions);
     initEvents(): void;
     select(e: MouseEvent): void;
     unSelect(_e?: MouseEvent): void;

@@ -1,4 +1,4 @@
-export declare class DraggablePanel {
+export declare class DraggableCollectionPanel {
     container: HTMLElement;
     panel: HTMLElement;
     resizeHandle: HTMLElement;
@@ -14,7 +14,7 @@ export declare class DraggablePanel {
     /**
      * @param {HTMLElement} container
      */
-    constructor(ID: string, container: HTMLElement);
+    constructor(ID: string, container: HTMLElement, collectionName?: string);
     initEvents(): void;
     select(e: MouseEvent): void;
     unSelect(_e?: MouseEvent): void;

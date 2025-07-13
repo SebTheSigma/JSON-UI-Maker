@@ -36,13 +36,5 @@ export declare class Converter {
      * @returns A JSON object representing the json-ui structure.
      */
     static test(node: Node, depth?: number): StringObjectMap;
-    /**
-     * Generates a random string of a specified length.
-     * The string consists of lowercase letters and digits.
-     *
-     * @param length The desired length of the generated string.
-     * @returns A random string of the specified length.
-     */
-    static generateRandomString(length: number): string;
 }
 export {};

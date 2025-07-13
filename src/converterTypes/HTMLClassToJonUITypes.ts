@@ -41,6 +41,42 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
         }
     ],
     [
+        'draggable-collection_panel',
+        (element: HTMLElement, nameSpace: string) => {
+            const parent = element.parentElement!;
+            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
+            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+
+            const collectionName: string = element.dataset.collectionName!;
+
+            const offset: [number, number] = [
+                StringUtil.cssDimToNumber(element.style.left),
+                StringUtil.cssDimToNumber(element.style.top),
+            ];
+
+            if (parent?.className == 'main_window') {
+                offset[0] = - processedWidth / 2;
+                offset[1] = - processedHeight / 2;
+            }
+
+            const jsonUIElement: JsonUISimpleElement = {
+                offset: offset,
+                size: [processedWidth, processedHeight],
+                layer: Number(element.style.zIndex),
+                type: 'collection_panel',
+                anchor_from: "top_left",
+                anchor_to: "top_left",
+                collection_name: collectionName
+            }
+
+            const instructions: TreeInstructions = {
+                ContinuePath: true,
+            };
+
+            return { element: jsonUIElement, instructions: instructions };
+        }
+    ],
+    [
         'draggable-canvas',
         (element: HTMLElement, nameSpace: string) => {
             const parent = element.parentElement!;
@@ -114,7 +150,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             }
 
             const instructions: TreeInstructions = {
-                ContinuePath: true,
+                ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`
             };
 

@@ -1,1 +1,1 @@
-export declare function initProperties(): void;
+export declare function updatePropertiesArea(): void;

@@ -8,4 +8,21 @@ export class StringUtil {
     public static cssDimToNumber(value: string): number {
         return Number(value.replace("px", ""));
     }
+
+    /**
+     * Generates a random string of a specified length.
+     * The string consists of lowercase letters and digits.
+     *
+     * @param length The desired length of the generated string.
+     * @returns A random string of the specified length.
+     */
+    public static generateRandomString(length: number): string {
+        let result = "";
+        const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
+        const charactersLength = characters.length;
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+        }
+        return result;
+    }
 }
