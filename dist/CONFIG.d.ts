@@ -8,5 +8,9 @@ export declare const config: {
     settings: {
         [key: string]: Setting;
     };
+    nameSpace: string;
+    magicNumbers: {
+        [key: string]: number;
+    };
 };
 export {};

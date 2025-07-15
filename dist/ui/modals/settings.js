@@ -23,6 +23,7 @@ openBtn.onclick = () => {
         input.name = setting;
         input.id = setting;
         input.style.maxWidth = '60px';
+        input.className = 'modalOptionInput';
         input.value = settingInfo?.value;
         if (settingInfo?.type === "checkbox") {
             input.checked = settingInfo?.value;
@@ -38,6 +39,7 @@ openBtn.onclick = () => {
         }
         // Label
         const label = document.createElement("label");
+        label.className = 'modalOptionLabel';
         label.innerText = `${settingInfo?.displayName}: `;
         label.htmlFor = setting;
         // Adds the elements
@@ -45,15 +47,20 @@ openBtn.onclick = () => {
         form.appendChild(input);
         form.appendChild(document.createElement("br"));
     }
+    /*
     // Make submit button
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Close";
+
     submit.onclick = () => {
         modal.style.display = "none";
-    };
+    }
+
     // Add submit button
     form.appendChild(submit);
+    */
+    // No need for the submit button as of now
 };
 /**
  * Hides the settings modal

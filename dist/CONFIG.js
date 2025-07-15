@@ -13,5 +13,9 @@ export const config = {
             displayName: "Arrow Key Move Amount",
         }
     },
+    magicNumbers: {
+        fontScalar: 1.6
+    },
+    nameSpace: 'main'
 };
 //# sourceMappingURL=CONFIG.js.map

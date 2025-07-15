@@ -5,8 +5,11 @@ import './ui/modals/settings.js';
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let selectedElement: HTMLElement | undefined;
 export declare const panelContainer: HTMLElement;
+export declare let isInMainWindow: boolean;
 export declare const GLOBAL_ELEMENT_MAP: Map<any, any>;
 export declare class Builder {
+    static isValidPath(parent: HTMLElement): boolean;
+    static addLabel(): void;
     static addPanel(): void;
     static addCollectionPanel(): void;
     static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void;

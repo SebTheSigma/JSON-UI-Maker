@@ -34,8 +34,10 @@ export async function addButtonModal() {
         input.type = option.type;
         input.name = option.name;
         input.style.maxWidth = "60px";
+        input.className = 'modalOptionInput';
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
+        label.className = 'modalOptionLabel';
         // Add the nodes
         form.appendChild(label);
         form.appendChild(input);
@@ -45,7 +47,8 @@ export async function addButtonModal() {
     // Make submit button
     const submit = document.createElement("input");
     submit.type = "submit";
-    submit.value = "Apply";
+    submit.value = "Create";
+    submit.className = 'modalSubmitButton';
     // Add submit button
     form.appendChild(submit);
     const fields = {};

@@ -1,4 +1,4 @@
-import { images, selectedElement, setSelectedElement } from "../index.js";
+import { images, isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { Nineslice, NinesliceData } from "../nineslice.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -121,9 +121,11 @@ export class DraggableCanvas {
         if (selectedElement) {
             if (selectedElement !== this.canvasHolder) {
                 selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
                 this.selected = true;
                 setSelectedElement(this.canvasHolder);
                 this.canvasHolder.style.border = "2px solid blue";
+                this.canvasHolder.style.outline = "2px solid blue";
                 updatePropertiesArea();
                 return;
             }
@@ -137,6 +139,7 @@ export class DraggableCanvas {
         this.selected = true;
         setSelectedElement(this.canvasHolder);
         this.canvasHolder.style.border = "2px solid blue";
+        this.canvasHolder.style.outline = "2px solid blue";
 
         updatePropertiesArea();
     }
@@ -145,6 +148,7 @@ export class DraggableCanvas {
         this.selected = false;
         setSelectedElement(undefined);
         this.canvasHolder.style.border = "2px solid black";
+        this.canvasHolder.style.outline = "2px solid black";
         updatePropertiesArea();
     }
 
@@ -196,6 +200,7 @@ export class DraggableCanvas {
     public stopDrag(): void {
         this.isDragging = false;
         this.canvas.style.cursor = "grab";
+        if (isInMainWindow) updatePropertiesArea();
     }
 
     public startResize(e: MouseEvent): void {
@@ -251,6 +256,7 @@ export class DraggableCanvas {
 
     public stopResize(): void {
         this.isResizing = false;
+        if (isInMainWindow) updatePropertiesArea();
     }
 
     /**

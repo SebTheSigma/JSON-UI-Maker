@@ -1,4 +1,4 @@
-import { selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice, NinesliceData } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -18,7 +18,6 @@ export class DraggableButton {
     public imageDataDefault: ImageDataState;
     public imageDataHover: ImageDataState;
     public imageDataPressed: ImageDataState;
-    public nineSlice?: NinesliceData;
     public container: HTMLElement;
     public button: HTMLElement;
     public canvas: HTMLCanvasElement;
@@ -126,12 +125,6 @@ export class DraggableButton {
         this.offsetY = 0;
 
         this.initEvents();
-
-        this.button.addEventListener("mouseenter", this.startHover.bind(this));
-        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
-
-        this.button.addEventListener("mousedown", this.startPress.bind(this));
-        this.button.addEventListener("mouseup", this.stopPress.bind(this));
     }
 
     public initEvents(): void {
@@ -143,6 +136,12 @@ export class DraggableButton {
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
         document.addEventListener("mousemove", (e) => this.resize(e));
         document.addEventListener("mouseup", () => this.stopResize());
+
+        this.button.addEventListener("mouseenter", this.startHover.bind(this));
+        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
+
+        this.canvas.addEventListener("mousedown", this.startPress.bind(this));
+        this.canvas.addEventListener("mouseup", this.stopPress.bind(this));
     }
 
     public select(e: MouseEvent): void {
@@ -153,9 +152,11 @@ export class DraggableButton {
         if (selectedElement) {
             if (selectedElement !== this.button) {
                 selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
                 this.selected = true;
                 setSelectedElement(this.button);
                 this.button.style.border = "2px solid blue";
+                this.button.style.outline = "2px solid blue";
                 updatePropertiesArea();
                 return;
             }
@@ -169,6 +170,7 @@ export class DraggableButton {
         this.selected = true;
         setSelectedElement(this.button);
         this.button.style.border = "2px solid blue";
+        this.button.style.outline = "2px solid blue";
 
         updatePropertiesArea();
     }
@@ -177,6 +179,7 @@ export class DraggableButton {
         this.selected = false;
         setSelectedElement(undefined);
         this.button.style.border = "2px solid black";
+        this.button.style.outline = "2px solid black";
         updatePropertiesArea();
     }
 
@@ -228,6 +231,7 @@ export class DraggableButton {
     public stopDrag(): void {
         this.isDragging = false;
         this.canvas.style.cursor = "grab";
+        if (isInMainWindow) updatePropertiesArea();
     }
 
     public startResize(e: MouseEvent): void {
@@ -283,12 +287,12 @@ export class DraggableButton {
 
     public stopResize(): void {
         this.isResizing = false;
+        if (isInMainWindow) updatePropertiesArea();
     }
 
     public startHover() {
         this.canvas.style.cursor = "pointer";
         this.isHovering = true;
-        console.log(`Start-Hover: hover-${this.isHovering}, press-${this.isPressing}`);
 
         this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
     }
@@ -313,13 +317,13 @@ export class DraggableButton {
         if (this.isHovering) this.canvas.style.cursor = "pointer";
         else this.canvas.style.cursor = "default";
 
-        if (!this.isHovering) this.drawImage(this.canvas.width, this.canvas.height);
-        else this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
+        if (this.isHovering) this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
+        else this.drawImage(this.canvas.width, this.canvas.height);
     }
 
     public getCurrentlyRenderedState() {
-        if (this.isPressing) return this.imageDataHover;
-        else if (this.isHovering) return this.imageDataPressed;
+        if (this.isPressing) return this.imageDataPressed;
+        else if (this.isHovering) return this.imageDataHover;
         else return this.imageDataDefault;
     }
 
@@ -332,6 +336,7 @@ export class DraggableButton {
         // Stops the canvas from being too small
         if (width <= 1) width = 1;
         if (height <= 1) height = 1;
+
 
         if (imageDataState.json) {
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
@@ -360,5 +365,44 @@ export class DraggableButton {
 
         this.button.style.width = `${width}px`;
         this.button.style.height = `${height}px`;
+    }
+
+    public setDefaultImage(imageName: string): void {
+        const data = images.get(imageName);
+
+        // Checks if the image is there
+        if (!data || !data.png) return;
+
+        // Sets pixel data
+        this.imageDataDefault = data;
+
+        this.button.dataset.defaultImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
+    }
+
+    public setHoverImage(imageName: string): void {
+        const data = images.get(imageName);
+
+        // Checks if the image is there
+        if (!data || !data.png) return;
+
+        // Sets pixel data
+        this.imageDataHover = data;
+
+        this.button.dataset.hoverImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
+    }
+
+    public setPressedImage(imageName: string): void {
+        const data = images.get(imageName);
+
+        // Checks if the image is there
+        if (!data || !data.png) return;
+
+        // Sets pixel data
+        this.imageDataPressed = data;
+
+        this.button.dataset.pressedImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
     }
 }

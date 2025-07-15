@@ -33,6 +33,7 @@ openBtn.onclick = () => {
         input.name = setting;
         input.id = setting;
         input.style.maxWidth = '60px';
+        input.className = 'modalOptionInput';
 
         input.value = settingInfo?.value!;
 
@@ -53,6 +54,7 @@ openBtn.onclick = () => {
 
         // Label
         const label = document.createElement("label");
+        label.className = 'modalOptionLabel';
         label.innerText = `${settingInfo?.displayName!}: `;
         label.htmlFor = setting;
 
@@ -62,6 +64,7 @@ openBtn.onclick = () => {
         form.appendChild(document.createElement("br"));
     }
 
+    /*
     // Make submit button
     const submit = document.createElement("input");
     submit.type = "submit";
@@ -73,6 +76,9 @@ openBtn.onclick = () => {
 
     // Add submit button
     form.appendChild(submit);
+    */
+
+    // No need for the submit button as of now
 };
 
 /**

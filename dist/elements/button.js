@@ -1,4 +1,4 @@
-import { selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -9,7 +9,6 @@ export class DraggableButton {
     imageDataDefault;
     imageDataHover;
     imageDataPressed;
-    nineSlice;
     container;
     button;
     canvas;
@@ -100,10 +99,6 @@ export class DraggableButton {
         this.offsetX = 0;
         this.offsetY = 0;
         this.initEvents();
-        this.button.addEventListener("mouseenter", this.startHover.bind(this));
-        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
-        this.button.addEventListener("mousedown", this.startPress.bind(this));
-        this.button.addEventListener("mouseup", this.stopPress.bind(this));
     }
     initEvents() {
         this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -113,6 +108,10 @@ export class DraggableButton {
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
         document.addEventListener("mousemove", (e) => this.resize(e));
         document.addEventListener("mouseup", () => this.stopResize());
+        this.button.addEventListener("mouseenter", this.startHover.bind(this));
+        this.button.addEventListener("mouseleave", this.stopHover.bind(this));
+        this.canvas.addEventListener("mousedown", this.startPress.bind(this));
+        this.canvas.addEventListener("mouseup", this.stopPress.bind(this));
     }
     select(e) {
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
@@ -120,9 +119,11 @@ export class DraggableButton {
         if (selectedElement) {
             if (selectedElement !== this.button) {
                 selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
                 this.selected = true;
                 setSelectedElement(this.button);
                 this.button.style.border = "2px solid blue";
+                this.button.style.outline = "2px solid blue";
                 updatePropertiesArea();
                 return;
             }
@@ -134,12 +135,14 @@ export class DraggableButton {
         this.selected = true;
         setSelectedElement(this.button);
         this.button.style.border = "2px solid blue";
+        this.button.style.outline = "2px solid blue";
         updatePropertiesArea();
     }
     unSelect(_e) {
         this.selected = false;
         setSelectedElement(undefined);
         this.button.style.border = "2px solid black";
+        this.button.style.outline = "2px solid black";
         updatePropertiesArea();
     }
     startDrag(e) {
@@ -182,6 +185,8 @@ export class DraggableButton {
     stopDrag() {
         this.isDragging = false;
         this.canvas.style.cursor = "grab";
+        if (isInMainWindow)
+            updatePropertiesArea();
     }
     startResize(e) {
         e.stopPropagation(); // Prevent event from bubbling to parent
@@ -231,11 +236,12 @@ export class DraggableButton {
     }
     stopResize() {
         this.isResizing = false;
+        if (isInMainWindow)
+            updatePropertiesArea();
     }
     startHover() {
         this.canvas.style.cursor = "pointer";
         this.isHovering = true;
-        console.log(`Start-Hover: hover-${this.isHovering}, press-${this.isPressing}`);
         this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
     }
     stopHover() {
@@ -254,16 +260,16 @@ export class DraggableButton {
             this.canvas.style.cursor = "pointer";
         else
             this.canvas.style.cursor = "default";
-        if (!this.isHovering)
-            this.drawImage(this.canvas.width, this.canvas.height);
-        else
+        if (this.isHovering)
             this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
+        else
+            this.drawImage(this.canvas.width, this.canvas.height);
     }
     getCurrentlyRenderedState() {
         if (this.isPressing)
-            return this.imageDataHover;
-        else if (this.isHovering)
             return this.imageDataPressed;
+        else if (this.isHovering)
+            return this.imageDataHover;
         else
             return this.imageDataDefault;
     }
@@ -295,6 +301,36 @@ export class DraggableButton {
         this.canvas.style.margin = "0 auto";
         this.button.style.width = `${width}px`;
         this.button.style.height = `${height}px`;
+    }
+    setDefaultImage(imageName) {
+        const data = images.get(imageName);
+        // Checks if the image is there
+        if (!data || !data.png)
+            return;
+        // Sets pixel data
+        this.imageDataDefault = data;
+        this.button.dataset.defaultImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
+    }
+    setHoverImage(imageName) {
+        const data = images.get(imageName);
+        // Checks if the image is there
+        if (!data || !data.png)
+            return;
+        // Sets pixel data
+        this.imageDataHover = data;
+        this.button.dataset.hoverImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
+    }
+    setPressedImage(imageName) {
+        const data = images.get(imageName);
+        // Checks if the image is there
+        if (!data || !data.png)
+            return;
+        // Sets pixel data
+        this.imageDataPressed = data;
+        this.button.dataset.pressedImageName = imageName;
+        this.drawImage(this.canvas.width, this.canvas.height, data);
     }
 }
 //# sourceMappingURL=button.js.map

@@ -6,7 +6,7 @@ interface Setting {
     displayName?: string;
 }
 
-export const config: { settings: { [key: string]: Setting } } = {
+export const config: { settings: { [key: string]: Setting }, nameSpace: string, magicNumbers: { [key: string]: number } } = {
     settings: {
         boundary_constraints: {
             type: "checkbox",
@@ -21,4 +21,8 @@ export const config: { settings: { [key: string]: Setting } } = {
             displayName: "Arrow Key Move Amount",
         }
     },
+    magicNumbers: {
+        fontScalar: 1.6
+    },
+    nameSpace: 'main'
 };

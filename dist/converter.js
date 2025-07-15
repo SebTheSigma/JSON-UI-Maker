@@ -1,3 +1,4 @@
+import { config } from "./CONFIG.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
 import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 import { StringUtil } from "./util/stringUtil.js";
@@ -35,7 +36,7 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static tree(startNodeTree, depth = 0, baseNode, nameSpace = "main") {
+    static tree(startNodeTree, depth = 0, baseNode, nameSpace = config.nameSpace) {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {

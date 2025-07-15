@@ -1,4 +1,4 @@
-import { selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
@@ -84,9 +84,11 @@ export class DraggablePanel {
         if (selectedElement) {
             if (selectedElement !== this.panel) {
                 selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
                 this.selected = true;
                 setSelectedElement(this.panel);
                 this.panel.style.border = "2px solid blue";
+                this.panel.style.outline = "2px solid blue";
                 updatePropertiesArea();
                 return;
             }
@@ -100,6 +102,7 @@ export class DraggablePanel {
         this.selected = true;
         setSelectedElement(this.panel);
         this.panel.style.border = "2px solid blue";
+        this.panel.style.outline = "2px solid blue";
 
         updatePropertiesArea();
     }
@@ -108,6 +111,7 @@ export class DraggablePanel {
         this.selected = false;
         setSelectedElement(undefined);
         this.panel.style.border = "2px solid black";
+        this.panel.style.outline = "2px solid black";
         updatePropertiesArea();
     }
 
@@ -161,6 +165,8 @@ export class DraggablePanel {
     public stopDrag(): void {
         this.isDragging = false;
         this.panel.style.cursor = "grab";
+
+        if (isInMainWindow) updatePropertiesArea();
     }
 
     public startResize(e: MouseEvent): void {
@@ -186,5 +192,6 @@ export class DraggablePanel {
 
     public stopResize(): void {
         this.isResizing = false;
+        if (isInMainWindow) updatePropertiesArea();
     }
 }

@@ -1,4 +1,3 @@
-import { NinesliceData } from "../nineslice.js";
 import { ImageDataState } from "../index.js";
 export interface ButtonOptions {
     collectionIndex?: string;
@@ -11,7 +10,6 @@ export declare class DraggableButton {
     imageDataDefault: ImageDataState;
     imageDataHover: ImageDataState;
     imageDataPressed: ImageDataState;
-    nineSlice?: NinesliceData;
     container: HTMLElement;
     button: HTMLElement;
     canvas: HTMLCanvasElement;
@@ -52,4 +50,7 @@ export declare class DraggableButton {
      * @param {number} height
      */
     drawImage(width: number, height: number, imageDataState?: ImageDataState): void;
+    setDefaultImage(imageName: string): void;
+    setHoverImage(imageName: string): void;
+    setPressedImage(imageName: string): void;
 }
