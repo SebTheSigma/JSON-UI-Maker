@@ -184,12 +184,13 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 text: (element as HTMLTextAreaElement).value!,
                 font_scale_factor: parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar!,
                 text_alignment: element.style.textAlign ?? "left",
+                font_color: []
             }
 
             console.log(JSON.stringify(jsonUIElement))
 
             const instructions: TreeInstructions = {
-                ContinuePath: true,
+                ContinuePath: false,
             };
 
             return { element: jsonUIElement, instructions: instructions };

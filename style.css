@@ -376,6 +376,64 @@ input[type="file"] {
     display: flex;
 }
 
+.scripter {
+    display: flex;
+    margin-right: 10px;
+    margin-top: 10px;
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+    color: white;
+    width: 300px;
+    height: calc(1510px / 1.7777777);
+    background-color:  rgb(39, 39, 39);
+    border-radius: 10px;
+}
+
+.scripter_text {
+    height: 400px;
+    border-radius: 10px;
+    margin: 10px;
+    text-align: left;
+    background-color: #424242;
+    outline: rgb(153, 0, 255) 2px solid;
+    border: none;
+    resize: none;
+    white-space: nowrap;
+}
+
+.scripter_buttons {
+    margin-left: 10px;
+    margin-right: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    text-align: center;
+    color: white;
+}
+
+.scripter_buttons > * {
+    padding: 5px;
+    height: 30px;
+    width: 50%;
+    border-radius: 5px;
+    background-color: rgb(59, 56, 71);
+    color: white;
+    cursor: pointer;
+    border: none;
+    outline: rgb(80, 77, 77) 1px solid;
+}
+
+.scripter_buttons > *:hover {
+    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+    outline: rgb(162, 0, 255) 2px solid;
+}
+
+.scripter_title_label {
+    margin-top: 10px;
+    font-size: 1.3em;
+}
+
 @font-face {
     font-family: 'MinecraftRegular';
     src: url('./fonts/MinecraftRegular.ttf') format('truetype');

@@ -5,12 +5,13 @@ import { DraggableCanvas } from "./elements/canvas.js";
 import { updatePropertiesArea } from "./ui/propertiesArea.js";
 import { config } from "./CONFIG.js";
 import { DraggableButton } from "./elements/button.js";
-import './ui/modals/settings.js';
 import { addButtonModal } from "./ui/modals/addButton.js";
 import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
+import './ui/modals/settings.js';
+import './scripter/eval.js';
 console.log("Script Loaded");
 export function setSelectedElement(element) {
     selectedElement = element;

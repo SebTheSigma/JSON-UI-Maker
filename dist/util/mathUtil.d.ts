@@ -1,0 +1,9 @@
+export declare class MathUtil {
+    /**
+     * Clamps a value between 0 and 255. If the value is below 0, it returns 0.
+     * If the value is above 255, it returns 255. Otherwise, it returns the value.
+     * @param value The value to clamp.
+     * @returns The clamped value.
+     */
+    static clampToByte(value: number): number;
+}

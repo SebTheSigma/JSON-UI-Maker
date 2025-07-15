@@ -237,7 +237,7 @@ const propertiesMap = new Map([
                 displayName: "Collection Name",
                 editable: true,
                 get: (element) => element.dataset.collectionName,
-                set: (element, value) => (element.dataset.collectionName = value)
+                set: (element, value) => (element.dataset.collectionName = value),
             },
         ],
     ],
@@ -301,25 +301,13 @@ const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.style.textAlign,
                 set: (element, value) => (element.style.textAlign = value),
-            },
-            {
-                type: "number",
-                displayName: "Font Color R (0-255)",
-                editable: true,
-                get: (element) => {
-                    console.log(element.style.color ?? 'hello', 1);
-                    return '100';
-                },
-                set: (element, value) => {
-                    console.log(typeof element.style.color, 2);
-                },
-            },
-        ]
-    ]
+            }
+        ],
+    ],
 ]);
 let currentInputs = [];
 export function updatePropertiesArea() {
-    console.log('Updating Properties Area');
+    console.log("Updating Properties Area");
     const propertiesArea = document.getElementById("properties");
     // Removes old event listeners
     for (let input of currentInputs) {

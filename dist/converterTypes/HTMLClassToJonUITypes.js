@@ -150,10 +150,11 @@ export const classToJsonUI = new Map([
                 text: element.value,
                 font_scale_factor: parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar,
                 text_alignment: element.style.textAlign ?? "left",
+                font_color: []
             };
             console.log(JSON.stringify(jsonUIElement));
             const instructions = {
-                ContinuePath: true,
+                ContinuePath: false,
             };
             return { element: jsonUIElement, instructions: instructions };
         }

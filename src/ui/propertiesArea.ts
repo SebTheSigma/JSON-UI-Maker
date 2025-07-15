@@ -2,6 +2,7 @@ import { DraggableButton } from "../elements/button.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { DraggableLabel } from "../elements/label.js";
 import { GLOBAL_ELEMENT_MAP, selectedElement } from "../index.js";
+import { MathUtil } from "../util/mathUtil.js";
 
 const propertiesMap = new Map([
     [
@@ -268,7 +269,7 @@ const propertiesMap = new Map([
                 editable: true,
 
                 get: (element: HTMLElement) => element.dataset.collectionName,
-                set: (element: HTMLElement, value: string) => (element.dataset.collectionName = value)
+                set: (element: HTMLElement, value: string) => (element.dataset.collectionName = value),
             },
         ],
     ],
@@ -340,29 +341,15 @@ const propertiesMap = new Map([
 
                 get: (element: HTMLElement) => element.style.textAlign,
                 set: (element: HTMLElement, value: string) => (element.style.textAlign = value),
-            },
-            {
-                type: "number",
-                displayName: "Font Color R (0-255)",
-                editable: true,
-
-                get: (element: HTMLElement) => {
-                    console.log(element.style.color ?? 'hello', 1);
-                    return '100'
-                },
-                set: (element: HTMLElement, value: string) => {
-                    console.log(typeof element.style.color, 2);
-                },
-            },
-        ]
-    ]
+            }
+        ],
+    ],
 ]);
-
 
 let currentInputs: HTMLInputElement[] = [];
 
 export function updatePropertiesArea(): void {
-    console.log('Updating Properties Area');
+    console.log("Updating Properties Area");
     const propertiesArea = document.getElementById("properties")!;
 
     // Removes old event listeners
@@ -379,7 +366,6 @@ export function updatePropertiesArea(): void {
 
     if (!selectedElement) return;
     for (let property of properties) {
-
         const input = document.createElement("input");
         input.type = property.type;
         input.className = "propertyInput";
@@ -393,15 +379,14 @@ export function updatePropertiesArea(): void {
         const isEditableLabel = document.createElement("label");
         isEditableLabel.className = "isEditableLabel";
         isEditableLabel.textContent = `${property.editable ? "Editable" : "Not Editable"}`;
-        
+
         if (property.editable) {
             input.contentEditable = "true";
 
             input.oninput = function () {
                 property.set(selectedElement!, input.value);
             };
-        }
-        else input.contentEditable = "false";
+        } else input.contentEditable = "false";
 
         currentInputs.push(input);
 

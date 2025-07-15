@@ -8,7 +8,6 @@ export let keyboardEvent: KeyboardEvent = new KeyboardEvent("keypress");
 
 window.addEventListener("keydown", (e) => {
     keyboardEvent = e;
-    console.log(e.key)
     
     if (e?.key?.startsWith("Arrow")) triggerArrowMovement(e);
     if (e?.key === "Delete") Builder.deleteSelected();

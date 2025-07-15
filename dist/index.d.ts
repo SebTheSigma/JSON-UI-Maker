@@ -2,6 +2,7 @@ import { Converter } from "./converter.js";
 import { NinesliceData } from "./nineslice.js";
 import { config } from "./CONFIG.js";
 import './ui/modals/settings.js';
+import './scripter/eval.js';
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let selectedElement: HTMLElement | undefined;
 export declare const panelContainer: HTMLElement;
