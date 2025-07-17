@@ -16,8 +16,8 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const jsonUIElement = {
-                offset: offset,
-                size: [processedWidth, processedHeight],
+                offset: [offset[0] * config.magicNumbers.UI_SCALAR, offset[1] * config.magicNumbers.UI_SCALAR],
+                size: [processedWidth * config.magicNumbers.UI_SCALAR, processedHeight * config.magicNumbers.UI_SCALAR],
                 layer: Number(element.style.zIndex),
                 type: 'panel',
                 anchor_from: "top_left",
@@ -45,8 +45,8 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const jsonUIElement = {
-                offset: offset,
-                size: [processedWidth, processedHeight],
+                offset: [offset[0] * config.magicNumbers.UI_SCALAR, offset[1] * config.magicNumbers.UI_SCALAR],
+                size: [processedWidth * config.magicNumbers.UI_SCALAR, processedHeight * config.magicNumbers.UI_SCALAR],
                 layer: Number(element.style.zIndex),
                 type: 'collection_panel',
                 anchor_from: "top_left",
@@ -74,8 +74,8 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const jsonUIElement = {
-                offset: offset,
-                size: [processedWidth, processedHeight],
+                offset: [offset[0] * config.magicNumbers.UI_SCALAR, offset[1] * config.magicNumbers.UI_SCALAR],
+                size: [processedWidth * config.magicNumbers.UI_SCALAR, processedHeight * config.magicNumbers.UI_SCALAR],
                 layer: Number(element.style.zIndex),
                 type: 'image',
                 texture: `textures/ui/${element.dataset.imageName}`,
@@ -110,8 +110,8 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const jsonUIElement = {
-                $offset_test: offset,
-                $button_size: [processedWidth, processedHeight],
+                $offset_test: [offset[0] * config.magicNumbers.UI_SCALAR, offset[1] * config.magicNumbers.UI_SCALAR],
+                $button_size: [processedWidth * config.magicNumbers.UI_SCALAR, processedHeight * config.magicNumbers.UI_SCALAR],
                 layer: Number(element.style.zIndex),
                 anchor_from: "top_left",
                 anchor_to: "top_left",
@@ -142,15 +142,17 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const jsonUIElement = {
-                offset: [offset[0] + 6, offset[1] + 6],
+                offset: [
+                    (offset[0] + config.magicNumbers.fontOffsetX) * config.magicNumbers.UI_SCALAR,
+                    (offset[1] + config.magicNumbers.fontOffsetY) * config.magicNumbers.UI_SCALAR
+                ],
                 layer: Number(element.style.zIndex),
                 type: 'label',
                 anchor_from: "top_left",
                 anchor_to: "top_left",
                 text: element.value,
-                font_scale_factor: parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar,
-                text_alignment: element.style.textAlign ?? "left",
-                font_color: []
+                font_scale_factor: (parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar) * config.magicNumbers.UI_SCALAR,
+                text_alignment: element.style.textAlign ?? "left"
             };
             console.log(JSON.stringify(jsonUIElement));
             const instructions = {

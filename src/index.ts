@@ -41,7 +41,7 @@ panelContainer.addEventListener('mouseleave', () => {
  * Each accessable element has a unique id.
  * The id is used to access the element.
  */
-export const GLOBAL_ELEMENT_MAP = new Map();
+export const GLOBAL_ELEMENT_MAP: Map<string, DraggableButton | DraggableCanvas | DraggableLabel | DraggablePanel | DraggableCollectionPanel > = new Map();
 
 export class Builder {
 

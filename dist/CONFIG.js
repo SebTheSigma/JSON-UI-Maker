@@ -14,7 +14,10 @@ export const config = {
         }
     },
     magicNumbers: {
-        fontScalar: 1.6
+        fontScalar: 1.6,
+        fontOffsetX: 6,
+        fontOffsetY: 6,
+        UI_SCALAR: 0.5
     },
     nameSpace: 'main'
 };

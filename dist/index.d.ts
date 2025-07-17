@@ -1,13 +1,18 @@
 import { Converter } from "./converter.js";
+import { DraggablePanel } from "./elements/panel.js";
+import { DraggableCanvas } from "./elements/canvas.js";
 import { NinesliceData } from "./nineslice.js";
 import { config } from "./CONFIG.js";
+import { DraggableButton } from "./elements/button.js";
+import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
+import { DraggableLabel } from "./elements/label.js";
 import './ui/modals/settings.js';
 import './scripter/eval.js';
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let selectedElement: HTMLElement | undefined;
 export declare const panelContainer: HTMLElement;
 export declare let isInMainWindow: boolean;
-export declare const GLOBAL_ELEMENT_MAP: Map<any, any>;
+export declare const GLOBAL_ELEMENT_MAP: Map<string, DraggableButton | DraggableCanvas | DraggableLabel | DraggablePanel | DraggableCollectionPanel>;
 export declare class Builder {
     static isValidPath(parent: HTMLElement): boolean;
     static addLabel(): void;

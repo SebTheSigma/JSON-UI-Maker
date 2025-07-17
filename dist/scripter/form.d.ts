@@ -10,5 +10,6 @@ export declare class ActionFormData {
     title(title: string): void;
     button(text: string, texture: string): void;
     body(text: string): void;
+    show(): void;
 }
 export {};
