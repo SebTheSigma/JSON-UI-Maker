@@ -37,6 +37,8 @@ export class Converter {
     public static nodeToJsonUI(node: HTMLElement, nameSpace: string): TreeData | undefined {
         try {
             let treeData: TreeData = {};
+            if (node?.dataset?.shouldParse == 'false') return treeData;
+
             const getTreeData: (element: HTMLElement, nameSpace: string) => TreeData = classToJsonUI.get(node.className)!;
 
             if (getTreeData) {

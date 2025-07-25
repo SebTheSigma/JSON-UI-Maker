@@ -192,6 +192,22 @@ const propertiesMap = new Map([
                 get: (element) => element.dataset.collectionIndex,
                 set: (element, value) => (element.dataset.collectionIndex = value),
             },
+            {
+                type: "text",
+                displayName: "Display Texture",
+                editable: true,
+                get: (element) => element.dataset.displayImageName,
+                set: (element, value) => {
+                    const id = element.dataset.id;
+                    if (!id)
+                        return;
+                    const elementClass = GLOBAL_ELEMENT_MAP.get(id);
+                    if (elementClass instanceof DraggableButton) {
+                        console.warn("Changing display image");
+                        elementClass.setDisplayImage(value);
+                    }
+                },
+            },
         ],
     ],
     [

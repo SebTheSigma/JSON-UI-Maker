@@ -5,10 +5,14 @@ import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { images } from "../index.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
+import { DraggableCanvas } from "./canvas.js";
+import { StringUtil } from "../util/stringUtil.js";
 export class DraggableButton {
     imageDataDefault;
     imageDataHover;
     imageDataPressed;
+    displayCanvas;
+    displayTexture;
     container;
     button;
     canvas;
@@ -29,7 +33,8 @@ export class DraggableButton {
      * @param {HTMLElement} container
      */
     constructor(ID, container, buttonOptions) {
-        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex } = buttonOptions ?? {};
+        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex, displayTexture } = buttonOptions ?? {};
+        this.displayTexture = displayTexture;
         const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
         const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "";
         const pressedTex = pressedTexture ?? hoverTexture ?? defaultTexture ?? "";
@@ -56,6 +61,7 @@ export class DraggableButton {
         this.button.dataset.defaultImageName = defaultTex;
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
+        this.button.dataset.displayImageName = displayTexture ?? "";
         this.button.dataset.id = ID;
         console.log(collectionIndex, typeof collectionIndex);
         this.button.dataset.collectionIndex = collectionIndex ?? "0";
@@ -331,6 +337,15 @@ export class DraggableButton {
         this.imageDataPressed = data;
         this.button.dataset.pressedImageName = imageName;
         this.drawImage(this.canvas.width, this.canvas.height, data);
+    }
+    setDisplayImage(imageName) {
+        const data = images.get(imageName);
+        if (!data || !data.png)
+            return;
+        const id = StringUtil.generateRandomString(15);
+        this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imageName, data.json);
+        this.displayCanvas.setParse(false);
+        this.button.dataset.displayImageName = imageName;
     }
 }
 //# sourceMappingURL=button.js.map

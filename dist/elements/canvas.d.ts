@@ -36,4 +36,5 @@ export declare class DraggableCanvas {
      */
     drawImage(width: number, height: number): void;
     changeImage(imageName: string): void;
+    setParse(shouldParse: boolean): void;
 }

@@ -1,5 +1,8 @@
 import { config } from "../CONFIG.js";
 import { TreeData, TreeInstructions } from "../converter.js";
+import { DraggableButton } from "../elements/button.js";
+import { DraggableCanvas } from "../elements/canvas.js";
+import { GLOBAL_ELEMENT_MAP } from "../index.js";
 import { StringUtil } from "../util/stringUtil.js";
 
 export interface JsonUISimpleElement {
@@ -138,6 +141,24 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 offset[1] = - processedHeight / 2;
             }
 
+            // Gets the display canvas
+            const id = element.dataset.id!;
+
+            const buttonIdToDisplayCanvasJsonUi = (id: string): JsonUISimpleElement | undefined => {
+                const buttonClass = GLOBAL_ELEMENT_MAP.get(id) as DraggableButton;
+                const displayCanvas: DraggableCanvas = buttonClass.displayCanvas!;
+
+                const transformationFunc = classToJsonUI.get('draggable-canvas');
+                if (!transformationFunc) return undefined;
+
+                const result = transformationFunc(displayCanvas.canvasHolder!, nameSpace);
+                if (!result) return undefined;
+
+                return result.element!;
+            }
+
+            const DisplayElementJsonUi: JsonUISimpleElement = buttonIdToDisplayCanvasJsonUi(id)!;
+
             const jsonUIElement: JsonUISimpleElement = {
                 $offset_test: [offset[0] * config.magicNumbers.UI_SCALAR!, offset[1] * config.magicNumbers.UI_SCALAR!],
                 $button_size: [processedWidth * config.magicNumbers.UI_SCALAR!, processedHeight * config.magicNumbers.UI_SCALAR!],
@@ -147,7 +168,12 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 $default_button_background_texture: defaultTex,
                 $hover_button_background_texture: hoverTex,
                 $pressed_button_background_texture: pressedTex,
-                collection_index: collectionIndex
+                collection_index: collectionIndex,
+                $icon_offset: [
+                    (DisplayElementJsonUi.offset![0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
+                    (DisplayElementJsonUi.offset![1] ?? 0) + config.magicNumbers.buttonImageOffsetY
+                ],
+                $icon_size: [DisplayElementJsonUi.size![0] ?? 45, DisplayElementJsonUi.size![1] ?? 45],
             }
 
             const instructions: TreeInstructions = {

@@ -314,4 +314,8 @@ export class DraggableCanvas {
         this.canvasHolder.dataset.imageName = imageName;
         this.drawImage(this.canvas.width, this.canvas.height);
     }
+
+    public setParse(shouldParse: boolean): void {
+        this.canvasHolder.dataset.shouldParse = `${shouldParse}`.toLowerCase();
+    }
 }

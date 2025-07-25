@@ -20,6 +20,8 @@ export class Converter {
     static nodeToJsonUI(node, nameSpace) {
         try {
             let treeData = {};
+            if (node?.dataset?.shouldParse == 'false')
+                return treeData;
             const getTreeData = classToJsonUI.get(node.className);
             if (getTreeData) {
                 treeData = getTreeData(node, nameSpace);

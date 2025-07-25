@@ -1,15 +1,19 @@
 import { ImageDataState } from "../index.js";
+import { DraggableCanvas } from "./canvas.js";
 export interface ButtonOptions {
     collectionIndex?: string;
     hoverTexture?: string;
     defaultTexture?: string;
     pressedTexture?: string;
+    displayTexture?: string;
     [key: string]: any;
 }
 export declare class DraggableButton {
     imageDataDefault: ImageDataState;
     imageDataHover: ImageDataState;
     imageDataPressed: ImageDataState;
+    displayCanvas?: DraggableCanvas;
+    displayTexture?: string;
     container: HTMLElement;
     button: HTMLElement;
     canvas: HTMLCanvasElement;
@@ -53,4 +57,5 @@ export declare class DraggableButton {
     setDefaultImage(imageName: string): void;
     setHoverImage(imageName: string): void;
     setPressedImage(imageName: string): void;
+    setDisplayImage(imageName: string): void;
 }

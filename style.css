@@ -415,7 +415,7 @@ input[type="file"] {
 .scripter_buttons > * {
     padding: 5px;
     height: 30px;
-    width: 50%;
+    width: 100%;
     border-radius: 5px;
     background-color: rgb(59, 56, 71);
     color: white;

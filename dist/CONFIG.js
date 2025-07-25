@@ -17,7 +17,9 @@ export const config = {
         fontScalar: 1.6,
         fontOffsetX: 6,
         fontOffsetY: 6,
-        UI_SCALAR: 0.5
+        UI_SCALAR: 0.5,
+        buttonImageOffsetX: 2,
+        buttonImageOffsetY: 2
     },
     nameSpace: 'main'
 };

@@ -10,8 +10,8 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
+import './scripter/generator.js';
 import './ui/modals/settings.js';
-import './scripter/eval.js';
 console.log("Script Loaded");
 export function setSelectedElement(element) {
     selectedElement = element;
