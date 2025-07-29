@@ -17,10 +17,12 @@ export const config = {
         fontScalar: 1.6,
         fontOffsetX: 6,
         fontOffsetY: 6,
+        getFontScaledOffsetY: (fontSize) => 2 * fontSize - 2,
         UI_SCALAR: 0.5,
         buttonImageOffsetX: 2,
         buttonImageOffsetY: 2
     },
-    nameSpace: 'main'
+    nameSpace: 'main',
+    defaultCollectionName: 'form_buttons'
 };
 //# sourceMappingURL=CONFIG.js.map

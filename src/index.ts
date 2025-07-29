@@ -11,46 +11,54 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
-import './scripter/generator.js';
-import './ui/modals/settings.js';
+import "./scripter/generator.js";
+import "./ui/modals/settings.js";
+import { Copier } from "./copyNPaste/copy.js";
+import { Paster } from "./copyNPaste/paste.js";
+import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 
 console.log("Script Loaded");
-
 
 export function setSelectedElement(element: HTMLElement | undefined): void {
     selectedElement = element;
 }
 export let selectedElement: HTMLElement | undefined = undefined;
 
-
 export const panelContainer: HTMLElement = document.getElementById("main_window")!;
 export let isInMainWindow: boolean = false;
 
-panelContainer.addEventListener('mouseenter', () => {
-  isInMainWindow = true;
+panelContainer.addEventListener("mouseenter", () => {
+    isInMainWindow = true;
 });
 
-panelContainer.addEventListener('mouseleave', () => {
-  isInMainWindow = false;
+panelContainer.addEventListener("mouseleave", () => {
+    isInMainWindow = false;
 });
-
-
 
 /*
  * Contains all the elements in the main window.
  * Each accessable element has a unique id.
  * The id is used to access the element.
  */
-export const GLOBAL_ELEMENT_MAP: Map<string, DraggableButton | DraggableCanvas | DraggableLabel | DraggablePanel | DraggableCollectionPanel > = new Map();
+export const GLOBAL_ELEMENT_MAP: Map<string, DraggableButton | DraggableCanvas | DraggablePanel | DraggableCollectionPanel | DraggableLabel | DraggableScrollingPanel> = new Map();
+
+export let copiedElement: HTMLElement | undefined = undefined;
+export function setCopiedElement(element: HTMLElement | undefined): void {
+    copiedElement = element;
+}
 
 export class Builder {
+    public static generateAndCopyJsonUI(): void {
+        const jsonUI = Converter.test(panelContainer, 0);
+        navigator.clipboard.writeText(JSON.stringify(jsonUI, null, 2));
+    }
 
     public static isValidPath(parent: HTMLElement): boolean {
         const convertionFunction = classToJsonUI.get(parent?.className)!;
         if (!convertionFunction) return false;
 
         // Gets the tree instructions
-        const instructions = convertionFunction(parent, config.nameSpace).instructions!
+        const instructions = convertionFunction(parent, config.nameSpace).instructions!;
         if (!instructions) return false;
         console.warn(`Is valid: ${instructions.ContinuePath}`);
 
@@ -106,18 +114,24 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
 
         const formFields = await addButtonModal();
-        const button = new DraggableButton(
-            id,
-            selectedElement ?? panelContainer,
-            {
-                defaultTexture: formFields.defaultTexture,
-                hoverTexture: formFields.hoverTexture,
-                pressedTexture: formFields.pressedTexture,
-                collectionIndex: formFields.collectionIndex
-            }
-        );
+        const button = new DraggableButton(id, selectedElement ?? panelContainer, {
+            defaultTexture: formFields.defaultTexture,
+            hoverTexture: formFields.hoverTexture,
+            pressedTexture: formFields.pressedTexture,
+            collectionIndex: formFields.collectionIndex,
+        });
 
         GLOBAL_ELEMENT_MAP.set(id, button);
+    }
+
+    public static addScrollingPanel(): void {
+        if (selectedElement) {
+            if (!this.isValidPath(selectedElement)) return;
+        }
+
+        const id = StringUtil.generateRandomString(15);
+        const panel = new DraggableScrollingPanel(id, selectedElement ?? panelContainer);
+        GLOBAL_ELEMENT_MAP.set(id, panel);
     }
 
     public static reset(): void {
@@ -130,6 +144,7 @@ export class Builder {
         if (!selectedElement) return;
         selectedElement.remove();
         selectedElement = undefined;
+        updatePropertiesArea();
     }
 
     public static setSettingToggle(setting: keyof typeof config.settings, value: any): void {
@@ -146,12 +161,24 @@ export class Builder {
         // Checks if the image is a nineslice
         this.addCanvas(imageData.png, imageName, imageData.json);
     }
+
+    /*
+    public static copy() {
+        if (!selectedElement) return;
+        Copier.copy(selectedElement);
+    }
+
+    public static paste() {
+        if (!copiedElement || !selectedElement) return;
+        Paster.paste(selectedElement, copiedElement);
+    }
+    */
 }
 
 export interface ImageDataState {
-    png?: ImageData,
-    json?: NinesliceData
-};
+    png?: ImageData;
+    json?: NinesliceData;
+}
 
 export var images: Map<string, ImageDataState> = new Map();
 
@@ -162,7 +189,6 @@ declare global {
         handlePackUpload: () => void;
     }
 }
-
 
 window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;

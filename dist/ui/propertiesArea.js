@@ -2,7 +2,7 @@ import { DraggableButton } from "../elements/button.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { DraggableLabel } from "../elements/label.js";
 import { GLOBAL_ELEMENT_MAP, selectedElement } from "../index.js";
-const propertiesMap = new Map([
+export const propertiesMap = new Map([
     [
         "draggable-panel",
         [
@@ -207,7 +207,7 @@ const propertiesMap = new Map([
                         elementClass.setDisplayImage(value);
                     }
                 },
-            },
+            }
         ],
     ],
     [
@@ -304,8 +304,11 @@ const propertiesMap = new Map([
                     const id = element.dataset.id;
                     if (!id)
                         return;
+                    console.log('Sigma', value);
                     const elementClass = GLOBAL_ELEMENT_MAP.get(id);
+                    console.log(typeof elementClass);
                     if (elementClass instanceof DraggableLabel) {
+                        console.log('alpha', value);
                         element.style.fontSize = `${value}em`;
                         elementClass.mirror.style.fontSize = `${value}em`;
                     }
@@ -318,6 +321,46 @@ const propertiesMap = new Map([
                 get: (element) => element.style.textAlign,
                 set: (element, value) => (element.style.textAlign = value),
             }
+        ],
+    ],
+    [
+        "draggable-scrolling_panel",
+        [
+            {
+                type: "string",
+                displayName: "Width",
+                editable: true,
+                get: (element) => element.style.width,
+                set: (element, value) => (element.style.width = value),
+            },
+            {
+                type: "string",
+                displayName: "Height",
+                editable: true,
+                get: (element) => element.style.height,
+                set: (element, value) => (element.style.height = value),
+            },
+            {
+                type: "string",
+                displayName: "Left",
+                editable: true,
+                get: (element) => element.style.left,
+                set: (element, value) => (element.style.left = value),
+            },
+            {
+                type: "string",
+                displayName: "Top",
+                editable: true,
+                get: (element) => element.style.top,
+                set: (element, value) => (element.style.top = value),
+            },
+            {
+                type: "string",
+                displayName: "Layer",
+                editable: true,
+                get: (element) => element.style.zIndex,
+                set: (element, value) => (element.style.zIndex = value),
+            },
         ],
     ],
 ]);

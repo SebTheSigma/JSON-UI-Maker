@@ -18,7 +18,7 @@ export class DraggableCollectionPanel {
     /**
      * @param {HTMLElement} container
      */
-    constructor(ID, container, collectionName = "form_buttons") {
+    constructor(ID, container, collectionName = config.defaultCollectionName) {
         let lastParent = container;
         let i = 0;
         parent_loop: while (true) {
@@ -27,6 +27,8 @@ export class DraggableCollectionPanel {
             lastParent = lastParent.parentElement;
             i++;
         }
+        // Saves parameters
+        this._constructorArgs = [ID, container, collectionName];
         this.container = container;
         this.panel = document.createElement("div");
         this.panel.className = "draggable-collection_panel";
@@ -163,6 +165,9 @@ export class DraggableCollectionPanel {
         this.isResizing = false;
         if (isInMainWindow)
             updatePropertiesArea();
+    }
+    getMainHTMLElement() {
+        return this.panel;
     }
 }
 //# sourceMappingURL=collectionPanel.js.map

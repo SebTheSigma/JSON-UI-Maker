@@ -28,6 +28,9 @@ export class DraggablePanel {
             i++;
         }
 
+        // Saves parameters
+        (this as any)._constructorArgs = [ID, container];
+
         this.container = container;
         this.panel = document.createElement("div");
         this.panel.className = "draggable-panel";
@@ -193,5 +196,10 @@ export class DraggablePanel {
     public stopResize(): void {
         this.isResizing = false;
         if (isInMainWindow) updatePropertiesArea();
+    }
+
+
+    public getMainHTMLElement(): HTMLElement {
+        return this.panel;
     }
 }

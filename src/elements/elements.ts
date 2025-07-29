@@ -5,5 +5,7 @@ export const AllJsonUIElements = [
     'draggable-canvas',
     'draggable-button',
     'draggable-collection_panel',
-    'draggable-label'
+    'draggable-label',
+    'draggable-scrolling_panel'
 ]
+

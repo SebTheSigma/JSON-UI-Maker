@@ -22,6 +22,8 @@ export class DraggableLabel {
             lastParent = lastParent.parentElement;
             i++;
         }
+        // Saves parameters
+        this._constructorArgs = [ID, container, labelOptions];
         this.container = container;
         const textAlign = labelOptions?.textAlign ?? "left";
         const fontSize = labelOptions?.fontScale ?? 1;
@@ -38,6 +40,8 @@ export class DraggableLabel {
         this.label.style.font = "16px sans-serif";
         this.label.style.padding = "4px";
         this.label.wrap = "off";
+        this.label.name = 'label';
+        this.label.style.color = "white";
         this.label.style.fontFamily = 'MinecraftRegular';
         this.label.spellcheck = false;
         this.label.style.color = `rgb(${fontColor[0], fontColor[1], fontColor[2]})`;
@@ -71,7 +75,7 @@ export class DraggableLabel {
         this.label.style.top = `${parentRect.height / 2}px`;
         this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.label.style.position = "absolute";
-        this.label.style.zIndex = String(2 * i);
+        this.label.style.zIndex = String((2 * i) + 1);
         this.container.appendChild(this.label);
         this.isDragging = false;
         this.selected = false;
@@ -172,6 +176,15 @@ export class DraggableLabel {
         this.label.style.cursor = "grab";
         if (isInMainWindow)
             updatePropertiesArea();
+    }
+    setParse(shouldParse) {
+        this.label.dataset.shouldParse = `${shouldParse}`.toLowerCase();
+    }
+    changeText(text) {
+        this.label.textContent = text;
+    }
+    getMainHTMLElement() {
+        return this.label;
     }
 }
 //# sourceMappingURL=label.js.map

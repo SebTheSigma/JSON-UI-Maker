@@ -1,3 +1,5 @@
+import { config } from "./CONFIG.js";
+
 export interface NinesliceData {
     nineslice_size: [left: number, top: number, right: number, bottom: number];
     base_size: [width: number, height: number];

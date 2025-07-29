@@ -1,12 +1,6 @@
 
-interface Setting {
-    type: string;
-    editable: boolean;
-    value: any;
-    displayName?: string;
-}
 
-export const config: { settings: { [key: string]: Setting }, nameSpace: string, magicNumbers: { [key: string]: number } } = {
+export const config = {
     settings: {
         boundary_constraints: {
             type: "checkbox",
@@ -24,10 +18,12 @@ export const config: { settings: { [key: string]: Setting }, nameSpace: string, 
     magicNumbers: {
         fontScalar: 1.6,
         fontOffsetX: 6,
-        fontOffsetY: 6, 
+        fontOffsetY: 6,
+        getFontScaledOffsetY: (fontSize: number): number => 2 * fontSize - 2,
         UI_SCALAR: 0.5,
         buttonImageOffsetX: 2,
         buttonImageOffsetY: 2
     },
-    nameSpace: 'main'
+    nameSpace: 'main',
+    defaultCollectionName: 'form_buttons'
 };

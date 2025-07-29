@@ -1,16 +1,27 @@
-interface Setting {
-    type: string;
-    editable: boolean;
-    value: any;
-    displayName?: string;
-}
 export declare const config: {
     settings: {
-        [key: string]: Setting;
+        boundary_constraints: {
+            type: string;
+            editable: boolean;
+            value: boolean;
+            displayName: string;
+        };
+        arrow_key_move_amount: {
+            type: string;
+            editable: boolean;
+            value: number;
+            displayName: string;
+        };
+    };
+    magicNumbers: {
+        fontScalar: number;
+        fontOffsetX: number;
+        fontOffsetY: number;
+        getFontScaledOffsetY: (fontSize: number) => number;
+        UI_SCALAR: number;
+        buttonImageOffsetX: number;
+        buttonImageOffsetY: number;
     };
     nameSpace: string;
-    magicNumbers: {
-        [key: string]: number;
-    };
+    defaultCollectionName: string;
 };
-export {};

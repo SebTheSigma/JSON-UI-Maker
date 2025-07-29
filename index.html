@@ -63,35 +63,35 @@
                 <button type="button" onclick="Builder.addButton()">Add button</button>
                 <button type="button" onclick="Builder.addCollectionPanel()">Add Collection Panel</button>
                 <button type="button" onclick="Builder.addLabel()">Add Label</button>
+                <button type="button" onclick="Builder.addScrollingPanel()">Add Scrolling Panel</button>
             </div>
 
             <div class="breaker"></div>
 
             <div class="utilElements">
-                <button type="button" onclick="Builder.reset()">Reset</button>
-                <button type="button" onclick="Builder.deleteSelected()">Delete Selected</button>
-                <button type="button"
-                    onclick="console.log(JSON.stringify(Converter.test(document.getElementById('main_window')), null, 2))">Test
-                    Button
-                </button>
+                <button type="button" onclick="Builder.reset()">Reset <img style="width: 17px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/reset.webp"> </button>
+                <button type="button" onclick="Builder.deleteSelected()">Delete Selected <img style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/bin.webp"> </button>
+                <button type="button"onclick="Builder.generateAndCopyJsonUI()">Copy To Clipboard <img style="width: 20px; top: 5px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/clipboard.webp"> </button>
+                <button type="button" id="download_server_form">Download Server-Form <img style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/download.webp"></button>
             </div>
 
         </div>
 
         <div class="main_window_outline">
             <div class="main_window" id="main_window">
-                <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">
+                <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image"> 106 0 255, 255 0 148
 
                 </img>
             </div>
         </div>
 
         <div class="scripter">
-            <label class="scripter_title_label">Script Visualiser</label>
-            <textarea spellcheck="false" class="scripter_text" id="scripter_text">
-            </textarea>
+            <label class="scripter_title_label">Script</label>
+
+            <label style="color: rgb(139, 139, 139);">For Fixed Collection Index Forms Only</label>
             <div class="scripter_buttons">
-                <button class="generate_scripter" id="generate_scripter">Generate</button>
+                <button class="generate_js_scripter" id="generate_js_scripter">Copy <img style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/js.webp"> To Clipboard</button>
+                <button class="generate_ts_scripter" id="generate_ts_scripter">Copy <img style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/ts.webp"> To Clipboard</button>
             </div>
         </div>
     </div>
@@ -99,8 +99,7 @@
 
 
 
-    <div id="properties" class="properties">
-    </div>
+    <div id="properties" class="properties"></div>
 
     <script src="./dist/index.js" type="module"></script>
 

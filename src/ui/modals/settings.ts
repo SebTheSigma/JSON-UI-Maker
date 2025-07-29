@@ -7,7 +7,12 @@ const closeBtn: HTMLElement = document.getElementById("modalSettingsClose") as H
 
 
 
-
+interface Setting {
+    type: string;
+    editable: boolean;
+    value: any;
+    displayName?: string;
+}
 
 /**
  * Shows the settings modal and selects the form within it.
@@ -26,7 +31,7 @@ openBtn.onclick = () => {
 
         // Input
         const input = document.createElement("input");
-        const settingInfo = config.settings[setting];
+        const settingInfo = (config.settings as Record<string, Setting>)[setting];
         if (!settingInfo?.editable) continue;
 
         input.type = settingInfo?.type!;

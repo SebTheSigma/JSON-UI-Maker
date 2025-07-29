@@ -20,7 +20,7 @@ export class Converter {
     static nodeToJsonUI(node, nameSpace) {
         try {
             let treeData = {};
-            if (node?.dataset?.shouldParse == 'false')
+            if (node?.dataset?.shouldParse == "false")
                 return treeData;
             const getTreeData = classToJsonUI.get(node.className);
             if (getTreeData) {
@@ -38,36 +38,60 @@ export class Converter {
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
      */
-    static tree(startNodeTree, depth = 0, baseNode, nameSpace = config.nameSpace) {
+    static tree(startNodeTree, depth = 0, nameSpace = config.nameSpace, _baseJsonUiNode, _nodeLink) {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {
             jsonNodes = { namespace: nameSpace, custom_button: JSON_TYPES.get("buttonWithHoverText") };
+            _baseJsonUiNode = jsonNodes;
         }
         else {
             jsonNodes = {};
         }
         for (let node of Array.from(startNodeTree.childNodes)) {
             const treeData = Converter.nodeToJsonUI(node, nameSpace);
+            console.log('depth: ', depth, treeData);
             // Checks if the node should be ignored
             if (!treeData.instructions)
                 continue;
-            const jsonUI = treeData.element;
-            // Recursively goes down the tree
-            const nextNodes = Converter.tree(node, depth + 1, baseNode);
-            if (treeData.instructions.ContinuePath) {
-                // Adds the JSON-UI controls
-                jsonUI.controls = [];
-                // Adds the nodes to the jsonUI
-                for (let nextNode of Object.keys(nextNodes)) {
-                    jsonUI.controls.push({ [nextNode]: nextNodes[nextNode] });
+            // Makes the new tree if needed
+            if (treeData.instructions.NewTreeFromBaseNode && treeData.instructions.rootStarterElement) {
+                jsonNodes[StringUtil.generateRandomString(8)] = treeData.element;
+                const panel = JSON_TYPES.get(treeData.instructions.rootStarterElement);
+                // Links the element to the panel which starts a new tree
+                const newTreeLink = treeData.instructions.NewTreeFromBaseNode.split(".")[1];
+                const nextNodes = Converter.tree(node, depth + 1, nameSpace, _baseJsonUiNode);
+                if (treeData.instructions.ContinuePath) {
+                    // Adds the JSON-UI controls
+                    panel.controls = [];
+                    // Adds the nodes to the jsonUI
+                    for (let nextNode of Object.keys(nextNodes)) {
+                        panel.controls.push({ [nextNode]: nextNodes[nextNode] });
+                    }
                 }
+                console.log(`New tree from base node: ${newTreeLink}`, _baseJsonUiNode);
+                // Adds the node to the jsonUI
+                if (_baseJsonUiNode)
+                    _baseJsonUiNode[newTreeLink] = panel;
             }
-            const randomString = StringUtil.generateRandomString(8);
-            const link = treeData.instructions?.CommonElementLink ?? "";
-            // Adds the node to the jsonUI
-            if (jsonUI)
-                jsonNodes[depth == 0 ? `${nameSpace}${link}` : `${randomString}${link}`] = jsonUI;
+            else {
+                const jsonUI = treeData.element;
+                // Recursively goes down the tree
+                const nextNodes = Converter.tree(node, depth + 1, nameSpace, _baseJsonUiNode);
+                if (treeData.instructions.ContinuePath) {
+                    // Adds the JSON-UI controls
+                    jsonUI.controls = [];
+                    // Adds the nodes to the jsonUI
+                    for (let nextNode of Object.keys(nextNodes)) {
+                        jsonUI.controls.push({ [nextNode]: nextNodes[nextNode] });
+                    }
+                }
+                const randomString = StringUtil.generateRandomString(8);
+                const link = treeData.instructions?.CommonElementLink ?? "";
+                // Adds the node to the jsonUI
+                if (jsonUI)
+                    jsonNodes[depth == 0 ? `${nameSpace}${link}` : `${randomString}${link}`] = jsonUI;
+            }
         }
         return jsonNodes;
     }
@@ -78,7 +102,7 @@ export class Converter {
      * @returns A JSON object representing the json-ui structure.
      */
     static test(node, depth = 0) {
-        return Converter.tree(node, depth, node);
+        return Converter.tree(node, depth);
     }
 }
 //# sourceMappingURL=converter.js.map

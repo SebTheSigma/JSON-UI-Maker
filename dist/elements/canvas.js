@@ -4,10 +4,12 @@ import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
+import { StringUtil } from "../util/stringUtil.js";
 export class DraggableCanvas {
     imageData;
     nineSlice;
     container;
+    outlineDiv;
     canvasHolder;
     canvas;
     aspectRatio;
@@ -34,6 +36,8 @@ export class DraggableCanvas {
             lastParent = lastParent.parentElement;
             i++;
         }
+        // Saves parameters
+        this._constructorArgs = [ID, container, imageData, imageName, nineSlice];
         this.imageData = imageData;
         this.nineSlice = nineSlice;
         this.container = container;
@@ -85,6 +89,12 @@ export class DraggableCanvas {
         this.selected = false;
         this.offsetX = 0;
         this.offsetY = 0;
+        this.outlineDiv = document.createElement("div");
+        this.outlineDiv.className = "outline-div";
+        this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
+        this.outlineDiv.style.position = "absolute";
+        this.outlineDiv.style.zIndex = '1000';
+        document.body.appendChild(this.outlineDiv);
         this.initEvents();
     }
     initEvents() {
@@ -93,7 +103,8 @@ export class DraggableCanvas {
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
+        document.addEventListener("mousemove", (e) => this.outlineResize(e));
+        document.addEventListener("mouseup", (e) => this.resize(e));
         document.addEventListener("mouseup", () => this.stopResize());
     }
     select(e) {
@@ -131,6 +142,9 @@ export class DraggableCanvas {
     startDrag(e) {
         if (e.target === this.resizeHandle)
             return;
+        this.outlineDiv.style.display = "none";
+        if (this.isResizing)
+            this.stopResize();
         // Stop propagation for nested elements
         for (let elementName of AllJsonUIElements) {
             if (this.container.classList.contains(elementName)) {
@@ -178,6 +192,10 @@ export class DraggableCanvas {
         this.resizeStartHeight = parseFloat(this.canvas.style.height);
         this.resizeStartX = e.clientX;
         this.resizeStartY = e.clientY;
+        const rect = this.canvasHolder.getBoundingClientRect();
+        this.outlineDiv.style.top = `${rect.top + window.scrollY}px`;
+        this.outlineDiv.style.left = `${rect.left + window.scrollX}px`;
+        this.outlineDiv.style.display = "block";
         e.preventDefault();
     }
     resize(e) {
@@ -217,8 +235,47 @@ export class DraggableCanvas {
         }
         this.drawImage(newWidth, newHeight);
     }
+    outlineResize(e) {
+        if (!this.isResizing)
+            return;
+        e.stopPropagation(); // Prevent event from bubbling to parent
+        const containerRect = this.container.getBoundingClientRect();
+        const widthChange = e.clientX - this.resizeStartX;
+        const heightChange = e.clientY - this.resizeStartY;
+        let newWidth;
+        let newHeight;
+        // If shift key is pressed, maintain aspect ratio,
+        // only if the image is a 9-slice
+        if (keyboardEvent?.shiftKey || !this.nineSlice) {
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = newWidth / this.aspectRatio;
+            if (config.settings.boundary_constraints.value) {
+                // Determine the maximum possible width while maintaining aspect ratio
+                const maxWidth = containerRect.width - parseFloat(this.canvasHolder.style.left);
+                const maxHeight = containerRect.height - parseFloat(this.canvasHolder.style.top);
+                // Adjust width and height proportionally
+                if (newWidth > maxWidth || newHeight > maxHeight) {
+                    if (newWidth / maxWidth > newHeight / maxHeight) {
+                        newWidth = maxWidth;
+                        newHeight = newWidth / this.aspectRatio;
+                    }
+                    else {
+                        newHeight = maxHeight;
+                        newWidth = newHeight * this.aspectRatio;
+                    }
+                }
+            }
+        }
+        else {
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = this.resizeStartHeight + heightChange;
+        }
+        this.outlineDiv.style.width = `${newWidth - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+        this.outlineDiv.style.height = `${newHeight - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+    }
     stopResize() {
         this.isResizing = false;
+        this.outlineDiv.style.display = "none";
         if (isInMainWindow)
             updatePropertiesArea();
     }
@@ -227,19 +284,22 @@ export class DraggableCanvas {
      * @param {number} width
      * @param {number} height
      */
-    drawImage(width, height) {
+    drawImage(width, height, _updateImage = false) {
+        width = Math.floor(width);
+        height = Math.floor(height);
         // Stops the canvas from being too small
         if (width <= 1)
             width = 1;
         if (height <= 1)
             height = 1;
+        const ctx = this.canvas.getContext("2d");
         if (this.nineSlice) {
-            const pixels = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, Math.floor(width), Math.floor(height));
-            this.canvas.width = Math.floor(width);
-            this.canvas.height = Math.floor(height);
-            const newImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
+            console.warn(`sigma`, this.nineSlice, this.imageData);
+            const pixels = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, width, height);
+            this.canvas.width = width;
+            this.canvas.height = height;
+            const newImageData = new ImageData(pixels, width, height, { colorSpace: this.imageData.colorSpace });
             // Draws the image
-            const ctx = this.canvas.getContext("2d");
             ctx.putImageData(newImageData, 0, 0);
         }
         // **Scale the display size (but keep internal resolution high)**
@@ -250,24 +310,53 @@ export class DraggableCanvas {
         this.canvas.style.margin = "0 auto";
         this.canvasHolder.style.width = `${width}px`;
         this.canvasHolder.style.height = `${height}px`;
+        if (_updateImage) {
+            this.canvas.width = this.imageData.width;
+            this.canvas.height = this.imageData.height;
+            const rect = this.container.getBoundingClientRect();
+            ctx.putImageData(this.imageData, 0, 0);
+            if (rect.width > rect.height) {
+                const scaledHeight = rect.height * 0.8;
+                this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, false);
+            }
+            else if (rect.width <= rect.height) {
+                const scaledWidth = rect.width * 0.8;
+                this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, false);
+            }
+        }
     }
     changeImage(imageName) {
         const data = images.get(imageName);
+        console.warn("rizz1", imageName);
         // Checks if the image is there
         if (!data || !data.png)
             return;
+        console.warn("rizz2", data.png, imageName);
         // Sets pixel data
         this.imageData = data.png;
+        // Re-calculates aspect ratio
+        this.aspectRatio = this.imageData.width / this.imageData.height;
+        console.warn("rizz3", data.json, imageName);
         // Sets nineslice
-        if (data.json)
-            this.nineSlice = data.json;
-        else
-            this.nineSlice = undefined;
+        this.nineSlice = undefined;
+        this.nineSlice = data.json;
+        console.warn("rizz4", imageName);
         this.canvasHolder.dataset.imageName = imageName;
-        this.drawImage(this.canvas.width, this.canvas.height);
+        this.drawImage(this.canvas.width, this.canvas.height, true);
     }
     setParse(shouldParse) {
         this.canvasHolder.dataset.shouldParse = `${shouldParse}`.toLowerCase();
+    }
+    detatch() {
+        document.removeEventListener("mousemove", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        this.canvas.remove();
+        this.canvasHolder.remove();
+    }
+    getMainHTMLElement() {
+        return this.canvasHolder;
     }
 }
 //# sourceMappingURL=canvas.js.map

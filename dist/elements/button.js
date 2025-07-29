@@ -1,4 +1,4 @@
-import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
+import { GLOBAL_ELEMENT_MAP, isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -7,13 +7,16 @@ import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 import { DraggableCanvas } from "./canvas.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { DraggableLabel } from "./label.js";
 export class DraggableButton {
     imageDataDefault;
     imageDataHover;
     imageDataPressed;
     displayCanvas;
     displayTexture;
+    displayText;
     container;
+    outlineDiv;
     button;
     canvas;
     aspectRatio;
@@ -33,8 +36,10 @@ export class DraggableButton {
      * @param {HTMLElement} container
      */
     constructor(ID, container, buttonOptions) {
-        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex, displayTexture } = buttonOptions ?? {};
+        const { defaultTexture, hoverTexture, pressedTexture, collectionIndex, displayTexture, buttonText } = buttonOptions ?? {};
         this.displayTexture = displayTexture;
+        // Saves parameters
+        this._constructorArgs = [ID, container, buttonOptions];
         const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
         const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "";
         const pressedTex = pressedTexture ?? hoverTexture ?? defaultTexture ?? "";
@@ -104,7 +109,14 @@ export class DraggableButton {
         this.selected = false;
         this.offsetX = 0;
         this.offsetY = 0;
+        this.outlineDiv = document.createElement("div");
+        this.outlineDiv.className = "outline-div";
+        this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
+        this.outlineDiv.style.position = "absolute";
+        this.outlineDiv.style.zIndex = '1000';
+        document.body.appendChild(this.outlineDiv);
         this.initEvents();
+        this.setDisplayText(buttonText ?? "Label");
     }
     initEvents() {
         this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -112,7 +124,8 @@ export class DraggableButton {
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
+        document.addEventListener("mousemove", (e) => this.outlineResize(e));
+        document.addEventListener("mouseup", (e) => this.resize(e));
         document.addEventListener("mouseup", () => this.stopResize());
         this.button.addEventListener("mouseenter", this.startHover.bind(this));
         this.button.addEventListener("mouseleave", this.stopHover.bind(this));
@@ -154,6 +167,9 @@ export class DraggableButton {
     startDrag(e) {
         if (e.target === this.resizeHandle)
             return;
+        this.outlineDiv.style.display = "none";
+        if (this.isResizing)
+            this.stopResize();
         // Stop propagation for nested elements
         for (let elementName of AllJsonUIElements) {
             if (this.container.classList.contains(elementName)) {
@@ -201,6 +217,10 @@ export class DraggableButton {
         this.resizeStartHeight = parseFloat(this.canvas.style.height);
         this.resizeStartX = e.clientX;
         this.resizeStartY = e.clientY;
+        const rect = this.button.getBoundingClientRect();
+        this.outlineDiv.style.top = `${rect.top + window.scrollY}px`;
+        this.outlineDiv.style.left = `${rect.left + window.scrollX}px`;
+        this.outlineDiv.style.display = "block";
         e.preventDefault();
     }
     resize(e) {
@@ -240,8 +260,47 @@ export class DraggableButton {
         }
         this.drawImage(newWidth, newHeight);
     }
+    outlineResize(e) {
+        if (!this.isResizing)
+            return;
+        e.stopPropagation(); // Prevent event from bubbling to parent
+        const containerRect = this.container.getBoundingClientRect();
+        const widthChange = e.clientX - this.resizeStartX;
+        const heightChange = e.clientY - this.resizeStartY;
+        let newWidth;
+        let newHeight;
+        // If shift key is pressed, maintain aspect ratio,
+        // only if the image is a 9-slice
+        if (keyboardEvent?.shiftKey || !this.getCurrentlyRenderedState().json) {
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = newWidth / this.aspectRatio;
+            if (config.settings.boundary_constraints.value) {
+                // Determine the maximum possible width while maintaining aspect ratio
+                const maxWidth = containerRect.width - parseFloat(this.button.style.left);
+                const maxHeight = containerRect.height - parseFloat(this.button.style.top);
+                // Adjust width and height proportionally
+                if (newWidth > maxWidth || newHeight > maxHeight) {
+                    if (newWidth / maxWidth > newHeight / maxHeight) {
+                        newWidth = maxWidth;
+                        newHeight = newWidth / this.aspectRatio;
+                    }
+                    else {
+                        newHeight = maxHeight;
+                        newWidth = newHeight * this.aspectRatio;
+                    }
+                }
+            }
+        }
+        else {
+            newWidth = this.resizeStartWidth + widthChange;
+            newHeight = this.resizeStartHeight + heightChange;
+        }
+        this.outlineDiv.style.width = `${newWidth - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+        this.outlineDiv.style.height = `${newHeight - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+    }
     stopResize() {
         this.isResizing = false;
+        this.outlineDiv.style.display = "none";
         if (isInMainWindow)
             updatePropertiesArea();
     }
@@ -339,13 +398,29 @@ export class DraggableButton {
         this.drawImage(this.canvas.width, this.canvas.height, data);
     }
     setDisplayImage(imageName) {
-        const data = images.get(imageName);
-        if (!data || !data.png)
-            return;
-        const id = StringUtil.generateRandomString(15);
-        this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imageName, data.json);
+        // Removes the canvas
+        if (this.displayCanvas)
+            this.displayCanvas.changeImage(imageName);
+        else {
+            const data = images.get(imageName);
+            if (!data || !data.png)
+                return;
+            const id = StringUtil.generateRandomString(15);
+            this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imageName, data.json);
+            GLOBAL_ELEMENT_MAP.set(id, this.displayCanvas);
+        }
         this.displayCanvas.setParse(false);
         this.button.dataset.displayImageName = imageName;
+    }
+    setDisplayText(text) {
+        const id = StringUtil.generateRandomString(15);
+        this.displayText = new DraggableLabel(id, this.button, { text });
+        this.displayText.setParse(false);
+        this.button.dataset.displayText = text;
+        GLOBAL_ELEMENT_MAP.set(id, this.displayText);
+    }
+    getMainHTMLElement() {
+        return this.button;
     }
 }
 //# sourceMappingURL=button.js.map

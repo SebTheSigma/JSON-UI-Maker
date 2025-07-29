@@ -23,5 +23,8 @@ export declare class DraggableLabel {
     startDrag(e: MouseEvent): void;
     drag(e: MouseEvent): void;
     stopDrag(): void;
+    setParse(shouldParse: boolean): void;
+    changeText(text: string): void;
+    getMainHTMLElement(): HTMLElement;
 }
 export {};

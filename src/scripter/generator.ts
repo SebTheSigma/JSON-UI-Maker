@@ -1,9 +1,10 @@
+import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
+import { GLOBAL_ELEMENT_MAP } from "../index.js";
+import { DraggableButton } from "../elements/button.js";
 
-
-interface FormButtonData {
+export interface FormButtonData {
     texture: string,
     text: string,
-
 }
 
 
@@ -16,32 +17,48 @@ export class ScriptGenerator {
      * The logged data is in the following format: { texture: string, text: string }
      * This function is intended to be called by the "Generate Scripter" button.
      */
-    static generateScript() {
+    static generateScript(language: 'ts' | 'js'): void {
         console.log('Generating script...');
         const buttons = document.getElementsByClassName("draggable-button");
+        const buttonInfo = Array.from(buttons).map((button) => ScriptGenerator.getButtonInfo(button as HTMLElement));
 
-        for (let button of Array.from(buttons) as HTMLElement[]) {
-            const info = this.getButtonInfo(button);
-            console.log(info);
+        let txt: string = '';
+        if (language === 'ts') {
+            txt = buttonDataToTypeScript(buttonInfo);
         }
 
-        console.log('Script generation complete.');
-    }
+        else if (language === 'js') {
+            txt = buttonDataToJavaScript(buttonInfo);
+        }
 
+
+        console.log('Script generation complete.', txt);
+        console.log('Copying to clipboard...');
+        navigator.clipboard.writeText(txt);
+        console.log('Copied to clipboard.');
+    }
+    
     /**
-     * Given an HTML element, returns an object containing the texture and text to display for that button.
+     * Retrieves the button information from a given HTML element.
      * 
-     * @param element The HTML element to get the texture and text from.
-     * @returns An object with two properties, texture and text, containing the texture and text to display for the given button.
+     * @param element - The HTML element representing the button.
+     * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element: HTMLElement): FormButtonData {
+
+        const id = element.dataset.id!;
+
+        const buttonClass = GLOBAL_ELEMENT_MAP.get(id) as DraggableButton;
+        const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
+
         return {
-            texture: `texture/ui/${element.dataset.displayImageName!}`,
-            text: 'hello'
+            texture: `textures/ui/${element.dataset.displayImageName ?? "blank"}`,
+            text: text
         }
     }
 }
 
-
-const generateScriptButton = document.getElementById("generate_scripter");
-generateScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript());
+const generateJavaScriptButton: HTMLTextAreaElement = document.getElementById("generate_js_scripter") as HTMLTextAreaElement;
+const generateTypeScriptButton: HTMLTextAreaElement = document.getElementById("generate_ts_scripter") as HTMLTextAreaElement;
+generateJavaScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('js'));
+generateTypeScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('ts'));

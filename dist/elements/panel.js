@@ -27,6 +27,8 @@ export class DraggablePanel {
             lastParent = lastParent.parentElement;
             i++;
         }
+        // Saves parameters
+        this._constructorArgs = [ID, container];
         this.container = container;
         this.panel = document.createElement("div");
         this.panel.className = "draggable-panel";
@@ -163,6 +165,9 @@ export class DraggablePanel {
         this.isResizing = false;
         if (isInMainWindow)
             updatePropertiesArea();
+    }
+    getMainHTMLElement() {
+        return this.panel;
     }
 }
 //# sourceMappingURL=panel.js.map

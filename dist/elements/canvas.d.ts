@@ -3,6 +3,7 @@ export declare class DraggableCanvas {
     imageData: ImageData;
     nineSlice?: NinesliceData;
     container: HTMLElement;
+    outlineDiv: HTMLDivElement;
     canvasHolder: HTMLDivElement;
     canvas: HTMLCanvasElement;
     aspectRatio: number;
@@ -28,13 +29,16 @@ export declare class DraggableCanvas {
     stopDrag(): void;
     startResize(e: MouseEvent): void;
     resize(e: MouseEvent): void;
+    outlineResize(e: MouseEvent): void;
     stopResize(): void;
     /**
      *
      * @param {number} width
      * @param {number} height
      */
-    drawImage(width: number, height: number): void;
+    drawImage(width: number, height: number, _updateImage?: boolean): void;
     changeImage(imageName: string): void;
     setParse(shouldParse: boolean): void;
+    detatch(): void;
+    getMainHTMLElement(): HTMLElement;
 }

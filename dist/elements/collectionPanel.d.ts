@@ -24,4 +24,5 @@ export declare class DraggableCollectionPanel {
     startResize(e: MouseEvent): void;
     resize(e: MouseEvent): void;
     stopResize(): void;
+    getMainHTMLElement(): HTMLElement;
 }

@@ -1,4 +1,4 @@
-interface FormButtonData {
+export interface FormButtonData {
     texture: string;
     text: string;
 }
@@ -10,13 +10,12 @@ export declare class ScriptGenerator {
      * The logged data is in the following format: { texture: string, text: string }
      * This function is intended to be called by the "Generate Scripter" button.
      */
-    static generateScript(): void;
+    static generateScript(language: 'ts' | 'js'): void;
     /**
-     * Given an HTML element, returns an object containing the texture and text to display for that button.
+     * Retrieves the button information from a given HTML element.
      *
-     * @param element The HTML element to get the texture and text from.
-     * @returns An object with two properties, texture and text, containing the texture and text to display for the given button.
+     * @param element - The HTML element representing the button.
+     * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element: HTMLElement): FormButtonData;
 }
-export {};

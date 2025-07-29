@@ -10,8 +10,9 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
-import './scripter/generator.js';
-import './ui/modals/settings.js';
+import "./scripter/generator.js";
+import "./ui/modals/settings.js";
+import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 console.log("Script Loaded");
 export function setSelectedElement(element) {
     selectedElement = element;
@@ -19,10 +20,10 @@ export function setSelectedElement(element) {
 export let selectedElement = undefined;
 export const panelContainer = document.getElementById("main_window");
 export let isInMainWindow = false;
-panelContainer.addEventListener('mouseenter', () => {
+panelContainer.addEventListener("mouseenter", () => {
     isInMainWindow = true;
 });
-panelContainer.addEventListener('mouseleave', () => {
+panelContainer.addEventListener("mouseleave", () => {
     isInMainWindow = false;
 });
 /*
@@ -31,7 +32,15 @@ panelContainer.addEventListener('mouseleave', () => {
  * The id is used to access the element.
  */
 export const GLOBAL_ELEMENT_MAP = new Map();
+export let copiedElement = undefined;
+export function setCopiedElement(element) {
+    copiedElement = element;
+}
 export class Builder {
+    static generateAndCopyJsonUI() {
+        const jsonUI = Converter.test(panelContainer, 0);
+        navigator.clipboard.writeText(JSON.stringify(jsonUI, null, 2));
+    }
     static isValidPath(parent) {
         const convertionFunction = classToJsonUI.get(parent?.className);
         if (!convertionFunction)
@@ -91,9 +100,18 @@ export class Builder {
             defaultTexture: formFields.defaultTexture,
             hoverTexture: formFields.hoverTexture,
             pressedTexture: formFields.pressedTexture,
-            collectionIndex: formFields.collectionIndex
+            collectionIndex: formFields.collectionIndex,
         });
         GLOBAL_ELEMENT_MAP.set(id, button);
+    }
+    static addScrollingPanel() {
+        if (selectedElement) {
+            if (!this.isValidPath(selectedElement))
+                return;
+        }
+        const id = StringUtil.generateRandomString(15);
+        const panel = new DraggableScrollingPanel(id, selectedElement ?? panelContainer);
+        GLOBAL_ELEMENT_MAP.set(id, panel);
     }
     static reset() {
         selectedElement = undefined;
@@ -105,6 +123,7 @@ export class Builder {
             return;
         selectedElement.remove();
         selectedElement = undefined;
+        updatePropertiesArea();
     }
     static setSettingToggle(setting, value) {
         config.settings[setting].value = value;
@@ -119,7 +138,6 @@ export class Builder {
         this.addCanvas(imageData.png, imageName, imageData.json);
     }
 }
-;
 export var images = new Map();
 window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;

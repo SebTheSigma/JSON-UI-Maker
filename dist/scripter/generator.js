@@ -1,3 +1,5 @@
+import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
+import { GLOBAL_ELEMENT_MAP } from "../index.js";
 export class ScriptGenerator {
     /**
      * Generates a script based on the current state of the UI.
@@ -6,28 +8,40 @@ export class ScriptGenerator {
      * The logged data is in the following format: { texture: string, text: string }
      * This function is intended to be called by the "Generate Scripter" button.
      */
-    static generateScript() {
+    static generateScript(language) {
         console.log('Generating script...');
         const buttons = document.getElementsByClassName("draggable-button");
-        for (let button of Array.from(buttons)) {
-            const info = this.getButtonInfo(button);
-            console.log(info);
+        const buttonInfo = Array.from(buttons).map((button) => ScriptGenerator.getButtonInfo(button));
+        let txt = '';
+        if (language === 'ts') {
+            txt = buttonDataToTypeScript(buttonInfo);
         }
-        console.log('Script generation complete.');
+        else if (language === 'js') {
+            txt = buttonDataToJavaScript(buttonInfo);
+        }
+        console.log('Script generation complete.', txt);
+        console.log('Copying to clipboard...');
+        navigator.clipboard.writeText(txt);
+        console.log('Copied to clipboard.');
     }
     /**
-     * Given an HTML element, returns an object containing the texture and text to display for that button.
+     * Retrieves the button information from a given HTML element.
      *
-     * @param element The HTML element to get the texture and text from.
-     * @returns An object with two properties, texture and text, containing the texture and text to display for the given button.
+     * @param element - The HTML element representing the button.
+     * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element) {
+        const id = element.dataset.id;
+        const buttonClass = GLOBAL_ELEMENT_MAP.get(id);
+        const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
         return {
-            texture: `texture/ui/${element.dataset.displayImageName}`,
-            text: 'hello'
+            texture: `textures/ui/${element.dataset.displayImageName ?? "blank"}`,
+            text: text
         };
     }
 }
-const generateScriptButton = document.getElementById("generate_scripter");
-generateScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript());
+const generateJavaScriptButton = document.getElementById("generate_js_scripter");
+const generateTypeScriptButton = document.getElementById("generate_ts_scripter");
+generateJavaScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('js'));
+generateTypeScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('ts'));
 //# sourceMappingURL=generator.js.map

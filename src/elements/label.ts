@@ -30,6 +30,9 @@ export class DraggableLabel {
             i++;
         }
 
+        // Saves parameters
+        (this as any)._constructorArgs = [ID, container, labelOptions];
+
         this.container = container;
 
         const textAlign = labelOptions?.textAlign ?? "left";
@@ -48,6 +51,8 @@ export class DraggableLabel {
         this.label.style.font = "16px sans-serif";
         this.label.style.padding = "4px";
         this.label.wrap = "off";
+        this.label.name = 'label';
+        this.label.style.color = "white";
         this.label.style.fontFamily = 'MinecraftRegular';
         this.label.spellcheck = false;
         this.label.style.color = `rgb(${fontColor[0], fontColor[1], fontColor[2]})`;
@@ -90,7 +95,7 @@ export class DraggableLabel {
 
         this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.label.style.position = "absolute";
-        this.label.style.zIndex = String(2 * i);
+        this.label.style.zIndex = String((2 * i) + 1);
 
         this.container.appendChild(this.label);
 
@@ -211,5 +216,17 @@ export class DraggableLabel {
         this.isDragging = false;
         this.label.style.cursor = "grab";
         if (isInMainWindow) updatePropertiesArea();
+    }
+
+    public setParse(shouldParse: boolean): void {
+        this.label.dataset.shouldParse = `${shouldParse}`.toLowerCase();
+    }
+
+    public changeText(text: string): void {
+        this.label.textContent = text;
+    }
+
+    public getMainHTMLElement(): HTMLElement {
+        return this.label;
     }
 }

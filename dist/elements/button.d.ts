@@ -1,11 +1,13 @@
 import { ImageDataState } from "../index.js";
 import { DraggableCanvas } from "./canvas.js";
+import { DraggableLabel } from "./label.js";
 export interface ButtonOptions {
     collectionIndex?: string;
     hoverTexture?: string;
     defaultTexture?: string;
     pressedTexture?: string;
     displayTexture?: string;
+    buttonText?: string;
     [key: string]: any;
 }
 export declare class DraggableButton {
@@ -14,7 +16,9 @@ export declare class DraggableButton {
     imageDataPressed: ImageDataState;
     displayCanvas?: DraggableCanvas;
     displayTexture?: string;
+    displayText?: DraggableLabel;
     container: HTMLElement;
+    outlineDiv: HTMLDivElement;
     button: HTMLElement;
     canvas: HTMLCanvasElement;
     aspectRatio: number;
@@ -42,6 +46,7 @@ export declare class DraggableButton {
     stopDrag(): void;
     startResize(e: MouseEvent): void;
     resize(e: MouseEvent): void;
+    outlineResize(e: MouseEvent): void;
     stopResize(): void;
     startHover(): void;
     stopHover(): void;
@@ -58,4 +63,6 @@ export declare class DraggableButton {
     setHoverImage(imageName: string): void;
     setPressedImage(imageName: string): void;
     setDisplayImage(imageName: string): void;
+    setDisplayText(text: string): void;
+    getMainHTMLElement(): HTMLElement;
 }

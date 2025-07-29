@@ -199,6 +199,7 @@ input[type="file"] {
 
 .properties {
     margin: 10px;
+    margin-right: 20px;
     padding: 10px;
     background-color: rgb(39, 39, 39);
     border-radius: 10px;
@@ -245,18 +246,19 @@ input[type="file"] {
 
 .addImageDropdown {
     position: relative;
-    width: 0px; /* Start with zero width */
     border-radius: 4px;
+    width: 200px;
     max-height: 0px;
     overflow: hidden;
     background-color: rgba(73, 73, 73, 0);
     transform-origin: center right; /* Resize from the center to the right */
     transition: width 0.5s ease, max-height 0.5s ease, background-color 0.5s ease;
+    scrollbar-color: rgb(0, 0, 0) rgb(73, 73, 73);
 }
 
 .addImage:hover > .addImageDropdown {
     position: relative;
-    width: 150px; /* Expands outward from the center-right */
+
     max-height: 250px;
     overflow: auto;
     background-color: rgba(73, 73, 73, 0.532);
@@ -378,13 +380,13 @@ input[type="file"] {
 
 .scripter {
     display: flex;
-    margin-right: 10px;
+    margin-right: 20px;
     margin-top: 10px;
     flex-direction: column;
     gap: 10px;
     text-align: center;
     color: white;
-    width: 300px;
+    flex: 1;
     height: calc(1510px / 1.7777777);
     background-color:  rgb(39, 39, 39);
     border-radius: 10px;
@@ -414,8 +416,7 @@ input[type="file"] {
 
 .scripter_buttons > * {
     padding: 5px;
-    height: 30px;
-    width: 100%;
+    width: 50%;
     border-radius: 5px;
     background-color: rgb(59, 56, 71);
     color: white;
@@ -432,6 +433,13 @@ input[type="file"] {
 .scripter_title_label {
     margin-top: 10px;
     font-size: 1.3em;
+}
+
+.draggable-scrolling_panel {
+  height: 300px;              /* Set a height */
+  overflow-y: scroll;           /* Enable vertical scrolling */
+  overflow-x: hidden;         /* Optional: hide horizontal scroll */
+  scroll-behavior: smooth;    /* Optional: smooth scrolling effect */
 }
 
 @font-face {
