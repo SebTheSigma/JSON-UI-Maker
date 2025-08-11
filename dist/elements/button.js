@@ -68,7 +68,6 @@ export class DraggableButton {
         this.button.dataset.pressedImageName = pressedTex;
         this.button.dataset.displayImageName = displayTexture ?? "";
         this.button.dataset.id = ID;
-        console.log(collectionIndex, typeof collectionIndex);
         this.button.dataset.collectionIndex = collectionIndex ?? "0";
         //-------------------------
         // Creates the canvas and puts it in the canvas holder
@@ -81,14 +80,12 @@ export class DraggableButton {
         this.canvas.height = rect.height * 0.8;
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
-            console.log(10000);
             const scaledHeight = rect.height * 0.8;
-            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight);
+            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, this.imageDataDefault, true);
         }
         else if (rect.width <= rect.height) {
-            console.log(20000);
             const scaledWidth = rect.width * 0.8;
-            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio);
+            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, this.imageDataDefault, true);
         }
         // First element and therefore needs different positioning to center
         this.button.style.left = `${rect.width / 2 - parseFloat(this.canvas.style.width) / 2}px`;
@@ -343,19 +340,22 @@ export class DraggableButton {
      * @param {number} width
      * @param {number} height
      */
-    drawImage(width, height, imageDataState = this.imageDataDefault) {
+    drawImage(width, height, imageDataState = this.imageDataDefault, _updateImage = false) {
+        console.warn(`Draw image: ${width} x ${height}`);
         // Stops the canvas from being too small
         if (width <= 1)
             width = 1;
         if (height <= 1)
             height = 1;
+        const floorWidth = Math.floor(width);
+        const floorHeight = Math.floor(height);
+        const ctx = this.canvas.getContext("2d");
         if (imageDataState.json) {
-            const pixels = Nineslice.ninesliceResize(imageDataState.json, imageDataState.png?.data, Math.floor(width), Math.floor(height));
-            this.canvas.width = Math.floor(width);
-            this.canvas.height = Math.floor(height);
-            const newImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
+            const pixels = Nineslice.ninesliceResize(imageDataState.json, imageDataState.png?.data, floorWidth, floorHeight);
+            this.canvas.width = floorWidth;
+            this.canvas.height = floorHeight;
+            const newImageData = new ImageData(pixels, floorWidth, floorHeight);
             // Draws the image
-            const ctx = this.canvas.getContext("2d");
             ctx.putImageData(newImageData, 0, 0);
         }
         // **Scale the display size (but keep internal resolution high)**
@@ -366,6 +366,20 @@ export class DraggableButton {
         this.canvas.style.margin = "0 auto";
         this.button.style.width = `${width}px`;
         this.button.style.height = `${height}px`;
+        if (_updateImage) {
+            this.canvas.width = imageDataState.png?.width;
+            this.canvas.height = imageDataState.png?.height;
+            const rect = this.container.getBoundingClientRect();
+            ctx.putImageData(imageDataState.png, 0, 0);
+            if (rect.width > rect.height) {
+                const scaledHeight = rect.height * 0.8;
+                this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, imageDataState, false);
+            }
+            else if (rect.width <= rect.height) {
+                const scaledWidth = rect.width * 0.8;
+                this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, imageDataState, false);
+            }
+        }
     }
     setDefaultImage(imageName) {
         const data = images.get(imageName);
@@ -421,6 +435,16 @@ export class DraggableButton {
     }
     getMainHTMLElement() {
         return this.button;
+    }
+    delete() {
+        if (this.selected)
+            this.unSelect();
+        this.container.removeChild(this.getMainHTMLElement());
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
+        document.removeEventListener("mouseup", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
     }
 }
 //# sourceMappingURL=button.js.map

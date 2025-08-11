@@ -1,3 +1,4 @@
+import { MinecraftSlider } from "../ui/sliders/addMinecraftSlider.js";
 export declare class DraggableScrollingPanel {
     container: HTMLElement;
     panel: HTMLElement;
@@ -11,6 +12,8 @@ export declare class DraggableScrollingPanel {
     resizeStartHeight?: number;
     resizeStartX?: number;
     resizeStartY?: number;
+    slider: MinecraftSlider;
+    basePanel: HTMLElement;
     /**
      * @param {HTMLElement} container
      */
@@ -25,4 +28,5 @@ export declare class DraggableScrollingPanel {
     resize(e: MouseEvent): void;
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
+    delete(): void;
 }

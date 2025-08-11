@@ -169,5 +169,14 @@ export class DraggableCollectionPanel {
     getMainHTMLElement() {
         return this.panel;
     }
+    delete() {
+        if (this.selected)
+            this.unSelect();
+        this.container.removeChild(this.getMainHTMLElement());
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
+    }
 }
 //# sourceMappingURL=collectionPanel.js.map

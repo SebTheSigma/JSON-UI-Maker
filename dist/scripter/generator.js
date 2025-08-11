@@ -1,5 +1,5 @@
 import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
-import { GLOBAL_ELEMENT_MAP } from "../index.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 export class ScriptGenerator {
     /**
      * Generates a script based on the current state of the UI.
@@ -31,8 +31,7 @@ export class ScriptGenerator {
      * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element) {
-        const id = element.dataset.id;
-        const buttonClass = GLOBAL_ELEMENT_MAP.get(id);
+        const buttonClass = GeneralUtil.elementToClassElement(element);
         const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
         return {
             texture: `textures/ui/${element.dataset.displayImageName ?? "blank"}`,

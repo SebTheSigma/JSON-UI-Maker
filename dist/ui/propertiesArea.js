@@ -1,7 +1,10 @@
+import { config } from "../CONFIG.js";
 import { DraggableButton } from "../elements/button.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { DraggableLabel } from "../elements/label.js";
 import { GLOBAL_ELEMENT_MAP, selectedElement } from "../index.js";
+import { GeneralUtil } from "../util/generalUtil.js";
+import { StringUtil } from "../util/stringUtil.js";
 export const propertiesMap = new Map([
     [
         "draggable-panel",
@@ -87,10 +90,7 @@ export const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.dataset.imageName,
                 set: (element, value) => {
-                    const id = element.dataset.id;
-                    if (!id)
-                        return;
-                    const elementClass = GLOBAL_ELEMENT_MAP.get(id);
+                    const elementClass = GeneralUtil.elementToClassElement(element);
                     if (elementClass instanceof DraggableCanvas) {
                         console.warn("Changing image");
                         elementClass.changeImage(value);
@@ -107,14 +107,24 @@ export const propertiesMap = new Map([
                 displayName: "Width",
                 editable: true,
                 get: (element) => element.style.width,
-                set: (element, value) => (element.style.width = value),
+                set: (element, value) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableButton) {
+                        elementClass.drawImage(parseFloat(value), elementClass.canvas.height);
+                    }
+                },
             },
             {
                 type: "string",
                 displayName: "Height",
                 editable: true,
                 get: (element) => element.style.height,
-                set: (element, value) => (element.style.height = value),
+                set: (element, value) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableButton) {
+                        elementClass.drawImage(elementClass.canvas.width, parseFloat(value));
+                    }
+                },
             },
             {
                 type: "string",
@@ -143,10 +153,7 @@ export const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.dataset.defaultImageName,
                 set: (element, value) => {
-                    const id = element.dataset.id;
-                    if (!id)
-                        return;
-                    const elementClass = GLOBAL_ELEMENT_MAP.get(id);
+                    const elementClass = GeneralUtil.elementToClassElement(element);
                     if (elementClass instanceof DraggableButton) {
                         console.warn("Changing image");
                         elementClass.setDefaultImage(value);
@@ -262,38 +269,44 @@ export const propertiesMap = new Map([
         [
             {
                 type: "string",
-                displayName: "Width",
-                editable: true,
-                get: (element) => element.style.width,
-                set: (element, value) => (element.style.width = value),
-            },
-            {
-                type: "string",
-                displayName: "Height",
-                editable: true,
-                get: (element) => element.style.height,
-                set: (element, value) => (element.style.height = value),
-            },
-            {
-                type: "string",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
-                set: (element, value) => (element.style.left = value),
+                set: (element, value) => {
+                    element.style.left = value;
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        const offset = config.magicNumbers.labelToOffset(elementClass.label);
+                        elementClass.shadowLabel.style.left = `${StringUtil.cssDimToNumber(elementClass.label.style.left) + elementClass.shadowOffsetX + offset[0]}px`;
+                    }
+                },
             },
             {
                 type: "string",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.style.top,
-                set: (element, value) => (element.style.top = value),
+                set: (element, value) => {
+                    element.style.top = value;
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        const offset = config.magicNumbers.labelToOffset(elementClass.label);
+                        elementClass.shadowLabel.style.top = `${StringUtil.cssDimToNumber(elementClass.label.style.top) + elementClass.shadowOffsetY + offset[1]}px`;
+                    }
+                },
             },
             {
                 type: "string",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
-                set: (element, value) => (element.style.zIndex = value),
+                set: (element, value) => {
+                    element.style.zIndex = value;
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        elementClass.shadowLabel.style.zIndex = value;
+                    }
+                },
             },
             {
                 type: "number",
@@ -301,16 +314,12 @@ export const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.style.fontSize.replace("em", ""),
                 set: (element, value) => {
-                    const id = element.dataset.id;
-                    if (!id)
-                        return;
-                    console.log('Sigma', value);
-                    const elementClass = GLOBAL_ELEMENT_MAP.get(id);
-                    console.log(typeof elementClass);
+                    const elementClass = GeneralUtil.elementToClassElement(element);
                     if (elementClass instanceof DraggableLabel) {
-                        console.log('alpha', value);
                         element.style.fontSize = `${value}em`;
                         elementClass.mirror.style.fontSize = `${value}em`;
+                        elementClass.shadowLabel.style.fontSize = `${value}em`;
+                        elementClass.updateSize();
                     }
                 },
             },
@@ -319,7 +328,49 @@ export const propertiesMap = new Map([
                 displayName: "Text Align",
                 editable: true,
                 get: (element) => element.style.textAlign,
-                set: (element, value) => (element.style.textAlign = value),
+                set: (element, value) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        elementClass.shadowLabel.style.textAlign = value;
+                        elementClass.label.style.textAlign = value;
+                        elementClass.mirror.style.textAlign = value;
+                        elementClass.updateSize(false);
+                    }
+                },
+            },
+            {
+                type: "text",
+                displayName: "Font Family",
+                editable: true,
+                get: (element) => element.style.fontFamily,
+                set: (element, value) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        elementClass.shadowLabel.style.fontFamily = value;
+                        elementClass.mirror.style.fontFamily = value;
+                        elementClass.label.style.fontFamily = value;
+                        elementClass.updateSize();
+                    }
+                },
+            },
+            {
+                type: "checkbox",
+                displayName: "Shadow",
+                editable: true,
+                get: (element) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        return elementClass.hasShadow;
+                    }
+                    return false;
+                },
+                set: (element) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    if (elementClass instanceof DraggableLabel) {
+                        return elementClass.shadow(!elementClass.hasShadow);
+                    }
+                    return false;
+                },
             }
         ],
     ],
@@ -366,7 +417,6 @@ export const propertiesMap = new Map([
 ]);
 let currentInputs = [];
 export function updatePropertiesArea() {
-    console.log("Updating Properties Area");
     const propertiesArea = document.getElementById("properties");
     // Removes old event listeners
     for (let input of currentInputs) {
@@ -383,7 +433,11 @@ export function updatePropertiesArea() {
         input.type = property.type;
         input.className = "propertyInput";
         const value = property.get(selectedElement);
-        input.value = value;
+        // Different input types
+        if (property.type === "checkbox")
+            input.checked = value;
+        else
+            input.value = value;
         const label = document.createElement("label");
         label.textContent = `${property.displayName}: `;
         const isEditableLabel = document.createElement("label");

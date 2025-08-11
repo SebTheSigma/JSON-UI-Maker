@@ -1,4 +1,3 @@
-import { config } from "./CONFIG.js";
 
 export interface NinesliceData {
     nineslice_size: [left: number, top: number, right: number, bottom: number];
@@ -12,7 +11,15 @@ export class Nineslice {
         newWidth: number,
         newHeight: number
     ): Uint8ClampedArray<ArrayBuffer> {
-        const [left, top, right, bottom] = nineslice_size;
+
+        let left: number, top: number, right: number, bottom: number;
+        if (Array.isArray(nineslice_size)) {
+            [left, top, right, bottom] = nineslice_size;
+        }
+
+        else {
+            [left, top, right, bottom] = new Array(4).fill(nineslice_size);
+        }
         const [baseWidth, baseHeight] = base_size;
 
         const output: Uint8ClampedArray<ArrayBuffer> = new Uint8ClampedArray(newWidth * newHeight * 4);

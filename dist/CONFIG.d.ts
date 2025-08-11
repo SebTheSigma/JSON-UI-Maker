@@ -14,6 +14,7 @@ export declare const config: {
         };
     };
     magicNumbers: {
+        resizeHandleSize: number;
         fontScalar: number;
         fontOffsetX: number;
         fontOffsetY: number;
@@ -21,6 +22,7 @@ export declare const config: {
         UI_SCALAR: number;
         buttonImageOffsetX: number;
         buttonImageOffsetY: number;
+        labelToOffset: (label: HTMLTextAreaElement) => [number, number];
     };
     nameSpace: string;
     defaultCollectionName: string;

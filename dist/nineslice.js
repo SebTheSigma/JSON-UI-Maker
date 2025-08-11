@@ -1,6 +1,12 @@
 export class Nineslice {
     static ninesliceResize({ nineslice_size, base_size }, pixelArray, newWidth, newHeight) {
-        const [left, top, right, bottom] = nineslice_size;
+        let left, top, right, bottom;
+        if (Array.isArray(nineslice_size)) {
+            [left, top, right, bottom] = nineslice_size;
+        }
+        else {
+            [left, top, right, bottom] = new Array(4).fill(nineslice_size);
+        }
         const [baseWidth, baseHeight] = base_size;
         const output = new Uint8ClampedArray(newWidth * newHeight * 4);
         function getPixel(x, y) {

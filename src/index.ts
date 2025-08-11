@@ -1,5 +1,5 @@
 import { Converter } from "./converter.js";
-import { handlePackUpload } from "./files/openFiles.js";
+import { FileUploader } from "./files/openFiles.js";
 import { DraggablePanel } from "./elements/panel.js";
 import { DraggableCanvas } from "./elements/canvas.js";
 import { NinesliceData } from "./nineslice.js";
@@ -11,11 +11,10 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
+import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
+import { GeneralUtil } from "./util/generalUtil.js";
 import "./scripter/generator.js";
 import "./ui/modals/settings.js";
-import { Copier } from "./copyNPaste/copy.js";
-import { Paster } from "./copyNPaste/paste.js";
-import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 
 console.log("Script Loaded");
 
@@ -35,12 +34,20 @@ panelContainer.addEventListener("mouseleave", () => {
     isInMainWindow = false;
 });
 
+export type GlobalElementMapValue =
+    DraggableButton |
+    DraggableCanvas |
+    DraggablePanel |
+    DraggableCollectionPanel |
+    DraggableLabel |
+    DraggableScrollingPanel;
+
 /*
  * Contains all the elements in the main window.
  * Each accessable element has a unique id.
  * The id is used to access the element.
  */
-export const GLOBAL_ELEMENT_MAP: Map<string, DraggableButton | DraggableCanvas | DraggablePanel | DraggableCollectionPanel | DraggableLabel | DraggableScrollingPanel> = new Map();
+export const GLOBAL_ELEMENT_MAP: Map<string, GlobalElementMapValue> = new Map();
 
 export let copiedElement: HTMLElement | undefined = undefined;
 export function setCopiedElement(element: HTMLElement | undefined): void {
@@ -48,6 +55,10 @@ export function setCopiedElement(element: HTMLElement | undefined): void {
 }
 
 export class Builder {
+    public static handlePackUpload(): void {
+        FileUploader.handlePackUpload();
+    }
+
     public static generateAndCopyJsonUI(): void {
         const jsonUI = Converter.test(panelContainer, 0);
         navigator.clipboard.writeText(JSON.stringify(jsonUI, null, 2));
@@ -142,8 +153,13 @@ export class Builder {
 
     public static deleteSelected(): void {
         if (!selectedElement) return;
-        selectedElement.remove();
-        selectedElement = undefined;
+        
+        const element = GeneralUtil.elementToClassElement(selectedElement)!;
+        const id = selectedElement.dataset.id!;
+
+        element.delete();
+
+        GLOBAL_ELEMENT_MAP.delete(id);
         updatePropertiesArea();
     }
 
@@ -161,18 +177,6 @@ export class Builder {
         // Checks if the image is a nineslice
         this.addCanvas(imageData.png, imageName, imageData.json);
     }
-
-    /*
-    public static copy() {
-        if (!selectedElement) return;
-        Copier.copy(selectedElement);
-    }
-
-    public static paste() {
-        if (!copiedElement || !selectedElement) return;
-        Paster.paste(selectedElement, copiedElement);
-    }
-    */
 }
 
 export interface ImageDataState {
@@ -190,6 +194,4 @@ declare global {
     }
 }
 
-window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;
-window.Converter = Converter;

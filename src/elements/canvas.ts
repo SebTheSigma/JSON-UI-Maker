@@ -24,11 +24,14 @@ export class DraggableCanvas {
     public resizeStartHeight?: number;
     public resizeStartX?: number;
     public resizeStartY?: number;
+    public isEditable: boolean;
+
     /**
      * @param {HTMLElement} container
      */
     public constructor(ID: string, container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData) {
         console.log(`Dimensions: ${imageData.width} ${imageData.height}`);
+        this.isEditable = true;
 
         let lastParent: HTMLElement | null = container;
         let i: number = 0;
@@ -128,6 +131,7 @@ export class DraggableCanvas {
     }
 
     public select(e: MouseEvent): void {
+        if (!this.isEditable) return;
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
 
         console.log(this.selected);
@@ -159,6 +163,7 @@ export class DraggableCanvas {
     }
 
     public unSelect(_e?: MouseEvent): void {
+        if (!this.isEditable) return;
         this.selected = false;
         setSelectedElement(undefined);
         this.canvasHolder.style.border = "2px solid black";
@@ -167,9 +172,6 @@ export class DraggableCanvas {
     }
 
     public startDrag(e: MouseEvent): void {
-        if (e.target === this.resizeHandle) return;
-        this.outlineDiv.style.display = "none";
-        if (this.isResizing) this.stopResize();
 
         // Stop propagation for nested elements
         for (let elementName of AllJsonUIElements) {
@@ -177,6 +179,11 @@ export class DraggableCanvas {
                 e.stopPropagation();
             }
         }
+
+        if (e.target === this.resizeHandle || !this.isEditable) return;
+
+        this.outlineDiv.style.display = "none";
+        if (this.isResizing) this.stopResize();
 
         this.isDragging = true;
 
@@ -190,7 +197,7 @@ export class DraggableCanvas {
     }
 
     public drag(e: MouseEvent): void {
-        if (!this.isDragging || this.isResizing) return;
+        if (!this.isDragging || this.isResizing || !this.isEditable) return;
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         if (config.settings.boundary_constraints!.value) {
@@ -221,6 +228,7 @@ export class DraggableCanvas {
 
     public startResize(e: MouseEvent): void {
         e.stopPropagation(); // Prevent event from bubbling to parent
+        if (!this.isEditable) return;
         this.isResizing = true;
         this.resizeStartWidth = parseFloat(this.canvas.style.width);
         this.resizeStartHeight = parseFloat(this.canvas.style.height);
@@ -236,8 +244,8 @@ export class DraggableCanvas {
     }
 
     public resize(e: MouseEvent): void {
-        if (!this.isResizing) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
+        if (!this.isResizing || !this.isEditable) return;
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         const widthChange: number = e.clientX - this.resizeStartX!;
@@ -277,8 +285,8 @@ export class DraggableCanvas {
     }
 
     public outlineResize(e: MouseEvent): void {
-        if (!this.isResizing) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
+        if (!this.isResizing || !this.isEditable) return;
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         const widthChange: number = e.clientX - this.resizeStartX!;
@@ -340,7 +348,6 @@ export class DraggableCanvas {
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
 
         if (this.nineSlice) {
-            console.warn(`sigma`, this.nineSlice, this.imageData);
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(this.nineSlice, this.imageData.data, width, height);
 
             this.canvas.width = width;
@@ -384,12 +391,8 @@ export class DraggableCanvas {
     public changeImage(imageName: string): void {
         const data = images.get(imageName);
 
-        console.warn("rizz1", imageName);
-
         // Checks if the image is there
         if (!data || !data.png) return;
-
-        console.warn("rizz2", data.png, imageName);
 
         // Sets pixel data
         this.imageData = data.png;
@@ -397,13 +400,9 @@ export class DraggableCanvas {
         // Re-calculates aspect ratio
         this.aspectRatio = this.imageData.width / this.imageData.height;
 
-        console.warn("rizz3", data.json, imageName);
-
         // Sets nineslice
         this.nineSlice = undefined;
         this.nineSlice = data.json;
-
-        console.warn("rizz4", imageName);
 
         this.canvasHolder.dataset.imageName = imageName;
         this.drawImage(this.canvas.width, this.canvas.height, true);
@@ -413,21 +412,54 @@ export class DraggableCanvas {
         this.canvasHolder.dataset.shouldParse = `${shouldParse}`.toLowerCase();
     }
 
-    public detatch(): void {
-        document.removeEventListener("mousemove", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
-
+    public detatchEvents(): void {
+        this.canvas.removeEventListener("mousedown", (e) => this.startDrag(e));
+        this.canvas.removeEventListener("dblclick", (e) => this.select(e));
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
 
-        this.canvas.remove();
-        this.canvasHolder.remove();
+        this.resizeHandle.removeEventListener("mousedown", (e) => this.startResize(e));
+        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
+        document.removeEventListener("mouseup", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
     }
 
     public getMainHTMLElement(): HTMLElement {
         return this.canvasHolder;
     }
+
+    public editable(isEditable: boolean): void {
+
+        if (!isEditable) {
+            this.stopDrag();
+            this.stopResize();
+            this.detatchEvents();
+
+            if (this.selected) this.unSelect();   
+        }
+
+        else {
+            this.initEvents();
+        }
+
+        this.resizeHandle.style.display = isEditable ? "block" : "none";
+        this.canvasHolder.style.outline = isEditable ? "2px solid black" : "none";
+        this.canvasHolder.style.border = isEditable ? "2px solid black" : "none";
+
+        this.isEditable = isEditable;
+    }
+
+    public delete(): void {
+
+        if (this.selected) this.unSelect();
+        
+        this.container.removeChild(this.getMainHTMLElement());
+        document.body.removeChild(this.outlineDiv);
+
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
+        document.removeEventListener("mouseup", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
+    }
 }
-
-
-

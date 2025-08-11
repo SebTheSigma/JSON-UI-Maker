@@ -25,4 +25,5 @@ export declare class DraggablePanel {
     resize(e: MouseEvent): void;
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
+    delete(): void;
 }

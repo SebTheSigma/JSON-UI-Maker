@@ -11,10 +11,6 @@ window.addEventListener("keydown", (e) => {
     
     if (e?.key?.startsWith("Arrow")) triggerArrowMovement(e);
     if (e?.key === "Delete") Builder.deleteSelected();
-
-    console.log(e?.key, e?.ctrlKey);
-    if (e?.key === "c" && e?.ctrlKey) Builder.copy();
-    if (e?.key === "v" && e?.ctrlKey) Builder.paste();
 });
 
 window.addEventListener("keypress", (e) => {

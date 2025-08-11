@@ -6,17 +6,22 @@ interface LabelOptions {
 }
 export declare class DraggableLabel {
     container: HTMLElement;
+    basePanel: HTMLElement;
     label: HTMLTextAreaElement;
     mirror: HTMLElement;
     isDragging: boolean;
     selected: boolean;
     offsetX: number;
     offsetY: number;
+    hasShadow: boolean;
+    shadowLabel: HTMLDivElement;
+    shadowOffsetX: number;
+    shadowOffsetY: number;
     /**
      * @param {HTMLElement} container
      */
     constructor(ID: string, container: HTMLElement, labelOptions?: LabelOptions);
-    updateSize(): void;
+    updateSize(updateProperties?: boolean): void;
     initEvents(): void;
     select(e: MouseEvent): void;
     unSelect(_e?: MouseEvent): void;
@@ -26,5 +31,7 @@ export declare class DraggableLabel {
     setParse(shouldParse: boolean): void;
     changeText(text: string): void;
     getMainHTMLElement(): HTMLElement;
+    delete(): void;
+    shadow(shouldShadow: boolean): void;
 }
 export {};

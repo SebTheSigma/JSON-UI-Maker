@@ -1,6 +1,6 @@
 import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
-import { GLOBAL_ELEMENT_MAP } from "../index.js";
 import { DraggableButton } from "../elements/button.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 
 export interface FormButtonData {
     texture: string,
@@ -45,10 +45,8 @@ export class ScriptGenerator {
      * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element: HTMLElement): FormButtonData {
+        const buttonClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
-        const id = element.dataset.id!;
-
-        const buttonClass = GLOBAL_ELEMENT_MAP.get(id) as DraggableButton;
         const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
 
         return {

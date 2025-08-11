@@ -4,15 +4,6 @@ import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 import { StringUtil } from "./util/stringUtil.js";
 export class Converter {
     /**
-     * Gets all of the nodes currently in the main window
-     * @returns An array of all the nodes in the main window
-     */
-    static getAllNodes() {
-        const container = document.getElementById("main_window");
-        const children = container.children;
-        return Array.from(children);
-    }
-    /**
      * Goes down the tree of nodes to develop the json-ui file
      * @param startNodeTree The node to start generating the json-ui from
      * @returns A JSON object with the json-ui
@@ -34,11 +25,19 @@ export class Converter {
         }
     }
     /**
-     * Goes down the tree of nodes to develop the json-ui file
-     * @param startNodeTree The node to start generating the json-ui from
-     * @returns A JSON object with the json-ui
+     * Recursively traverses the tree of nodes to generate the json-ui structure.
+     * Uses skip and continue attributes to control the flow of the tree.
+     * Uses the NewTree and CommonElementLink attributes to control the flow of the tree.
+     * Can choose whether to parse the node or not.
+     *
+     * @param startNodeTree The starting node for generating the json-ui structure.
+     * @param depth The current depth of the node in the tree, defaults to 0.
+     * @param nameSpace The namespace for the json-ui, defaults to the one specified in the CONFIG.
+     * @param _baseJsonUiNode The base node for the json-ui, defaults to an empty node.
+     * @param _nodeLink The link to the node, defaults to an empty string.
+     * @returns A JSON object representing the json-ui structure.
      */
-    static tree(startNodeTree, depth = 0, nameSpace = config.nameSpace, _baseJsonUiNode, _nodeLink) {
+    static tree(startNodeTree, depth = 0, nameSpace = config.nameSpace, _baseJsonUiNode) {
         // Goes down the tree of nodes to develop the json-ui file
         let jsonNodes = {};
         if (depth == 0) {
@@ -50,16 +49,24 @@ export class Converter {
         }
         for (let node of Array.from(startNodeTree.childNodes)) {
             const treeData = Converter.nodeToJsonUI(node, nameSpace);
-            console.log('depth: ', depth, treeData);
+            console.log("depth: ", depth, treeData);
+            // Skips the node and goes to its children
+            if (node?.dataset?.skip == "true") {
+                const nextNodes = Converter.tree(node, depth + 1, nameSpace, _baseJsonUiNode);
+                for (let nextNode of Object.keys(nextNodes)) {
+                    jsonNodes[nextNode] = nextNodes[nextNode];
+                }
+                continue;
+            }
             // Checks if the node should be ignored
             if (!treeData.instructions)
                 continue;
             // Makes the new tree if needed
-            if (treeData.instructions.NewTreeFromBaseNode && treeData.instructions.rootStarterElement) {
+            if (treeData.instructions.NewTree) {
                 jsonNodes[StringUtil.generateRandomString(8)] = treeData.element;
-                const panel = JSON_TYPES.get(treeData.instructions.rootStarterElement);
+                const panel = JSON_TYPES.get(treeData.instructions.NewTree.startingNode);
                 // Links the element to the panel which starts a new tree
-                const newTreeLink = treeData.instructions.NewTreeFromBaseNode.split(".")[1];
+                const newTreeLink = treeData.instructions.NewTree.link.split(".")[1];
                 const nextNodes = Converter.tree(node, depth + 1, nameSpace, _baseJsonUiNode);
                 if (treeData.instructions.ContinuePath) {
                     // Adds the JSON-UI controls
@@ -69,10 +76,11 @@ export class Converter {
                         panel.controls.push({ [nextNode]: nextNodes[nextNode] });
                     }
                 }
-                console.log(`New tree from base node: ${newTreeLink}`, _baseJsonUiNode);
+                console.warn(`New tree from base node: `, newTreeLink, `\npanel: `, panel, `\nnextNodes: `, nextNodes, `\n_baseJsonUiNode: `, JSON.stringify(_baseJsonUiNode, null, 2), `\ntreeData: `, treeData, `\njsonNodes: `, jsonNodes, `\nnode: `, node, `\ndepth: `, depth, `\nnameSpace: `, nameSpace);
                 // Adds the node to the jsonUI
                 if (_baseJsonUiNode)
                     _baseJsonUiNode[newTreeLink] = panel;
+                console.log('_baseJsonUiNode: ', JSON.stringify(_baseJsonUiNode, null, 2));
             }
             else {
                 const jsonUI = treeData.element;

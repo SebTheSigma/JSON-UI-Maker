@@ -202,4 +202,16 @@ export class DraggablePanel {
     public getMainHTMLElement(): HTMLElement {
         return this.panel;
     }
+
+    public delete(): void {
+
+        if (this.selected) this.unSelect();
+
+        this.container.removeChild(this.getMainHTMLElement());
+
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
+    }
 }

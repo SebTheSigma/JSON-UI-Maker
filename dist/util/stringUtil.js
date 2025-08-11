@@ -24,5 +24,19 @@ export class StringUtil {
         }
         return result;
     }
+    /**
+     * Returns a string that is the filename without its extension.
+     *
+     * If the filename does not have an extension, the filename is returned as is.
+     *
+     * @param filename The filename to remove the extension from.
+     * @returns The filename without its extension.
+     */
+    static removeFileExtension(filename) {
+        const lastDot = filename.lastIndexOf('.');
+        if (lastDot === -1)
+            return filename; // No dot
+        return filename.slice(0, lastDot);
+    }
 }
 //# sourceMappingURL=stringUtil.js.map

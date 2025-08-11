@@ -1,5 +1,6 @@
 import { config } from "../CONFIG.js";
 import { GLOBAL_ELEMENT_MAP } from "../index.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
 export const classToJsonUI = new Map([
     [
@@ -157,6 +158,7 @@ export const classToJsonUI = new Map([
         "draggable-label",
         (element, nameSpace) => {
             const parent = element.parentElement;
+            const classElement = GeneralUtil.elementToClassElement(element);
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
@@ -178,6 +180,8 @@ export const classToJsonUI = new Map([
                 text: element.value,
                 font_scale_factor: parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar * ui_scaler,
                 text_alignment: element.style.textAlign ?? "left",
+                font_type: element.style.fontFamily ?? "MinecraftRegular",
+                shadow: classElement.hasShadow
             };
             console.log(JSON.stringify(jsonUIElement));
             const instructions = {
@@ -189,36 +193,14 @@ export const classToJsonUI = new Map([
     [
         "draggable-scrolling_panel",
         (element, nameSpace) => {
-            const parent = element.parentElement;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-            const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
-            if (parent?.className == "main_window") {
-                offset[0] = -processedWidth / 2;
-                offset[1] = -processedHeight / 2;
-            }
-            const ui_scaler = config.magicNumbers.UI_SCALAR;
-            const jsonUIElement = {
-                offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
-                size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
-                layer: Number(element.style.zIndex),
-                type: "panel",
-                anchor_from: "top_left",
-                anchor_to: "top_left",
-            };
-            const instructions = {
-                ContinuePath: true,
-            };
-            return { element: jsonUIElement, instructions: instructions };
-        },
-    ],
-    [
-        "draggable-scrolling_panel",
-        (element, nameSpace) => {
-            const parent = element.parentElement;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-            const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
+            console.log("SKIBIFIDO", element);
+            // Has the position of the panel as the panel is strictly used for scrolling
+            // and cant have positional properties
+            const basePanel = element.parentElement;
+            const parent = basePanel?.parentElement;
+            const processedWidth = StringUtil.cssDimToNumber(basePanel.style.width);
+            const processedHeight = StringUtil.cssDimToNumber(basePanel.style.height);
+            const offset = [StringUtil.cssDimToNumber(basePanel.style.left), StringUtil.cssDimToNumber(basePanel.style.top)];
             if (parent?.className == "main_window") {
                 offset[0] = -processedWidth / 2;
                 offset[1] = -processedHeight / 2;
@@ -232,15 +214,18 @@ export const classToJsonUI = new Map([
                 anchor_from: "top_left",
                 anchor_to: "top_left",
                 $scroll_size: [5 * ui_scaler, (processedHeight - 4) * ui_scaler],
-                $scrolling_pane_size: [(processedWidth - 4) * ui_scaler, (processedHeight - 4) * ui_scaler],
+                $scrolling_pane_size: [(processedWidth - 4) * ui_scaler, (processedHeight - 0) * ui_scaler],
                 $scrolling_pane_offset: [0, 0],
                 $scroll_bar_right_padding_size: [0, 0],
             };
-            const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}`;
+            const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}-link`;
+            console.log(`New tree link: ${newTreeLink}`);
             const instructions = {
                 ContinuePath: true,
-                NewTreeFromBaseNode: newTreeLink,
-                rootStarterElement: "basicPanelScrollingContent",
+                NewTree: {
+                    link: newTreeLink,
+                    startingNode: "basicPanelScrollingContent",
+                },
             };
             const structure = {
                 type: "stack_panel",

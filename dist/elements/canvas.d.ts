@@ -17,6 +17,7 @@ export declare class DraggableCanvas {
     resizeStartHeight?: number;
     resizeStartX?: number;
     resizeStartY?: number;
+    isEditable: boolean;
     /**
      * @param {HTMLElement} container
      */
@@ -39,6 +40,8 @@ export declare class DraggableCanvas {
     drawImage(width: number, height: number, _updateImage?: boolean): void;
     changeImage(imageName: string): void;
     setParse(shouldParse: boolean): void;
-    detatch(): void;
+    detatchEvents(): void;
     getMainHTMLElement(): HTMLElement;
+    editable(isEditable: boolean): void;
+    delete(): void;
 }

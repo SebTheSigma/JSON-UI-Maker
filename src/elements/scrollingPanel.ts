@@ -2,6 +2,7 @@ import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
+import { MinecraftSlider } from "../ui/sliders/addMinecraftSlider.js";
 
 export class DraggableScrollingPanel {
     public container: HTMLElement;
@@ -16,6 +17,8 @@ export class DraggableScrollingPanel {
     public resizeStartHeight?: number;
     public resizeStartX?: number;
     public resizeStartY?: number;
+    public slider: MinecraftSlider;
+    public basePanel: HTMLElement;
     /**
      * @param {HTMLElement} container
      */
@@ -28,39 +31,50 @@ export class DraggableScrollingPanel {
             i++;
         }
 
+        this.basePanel = document.createElement("div");
+        this.basePanel.style.position = "absolute";
+        this.basePanel.dataset.skip = "true";
+
         // Saves parameters
         (this as any)._constructorArgs = [ID, container];
 
         this.container = container;
         this.panel = document.createElement("div");
         this.panel.className = "draggable-scrolling_panel";
+        this.panel.style.position = "absolute";
 
         // Custom data
         this.panel.dataset.id = ID;
 
         const rect: DOMRect = container.getBoundingClientRect();
 
-        this.panel.style.height = `${rect.height * 0.8}px`;
-        this.panel.style.width = `${rect.width * 0.8}px`;
+        this.basePanel.style.width = `${rect.width * 0.8}px`;
+        this.basePanel.style.height = `${rect.height * 0.8}px`;
+        this.panel.style.width = this.basePanel.style.width
+        this.panel.style.height = this.basePanel.style.height
 
         console.log(`Left: ${rect.left}, Top: ${rect.top}`);
         console.log(`Width: ${rect.width}, Height: ${rect.height}`);
 
         // Frist element and therefore needs different positioning to center
-        this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
-        this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
+        this.basePanel.style.left = `${rect.width / 2 - parseFloat(this.basePanel.style.width) / 2}px`;
+        this.basePanel.style.top = `${rect.height / 2 - parseFloat(this.basePanel.style.height) / 2}px`;
 
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.panel.style.border = "2px solid black";
-        this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
 
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
-        this.panel.appendChild(this.resizeHandle);
-        this.container.appendChild(this.panel);
-        this.resizeHandle.style.zIndex = String(2 * i + 1);
+
+        this.resizeHandle.style.zIndex = String(2 * i + 2);
         this.resizeHandle.style.position = "sticky";
+
+        this.panel.appendChild(this.resizeHandle);
+        this.basePanel.appendChild(this.panel)
+        this.container.appendChild(this.basePanel);
+
+        this.slider = new MinecraftSlider(this);
 
         this.isDragging = false;
         this.isResizing = false;
@@ -80,6 +94,8 @@ export class DraggableScrollingPanel {
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
         document.addEventListener("mousemove", (e) => this.resize(e));
         document.addEventListener("mouseup", () => this.stopResize());
+
+        this.panel.addEventListener("scroll", () => this.slider.updateHandle());
     }
 
     public select(e: MouseEvent): void {
@@ -154,15 +170,15 @@ export class DraggableScrollingPanel {
             newLeft = Math.max(0, Math.min(newLeft, containerRect.width - this.panel.offsetWidth));
             newTop = Math.max(0, Math.min(newTop, containerRect.height - this.panel.offsetHeight));
 
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
+            this.basePanel.style.left = `${newLeft}px`;
+            this.basePanel.style.top = `${newTop}px`;
         } else {
             // Calculate position relative to parent container
             const newLeft: number = e.clientX - containerRect.left - this.offsetX;
             const newTop: number = e.clientY - containerRect.top - this.offsetY;
 
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
+            this.basePanel.style.left = `${newLeft}px`;
+            this.basePanel.style.top = `${newTop}px`;
         }
     }
 
@@ -176,6 +192,7 @@ export class DraggableScrollingPanel {
     public startResize(e: MouseEvent): void {
         e.stopPropagation(); // Prevent event from bubbling to parent
         this.isResizing = true;
+        this.slider.setMoveType('instant')
         this.resizeStartWidth = parseFloat(this.panel.style.width);
         this.resizeStartHeight = parseFloat(this.panel.style.height);
         this.resizeStartX = e.clientX;
@@ -186,21 +203,37 @@ export class DraggableScrollingPanel {
     public resize(e: MouseEvent): void {
         if (!this.isResizing) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
+        this.slider.updateHandle();
 
         const widthChange: number = e.clientX - this.resizeStartX!;
         const heightChange: number = e.clientY - this.resizeStartY!;
 
+        this.basePanel.style.width = `${this.resizeStartWidth! + widthChange}px`;
+        this.basePanel.style.height = `${this.resizeStartHeight! + heightChange}px`;
         this.panel.style.width = `${this.resizeStartWidth! + widthChange}px`;
         this.panel.style.height = `${this.resizeStartHeight! + heightChange}px`;
     }
 
     public stopResize(): void {
         this.isResizing = false;
+        this.slider.setMoveType('smooth')
         if (isInMainWindow) updatePropertiesArea();
     }
-
 
     public getMainHTMLElement(): HTMLElement {
         return this.panel;
     }
+
+    public delete(): void {
+
+        if (this.selected) this.unSelect();
+
+        this.container.removeChild(this.basePanel);
+
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
+    }
 }
+

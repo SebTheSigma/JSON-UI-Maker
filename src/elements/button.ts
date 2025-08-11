@@ -89,7 +89,6 @@ export class DraggableButton {
 
         this.button.dataset.id = ID;
 
-        console.log(collectionIndex, typeof collectionIndex);
         this.button.dataset.collectionIndex = collectionIndex ?? "0";
         //-------------------------
 
@@ -106,13 +105,11 @@ export class DraggableButton {
 
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
-            console.log(10000);
             const scaledHeight: number = rect.height * 0.8;
-            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight);
+            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, this.imageDataDefault, true);
         } else if (rect.width <= rect.height) {
-            console.log(20000);
             const scaledWidth: number = rect.width * 0.8;
-            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio);
+            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, this.imageDataDefault, true);
         }
 
         // First element and therefore needs different positioning to center
@@ -408,26 +405,31 @@ export class DraggableButton {
      * @param {number} width
      * @param {number} height
      */
-    public drawImage(width: number, height: number, imageDataState: ImageDataState = this.imageDataDefault): void {
+    public drawImage(width: number, height: number, imageDataState: ImageDataState = this.imageDataDefault, _updateImage: boolean = false): void {
+        console.warn(`Draw image: ${width} x ${height}`);
         // Stops the canvas from being too small
         if (width <= 1) width = 1;
         if (height <= 1) height = 1;
 
+        const floorWidth: number = Math.floor(width);
+        const floorHeight: number = Math.floor(height);
+
+        const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
 
         if (imageDataState.json) {
             const pixels: Uint8ClampedArray<ArrayBuffer> = Nineslice.ninesliceResize(
                 imageDataState.json!,
                 imageDataState.png?.data!,
-                Math.floor(width),
-                Math.floor(height)
+                floorWidth,
+                floorHeight
             );
-            this.canvas.width = Math.floor(width);
-            this.canvas.height = Math.floor(height);
 
-            const newImageData: ImageData = new ImageData(pixels, Math.floor(width), Math.floor(height));
+            this.canvas.width = floorWidth;
+            this.canvas.height = floorHeight;
+
+            const newImageData: ImageData = new ImageData(pixels, floorWidth, floorHeight);
 
             // Draws the image
-            const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
             ctx.putImageData(newImageData, 0, 0);
         }
 
@@ -441,6 +443,23 @@ export class DraggableButton {
 
         this.button.style.width = `${width}px`;
         this.button.style.height = `${height}px`;
+
+        if (_updateImage) {
+            this.canvas.width = imageDataState.png?.width!;
+            this.canvas.height = imageDataState.png?.height!;
+
+            const rect: DOMRect = this.container.getBoundingClientRect();
+
+            ctx.putImageData(imageDataState.png!, 0, 0);
+
+            if (rect.width > rect.height) {
+                const scaledHeight: number = rect.height * 0.8;
+                this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, imageDataState, false);
+            } else if (rect.width <= rect.height) {
+                const scaledWidth: number = rect.width * 0.8;
+                this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, imageDataState, false);
+            }
+        }
     }
 
     public setDefaultImage(imageName: string): void {
@@ -512,5 +531,18 @@ export class DraggableButton {
 
     public getMainHTMLElement(): HTMLElement {
         return this.button;
+    }
+
+    public delete(): void {
+
+        if (this.selected) this.unSelect();
+        
+        this.container.removeChild(this.getMainHTMLElement());
+
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
+        document.removeEventListener("mouseup", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
     }
 }

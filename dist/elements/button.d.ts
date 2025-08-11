@@ -58,11 +58,12 @@ export declare class DraggableButton {
      * @param {number} width
      * @param {number} height
      */
-    drawImage(width: number, height: number, imageDataState?: ImageDataState): void;
+    drawImage(width: number, height: number, imageDataState?: ImageDataState, _updateImage?: boolean): void;
     setDefaultImage(imageName: string): void;
     setHoverImage(imageName: string): void;
     setPressedImage(imageName: string): void;
     setDisplayImage(imageName: string): void;
     setDisplayText(text: string): void;
     getMainHTMLElement(): HTMLElement;
+    delete(): void;
 }

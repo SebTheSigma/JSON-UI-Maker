@@ -1,5 +1,5 @@
 import { Converter } from "./converter.js";
-import { handlePackUpload } from "./files/openFiles.js";
+import { FileUploader } from "./files/openFiles.js";
 import { DraggablePanel } from "./elements/panel.js";
 import { DraggableCanvas } from "./elements/canvas.js";
 import { updatePropertiesArea } from "./ui/propertiesArea.js";
@@ -10,9 +10,10 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { StringUtil } from "./util/stringUtil.js";
 import { DraggableLabel } from "./elements/label.js";
 import { classToJsonUI } from "./converterTypes/HTMLClassToJonUITypes.js";
+import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
+import { GeneralUtil } from "./util/generalUtil.js";
 import "./scripter/generator.js";
 import "./ui/modals/settings.js";
-import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 console.log("Script Loaded");
 export function setSelectedElement(element) {
     selectedElement = element;
@@ -37,6 +38,9 @@ export function setCopiedElement(element) {
     copiedElement = element;
 }
 export class Builder {
+    static handlePackUpload() {
+        FileUploader.handlePackUpload();
+    }
     static generateAndCopyJsonUI() {
         const jsonUI = Converter.test(panelContainer, 0);
         navigator.clipboard.writeText(JSON.stringify(jsonUI, null, 2));
@@ -121,8 +125,10 @@ export class Builder {
     static deleteSelected() {
         if (!selectedElement)
             return;
-        selectedElement.remove();
-        selectedElement = undefined;
+        const element = GeneralUtil.elementToClassElement(selectedElement);
+        const id = selectedElement.dataset.id;
+        element.delete();
+        GLOBAL_ELEMENT_MAP.delete(id);
         updatePropertiesArea();
     }
     static setSettingToggle(setting, value) {
@@ -139,7 +145,5 @@ export class Builder {
     }
 }
 export var images = new Map();
-window.handlePackUpload = handlePackUpload;
 window.Builder = Builder;
-window.Converter = Converter;
 //# sourceMappingURL=index.js.map

@@ -14,4 +14,13 @@ export declare class StringUtil {
      * @returns A random string of the specified length.
      */
     static generateRandomString(length: number): string;
+    /**
+     * Returns a string that is the filename without its extension.
+     *
+     * If the filename does not have an extension, the filename is returned as is.
+     *
+     * @param filename The filename to remove the extension from.
+     * @returns The filename without its extension.
+     */
+    static removeFileExtension(filename: string): string;
 }

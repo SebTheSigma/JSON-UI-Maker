@@ -16,7 +16,8 @@ export class Copier {
         if (!id)
             return;
         const elementClass = GLOBAL_ELEMENT_MAP.get(id);
-        elementClass?.unSelect();
+        if (elementClass?.selected)
+            elementClass?.unSelect();
         setCopiedElement(elementClass?.getMainHTMLElement().cloneNode(true));
         console.log("Copied element.");
     }
