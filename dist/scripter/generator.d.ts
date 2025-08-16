@@ -3,6 +3,7 @@ export interface FormButtonData {
     text: string;
 }
 export declare class ScriptGenerator {
+    static init(): void;
     /**
      * Generates a script based on the current state of the UI.
      * This function is called when the "Generate Scripter" button is clicked.

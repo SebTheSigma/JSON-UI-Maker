@@ -24,11 +24,11 @@ export class DraggableCanvas {
     resizeStartX;
     resizeStartY;
     isEditable;
+    bindings = "[]";
     /**
      * @param {HTMLElement} container
      */
     constructor(ID, container, imageData, imageName, nineSlice) {
-        console.log(`Dimensions: ${imageData.width} ${imageData.height}`);
         this.isEditable = true;
         let lastParent = container;
         let i = 0;
@@ -98,6 +98,7 @@ export class DraggableCanvas {
         this.outlineDiv.style.zIndex = '1000';
         document.body.appendChild(this.outlineDiv);
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
     initEvents() {
         this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -113,7 +114,6 @@ export class DraggableCanvas {
         if (!this.isEditable)
             return;
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        console.log(this.selected);
         if (selectedElement) {
             if (selectedElement !== this.canvasHolder) {
                 selectedElement.style.border = "2px solid black";
@@ -135,6 +135,7 @@ export class DraggableCanvas {
         this.canvasHolder.style.border = "2px solid blue";
         this.canvasHolder.style.outline = "2px solid blue";
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         if (!this.isEditable)
@@ -144,6 +145,7 @@ export class DraggableCanvas {
         this.canvasHolder.style.border = "2px solid black";
         this.canvasHolder.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
     startDrag(e) {
         // Stop propagation for nested elements
@@ -389,6 +391,17 @@ export class DraggableCanvas {
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
         document.removeEventListener("mouseup", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+    grid(showGrid) {
+        const element = this.getMainHTMLElement();
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');
+        }
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }
 //# sourceMappingURL=canvas.js.map

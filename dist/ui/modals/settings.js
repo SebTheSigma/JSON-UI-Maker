@@ -22,20 +22,29 @@ openBtn.onclick = () => {
         input.type = settingInfo?.type;
         input.name = setting;
         input.id = setting;
-        input.style.maxWidth = '60px';
+        input.style.outline = 'none';
+        input.style.width = '60px';
+        input.style.height = '15px';
+        input.style.position = 'relative';
         input.className = 'modalOptionInput';
         input.value = settingInfo?.value;
         if (settingInfo?.type === "checkbox") {
             input.checked = settingInfo?.value;
+            input.style.top = '2px';
             input.oninput = (e) => {
                 Builder.setSettingToggle(setting, e.target.checked);
+                settingInfo.onchange?.(settingInfo?.value);
             };
         }
         else if (settingInfo?.type === "number") {
             input.valueAsNumber = settingInfo?.value;
             input.oninput = (e) => {
                 Builder.setSettingToggle(setting, e.target.valueAsNumber);
+                settingInfo.onchange?.(settingInfo?.value);
             };
+        }
+        else {
+            settingInfo.onchange?.(settingInfo?.value);
         }
         // Label
         const label = document.createElement("label");
@@ -47,20 +56,6 @@ openBtn.onclick = () => {
         form.appendChild(input);
         form.appendChild(document.createElement("br"));
     }
-    /*
-    // Make submit button
-    const submit = document.createElement("input");
-    submit.type = "submit";
-    submit.value = "Close";
-
-    submit.onclick = () => {
-        modal.style.display = "none";
-    }
-
-    // Add submit button
-    form.appendChild(submit);
-    */
-    // No need for the submit button as of now
 };
 /**
  * Hides the settings modal

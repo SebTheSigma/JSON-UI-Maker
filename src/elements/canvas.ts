@@ -5,6 +5,7 @@ import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { Binding } from "../scripter/bindings/types.js";
 
 export class DraggableCanvas {
     public imageData: ImageData;
@@ -26,11 +27,12 @@ export class DraggableCanvas {
     public resizeStartY?: number;
     public isEditable: boolean;
 
+    public bindings: string = "[]";
+
     /**
      * @param {HTMLElement} container
      */
     public constructor(ID: string, container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData) {
-        console.log(`Dimensions: ${imageData.width} ${imageData.height}`);
         this.isEditable = true;
 
         let lastParent: HTMLElement | null = container;
@@ -116,6 +118,7 @@ export class DraggableCanvas {
         document.body.appendChild(this.outlineDiv);
 
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
 
     public initEvents(): void {
@@ -133,8 +136,6 @@ export class DraggableCanvas {
     public select(e: MouseEvent): void {
         if (!this.isEditable) return;
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
-
-        console.log(this.selected);
 
         if (selectedElement) {
             if (selectedElement !== this.canvasHolder) {
@@ -160,6 +161,7 @@ export class DraggableCanvas {
         this.canvasHolder.style.outline = "2px solid blue";
 
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
@@ -169,6 +171,7 @@ export class DraggableCanvas {
         this.canvasHolder.style.border = "2px solid black";
         this.canvasHolder.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
@@ -461,5 +464,19 @@ export class DraggableCanvas {
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
         document.removeEventListener("mouseup", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+
+    public grid(showGrid: boolean): void {
+        const element = this.getMainHTMLElement();
+
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');    
+        }
+
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }

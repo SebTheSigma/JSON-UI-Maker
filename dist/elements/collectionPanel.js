@@ -15,6 +15,7 @@ export class DraggableCollectionPanel {
     resizeStartHeight;
     resizeStartX;
     resizeStartY;
+    bindings = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -38,8 +39,6 @@ export class DraggableCollectionPanel {
         const rect = container.getBoundingClientRect();
         this.panel.style.height = `${rect.height * 0.8}px`;
         this.panel.style.width = `${rect.width * 0.8}px`;
-        console.log(`Left: ${rect.left}, Top: ${rect.top}`);
-        console.log(`Width: ${rect.width}, Height: ${rect.height}`);
         // Frist element and therefore needs different positioning to center
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
         this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
@@ -58,6 +57,7 @@ export class DraggableCollectionPanel {
         this.offsetX = 0;
         this.offsetY = 0;
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -91,6 +91,7 @@ export class DraggableCollectionPanel {
         this.panel.style.border = "2px solid blue";
         this.panel.style.outline = "2px solid blue";
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         this.selected = false;
@@ -98,6 +99,7 @@ export class DraggableCollectionPanel {
         this.panel.style.border = "2px solid black";
         this.panel.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
@@ -120,7 +122,6 @@ export class DraggableCollectionPanel {
             return;
         const containerRect = this.container.getBoundingClientRect();
         if (config.settings.boundary_constraints.value) {
-            console.log("Boudary");
             let newLeft = e.clientX - containerRect.left - this.offsetX;
             let newTop = e.clientY - containerRect.top - this.offsetY;
             // Constrain to container bounds
@@ -177,6 +178,17 @@ export class DraggableCollectionPanel {
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+    grid(showGrid) {
+        const element = this.getMainHTMLElement();
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');
+        }
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }
 //# sourceMappingURL=collectionPanel.js.map

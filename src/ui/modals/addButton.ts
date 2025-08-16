@@ -69,7 +69,6 @@ export async function addButtonModal(): Promise<ButtonOptions> {
 
     return new Promise((resolve: (textures: ButtonOptions) => void): void => {
         submit.onclick = () => {
-            console.log("Leaving Add Button Modal");
             modal.style.display = "none";
 
             for (let element of elements) {

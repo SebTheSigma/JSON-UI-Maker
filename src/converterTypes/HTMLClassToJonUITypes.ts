@@ -2,7 +2,10 @@ import { config } from "../CONFIG.js";
 import { TreeData, TreeInstructions } from "../converter.js";
 import { DraggableButton } from "../elements/button.js";
 import { DraggableCanvas } from "../elements/canvas.js";
+import { DraggableCollectionPanel } from "../elements/collectionPanel.js";
 import { DraggableLabel } from "../elements/label.js";
+import { DraggablePanel } from "../elements/panel.js";
+import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
 import { GLOBAL_ELEMENT_MAP } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
@@ -20,6 +23,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
 
+            const panelClass = GeneralUtil.elementToClassElement(element) as DraggablePanel;
+
             const offset: [number, number] = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
 
             if (parent?.className == "main_window") {
@@ -29,6 +34,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
+            const bindings = GeneralUtil.tryParseBindings(panelClass.bindings) ?? [];
+
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -36,6 +43,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 type: "panel",
                 anchor_from: "top_left",
                 anchor_to: "top_left",
+
+                bindings: bindings,
             };
 
             const instructions: TreeInstructions = {
@@ -54,6 +63,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
             const collectionName: string = element.dataset.collectionName!;
 
+            const collectionPanelClass = GeneralUtil.elementToClassElement(element) as DraggableCollectionPanel;
+
             const offset: [number, number] = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
 
             if (parent?.className == "main_window") {
@@ -63,6 +74,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
+            const bindings = GeneralUtil.tryParseBindings(collectionPanelClass.bindings) ?? [];
+
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -71,6 +84,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 anchor_from: "top_left",
                 anchor_to: "top_left",
                 collection_name: collectionName,
+
+                bindings: bindings,
             };
 
             const instructions: TreeInstructions = {
@@ -87,6 +102,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
 
+            const canvasClass = GeneralUtil.elementToClassElement(element) as DraggableCanvas;
+
             const offset: [number, number] = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
 
             if (parent?.className == "main_window") {
@@ -96,6 +113,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
+            const bindings = GeneralUtil.tryParseBindings(canvasClass.bindings) ?? [];
+
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -104,6 +123,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 texture: `textures/ui/${element.dataset.imageName!}`,
                 anchor_from: "top_left",
                 anchor_to: "top_left",
+
+                bindings: bindings,
             };
 
             const instructions: TreeInstructions = {
@@ -137,11 +158,9 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 offset[1] = -processedHeight / 2;
             }
 
-            // Gets the display canvas
-            const id = element.dataset.id!;
+            const buttonClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
-            const buttonIdToDisplayCanvasJsonUi = (id: string): JsonUISimpleElement | undefined => {
-                const buttonClass = GLOBAL_ELEMENT_MAP.get(id) as DraggableButton;
+            const buttonIdToDisplayCanvasJsonUi = (): JsonUISimpleElement | undefined => {
                 const displayCanvas: DraggableCanvas = buttonClass.displayCanvas!;
 
                 const transformationFunc = classToJsonUI.get("draggable-canvas");
@@ -153,8 +172,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 return result.element!;
             };
 
-            const buttonIdToDisplayTextJsonUi = (id: string): JsonUISimpleElement | undefined => {
-                const buttonClass = GLOBAL_ELEMENT_MAP.get(id) as DraggableButton;
+            const buttonIdToDisplayTextJsonUi = (): JsonUISimpleElement | undefined => {
                 const displayCanvas: DraggableLabel = buttonClass.displayText!;
 
                 const transformationFunc = classToJsonUI.get("draggable-label");
@@ -166,31 +184,42 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 return result.element!;
             };
 
-            const DisplayElementJsonUi: JsonUISimpleElement = buttonIdToDisplayCanvasJsonUi(id)!;
-            const TextElementJsonUi: JsonUISimpleElement = buttonIdToDisplayTextJsonUi(id)!;
+            const DisplayElementJsonUi: JsonUISimpleElement = buttonIdToDisplayCanvasJsonUi()!;
+            const TextElementJsonUi: JsonUISimpleElement = buttonIdToDisplayTextJsonUi()!;
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
+            const bindings = GeneralUtil.tryParseBindings(buttonClass.bindings) ?? [];
+
             const jsonUIElement: JsonUISimpleElement = {
-                $offset_test: [offset[0] * ui_scaler, offset[1] * ui_scaler],
-                $button_size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
-                layer: Number(element.style.zIndex),
-                anchor_from: "top_left",
-                anchor_to: "top_left",
                 $default_button_background_texture: defaultTex,
                 $hover_button_background_texture: hoverTex,
                 $pressed_button_background_texture: pressedTex,
+
+                $button_offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
+                $button_size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
+
+                layer: Number(element.style.zIndex),
+                anchor_from: "top_left",
+                anchor_to: "top_left",
                 collection_index: collectionIndex,
+
                 $icon_offset: [
                     (DisplayElementJsonUi.offset![0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
                     (DisplayElementJsonUi.offset![1] ?? 0) + config.magicNumbers.buttonImageOffsetY,
                 ],
                 $icon_size: [DisplayElementJsonUi.size![0] ?? 45, DisplayElementJsonUi.size![1] ?? 45],
+
                 $font_size: TextElementJsonUi.font_scale_factor ?? 1,
                 $text_offset: [TextElementJsonUi.offset![0] ?? 0, TextElementJsonUi.offset![1] ?? 0],
+                $font_type: TextElementJsonUi.font_type ?? "MinecraftRegular",
+
+                $show_hover_text: false,
+
+                bindings: bindings,
             };
 
             const instructions: TreeInstructions = {
-                ContinuePath: true,
+                ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`,
             };
 
@@ -216,6 +245,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
             const getFontScaledOffsetY = config.magicNumbers.getFontScaledOffsetY as Function;
 
+            const bindings = GeneralUtil.tryParseBindings(classElement.bindings) ?? [];
+
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [
                     (offset[0] + (config.magicNumbers.fontOffsetX as number)) * ui_scaler,
@@ -229,10 +260,10 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 font_scale_factor: parseFloat(element.style.fontSize) * (config.magicNumbers.fontScalar as number) * ui_scaler,
                 text_alignment: element.style.textAlign ?? "left",
                 font_type: element.style.fontFamily ?? "MinecraftRegular",
-                shadow: classElement.hasShadow
-            };
+                shadow: classElement.hasShadow,
 
-            console.log(JSON.stringify(jsonUIElement));
+                bindings: bindings,
+            };
 
             const instructions: TreeInstructions = {
                 ContinuePath: false,
@@ -244,12 +275,13 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
     [
         "draggable-scrolling_panel",
         (element: HTMLElement, nameSpace: string) => {
-            console.log("SKIBIFIDO", element);
 
             // Has the position of the panel as the panel is strictly used for scrolling
             // and cant have positional properties
             const basePanel = element.parentElement!;
             const parent = basePanel?.parentElement!;
+
+            const elementClass = GeneralUtil.elementToClassElement(element) as DraggableScrollingPanel;
 
             const processedWidth = StringUtil.cssDimToNumber(basePanel.style.width);
             const processedHeight = StringUtil.cssDimToNumber(basePanel.style.height);
@@ -277,7 +309,6 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             };
 
             const newTreeLink: string = `${nameSpace}.${StringUtil.generateRandomString(8)}-link`;
-            console.log(`New tree link: ${newTreeLink}`);
 
             const instructions: TreeInstructions = {
                 ContinuePath: true,
@@ -286,6 +317,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                     startingNode: "basicPanelScrollingContent",
                 },
             };
+
+            const bindings = GeneralUtil.tryParseBindings(elementClass.bindings) ?? [];
 
             const structure: JsonUISimpleElement = {
                 type: "stack_panel",
@@ -306,6 +339,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                             $scrolling_pane_size: jsonUIElement.$scrolling_pane_size,
                             $scrolling_pane_offset: jsonUIElement.offset,
                             $scroll_bar_right_padding_size: jsonUIElement.$scroll_bar_right_padding_size,
+
+                            bindings: bindings
                         },
                     },
                 ],

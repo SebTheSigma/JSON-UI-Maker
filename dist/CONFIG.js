@@ -1,3 +1,5 @@
+import { selectedElement } from "./index.js";
+import { GeneralUtil } from "./util/generalUtil.js";
 export const config = {
     settings: {
         boundary_constraints: {
@@ -11,9 +13,64 @@ export const config = {
             editable: true,
             value: 10,
             displayName: "Arrow Key Move Amount",
+        },
+        grid_lock_rows: {
+            type: "number",
+            editable: true,
+            value: 2,
+            displayName: "Grid Lock Rows",
+            onchange: (value) => {
+                if (!selectedElement)
+                    return;
+                const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (selectedElementClass)
+                    selectedElementClass.grid(config.settings.show_grid.value);
+            }
+        },
+        grid_lock_columns: {
+            type: "number",
+            editable: true,
+            value: 2,
+            displayName: "Grid Lock Columns",
+            onchange: (value) => {
+                if (!selectedElement)
+                    return;
+                const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (selectedElementClass)
+                    selectedElementClass.grid(config.settings.show_grid.value);
+            }
+        },
+        grid_lock: {
+            type: "checkbox",
+            editable: true,
+            value: false,
+            displayName: "Grid Lock",
+            onchange: (value) => {
+                if (!selectedElement)
+                    return;
+                const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (selectedElementClass)
+                    selectedElementClass.grid(config.settings.show_grid.value);
+            }
+        },
+        show_grid: {
+            type: "checkbox",
+            editable: true,
+            value: false,
+            displayName: "Show Grid",
+            onchange: (value) => {
+                if (!selectedElement)
+                    return;
+                const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (selectedElementClass)
+                    selectedElementClass.grid(value);
+            }
         }
     },
     magicNumbers: {
+        textEditor: {
+            indentation: 4
+        },
         resizeHandleSize: 15,
         fontScalar: 1.6,
         fontOffsetX: 6,
@@ -37,8 +94,16 @@ export const config = {
                         return [offsetX, offsetY];
                     }],
                 ['MinecraftTen', (element) => {
-                        let offsetX = parseFloat(element.style.fontSize ?? '1') * 2.5;
-                        return [offsetX, offsetX];
+                        const fontSize = parseFloat(element.style.fontSize ?? '1');
+                        let offsetX = fontSize * 2.5;
+                        let offsetY = offsetX;
+                        if (element.style.textAlign == 'center') {
+                            offsetX -= 5;
+                        }
+                        else if (element.style.textAlign == 'right') {
+                            offsetX -= 10;
+                        }
+                        return [offsetX, offsetY];
                     }],
             ]);
             const func = fontToScalingFuncMap.get(label.style.fontFamily ?? 'MinecraftRegular');
@@ -48,7 +113,8 @@ export const config = {
             return offset;
         },
     },
-    nameSpace: 'main',
+    nameSpace: 'default_namespace',
+    title: 'default_title',
     defaultCollectionName: 'form_buttons'
 };
 //# sourceMappingURL=CONFIG.js.map

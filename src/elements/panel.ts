@@ -2,6 +2,7 @@ import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
+import { Binding } from "../scripter/bindings/types.js";
 
 export class DraggablePanel {
     public container: HTMLElement;
@@ -16,6 +17,8 @@ export class DraggablePanel {
     public resizeStartHeight?: number;
     public resizeStartX?: number;
     public resizeStartY?: number;
+
+    public bindings: string = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -33,7 +36,8 @@ export class DraggablePanel {
 
         this.container = container;
         this.panel = document.createElement("div");
-        this.panel.className = "draggable-panel";
+        this.panel.classList.add("draggable-panel"); // Needs to be added before gridable
+        this.panel.classList.add("gridable");
 
         // Custom data
         this.panel.dataset.id = ID;
@@ -42,9 +46,6 @@ export class DraggablePanel {
 
         this.panel.style.height = `${rect.height * 0.8}px`;
         this.panel.style.width = `${rect.width * 0.8}px`;
-
-        console.log(`Left: ${rect.left}, Top: ${rect.top}`);
-        console.log(`Width: ${rect.width}, Height: ${rect.height}`);
 
         // Frist element and therefore needs different positioning to center
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
@@ -68,6 +69,7 @@ export class DraggablePanel {
         this.offsetY = 0;
 
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
 
     public initEvents(): void {
@@ -108,6 +110,7 @@ export class DraggablePanel {
         this.panel.style.outline = "2px solid blue";
 
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
@@ -115,7 +118,9 @@ export class DraggablePanel {
         setSelectedElement(undefined);
         this.panel.style.border = "2px solid black";
         this.panel.style.outline = "2px solid black";
+
         updatePropertiesArea();
+        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
@@ -145,7 +150,6 @@ export class DraggablePanel {
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         if (config.settings.boundary_constraints!.value) {
-            console.log("Boudary");
             let newLeft: number = e.clientX - containerRect.left - this.offsetX;
             let newTop: number = e.clientY - containerRect.top - this.offsetY;
 
@@ -214,4 +218,19 @@ export class DraggablePanel {
         document.removeEventListener("mousemove", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
     }
+
+    public grid(showGrid: boolean): void {
+        const element = this.getMainHTMLElement();
+
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');    
+        }
+
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
+    }
 }
+

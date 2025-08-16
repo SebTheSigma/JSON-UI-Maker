@@ -1,3 +1,4 @@
+import { config } from "../CONFIG.js";
 export const JSON_TYPES = new Map([
     [
         "buttonWithHoverText",
@@ -6,14 +7,13 @@ export const JSON_TYPES = new Map([
             "$hover_button_background_texture|default": "textures/ui/glass_pane_hover",
             "$pressed_button_background_texture|default": "textures/ui/button_black_hover",
             "$button_size|default": [64, 64],
+            "$button_offset|default": [0, 0],
             "$icon_size|default": [45, 45],
+            "$icon_offset|default": [0, -5],
             "$text_offset|default": [0, -8],
             "$font_size|default": 1,
-            "$offset_test|default": [0, 0],
-            "$icon_offset|default": [0, -5],
-            "$hover_text|default": true,
-            "$show_text|default": "yes",
-            "$binding_name_condition|default": "",
+            "$font_type|default": "MinecraftRegular",
+            "$show_hover_text|default": true,
             type: "panel",
             size: "$button_size",
             anchor_from: "top_left",
@@ -23,7 +23,7 @@ export const JSON_TYPES = new Map([
                     panel_name: {
                         type: "panel",
                         size: "$button_size",
-                        offset: "$offset_test",
+                        offset: "$button_offset",
                         anchor_from: "top_left",
                         anchor_to: "top_left",
                         bindings: [
@@ -71,6 +71,7 @@ export const JSON_TYPES = new Map([
                                     anchor_to: "top_left",
                                     type: "label",
                                     text: "#form_button_text",
+                                    font_type: "$font_type",
                                     font_scale_factor: "$font_size",
                                     layer: 5,
                                     shadow: true,
@@ -96,7 +97,7 @@ export const JSON_TYPES = new Map([
                         $hover_state_border_visible: false,
                         $pressed_state_border_visible: false,
                         $pressed_button_name: "button.form_button_click",
-                        offset: "$offset_test",
+                        offset: "$button_offset",
                         anchor_from: "top_left",
                         anchor_to: "top_left",
                         size: "$button_size",
@@ -106,8 +107,8 @@ export const JSON_TYPES = new Map([
                         $button_text_max_size: ["100%", 20],
                         variables: [
                             {
-                                requires: "($hover_text)",
-                                $button_content: "main.hover_text_panel",
+                                requires: "($show_hover_text)",
+                                $button_content: `${config.nameSpace}.hover_text_panel`,
                             },
                         ],
                         bindings: [
@@ -134,14 +135,70 @@ export const JSON_TYPES = new Map([
         },
     ],
     [
-        'basicPanelScrollingContent',
+        "basicPanelScrollingContent",
         {
-            type: 'panel',
-            size: ['100%', '100%c'],
-            anchor_from: 'top_left',
-            anchor_to: 'top_left',
-            controls: []
-        }
-    ]
+            type: "panel",
+            size: ["100%", "100%c"],
+            anchor_from: "top_left",
+            anchor_to: "top_left",
+            controls: [],
+        },
+    ],
+]);
+export const JSON_TYPES_GENERATOR = new Map([
+    [
+        "server_form",
+        () => {
+            return `{
+    "namespace": "server_form",
+
+    "long_form": {
+        "type": "panel",
+        "size": ["100%", "100%"],
+        "controls": [
+            {
+                "long_form@common_dialogs.${config.nameSpace}_panel_no_buttons": {
+                    "$title_panel": "common_dialogs.standard_title_label",
+                    "$title_size": ["100% - 15px", 10],
+                    "$title_max_size": ["100% - 15px", 10],
+                    "size": [225, 200],
+                    "$text_name": "#title_text",
+                    "$title_text_binding_type": "none",
+                    "$child_control": "server_form.long_form_panel",
+                    "layer": 2,
+
+                    "bindings": [
+                        {
+                            "binding_name": "#title_text"
+                        },
+                        {
+							"binding_type": "view",
+							"source_property_name": "((#title_text - '${config.title}') = #title_text)",
+							"target_property_name": "#visible"
+						}
+                    ]
+                }
+            },
+            {
+                "${config.nameSpace}@${config.nameSpace}.${config.nameSpace}": {
+                    "layer": 2,
+                    "bindings": [
+                        {
+                            "binding_name": "#title_text"
+                        },
+                        {
+                            "binding_type": "view",
+                            "source_property_name": "(#title_text = '${config.title}')",
+                            "target_property_name": "#visible"
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+`;
+        },
+    ],
 ]);
 //# sourceMappingURL=jsonUITypes.js.map

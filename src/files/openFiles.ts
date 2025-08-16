@@ -13,7 +13,7 @@ export class FileUploader {
         const files = Array.from(fileInput.files);
 
         // Debug: list all files
-        files.forEach((file) => console.log(file.name));
+        files.forEach((file) => console.log('Filename', file.name));
 
         FileUploader.processFileUpload(files);
     }
@@ -29,7 +29,6 @@ export class FileUploader {
             const existingData = images.get(baseName) ?? {};
             existingData.png = imageData;
             images.set(baseName, existingData);
-            console.log(`Loaded image for ${baseName}:`, existingData);
 
             const jsonFile = files.find((file) => file.name === `${baseName}.json`);
             if (jsonFile) {
@@ -37,7 +36,6 @@ export class FileUploader {
                     const json = await this.readJsonFile(jsonFile);
                     existingData.json = json;
                     images.set(baseName, existingData);
-                    console.log(`Loaded JSON for ${baseName}:`, json);
                 } catch (err) {
                     console.error(`Error parsing JSON for ${baseName}:`, err);
                 }

@@ -14,6 +14,7 @@ export declare class DraggableScrollingPanel {
     resizeStartY?: number;
     slider: MinecraftSlider;
     basePanel: HTMLElement;
+    bindings: string;
     /**
      * @param {HTMLElement} container
      */
@@ -29,4 +30,5 @@ export declare class DraggableScrollingPanel {
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
+    grid(showGrid: boolean): void;
 }

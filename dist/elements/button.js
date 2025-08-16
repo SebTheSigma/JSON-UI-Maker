@@ -32,6 +32,7 @@ export class DraggableButton {
     resizeStartY;
     isHovering = false;
     isPressing = false;
+    bindings = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -114,6 +115,7 @@ export class DraggableButton {
         document.body.appendChild(this.outlineDiv);
         this.initEvents();
         this.setDisplayText(buttonText ?? "Label");
+        this.grid(config.settings.show_grid.value);
     }
     initEvents() {
         this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -131,7 +133,6 @@ export class DraggableButton {
     }
     select(e) {
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        console.log(this.selected);
         if (selectedElement) {
             if (selectedElement !== this.button) {
                 selectedElement.style.border = "2px solid black";
@@ -153,6 +154,7 @@ export class DraggableButton {
         this.button.style.border = "2px solid blue";
         this.button.style.outline = "2px solid blue";
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         this.selected = false;
@@ -160,6 +162,7 @@ export class DraggableButton {
         this.button.style.border = "2px solid black";
         this.button.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
@@ -341,7 +344,6 @@ export class DraggableButton {
      * @param {number} height
      */
     drawImage(width, height, imageDataState = this.imageDataDefault, _updateImage = false) {
-        console.warn(`Draw image: ${width} x ${height}`);
         // Stops the canvas from being too small
         if (width <= 1)
             width = 1;
@@ -428,7 +430,7 @@ export class DraggableButton {
     }
     setDisplayText(text) {
         const id = StringUtil.generateRandomString(15);
-        this.displayText = new DraggableLabel(id, this.button, { text });
+        this.displayText = new DraggableLabel(id, this.button, { text: text, includeTextPrompt: false });
         this.displayText.setParse(false);
         this.button.dataset.displayText = text;
         GLOBAL_ELEMENT_MAP.set(id, this.displayText);
@@ -445,6 +447,17 @@ export class DraggableButton {
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
         document.removeEventListener("mouseup", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+    grid(showGrid) {
+        const element = this.getMainHTMLElement();
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');
+        }
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }
 //# sourceMappingURL=button.js.map

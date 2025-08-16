@@ -1,4 +1,4 @@
-import { FormButtonData } from "./generator";
+import { FormButtonData } from "./generator.js";
 /**
  * Generates a script in JavaScript that creates a custom form in Minecraft Bedrock server.
  * The form contains buttons with the specified text and texture.

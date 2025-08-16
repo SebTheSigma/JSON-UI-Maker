@@ -34,6 +34,7 @@ export declare class DraggableButton {
     resizeStartY?: number;
     isHovering: boolean;
     isPressing: boolean;
+    bindings: string;
     /**
      * @param {HTMLElement} container
      */
@@ -66,4 +67,5 @@ export declare class DraggableButton {
     setDisplayText(text: string): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
+    grid(showGrid: boolean): void;
 }

@@ -12,6 +12,7 @@ interface Setting {
     editable: boolean;
     value: any;
     displayName?: string;
+    onchange?: (value: any) => void;
 }
 
 /**
@@ -37,15 +38,21 @@ openBtn.onclick = () => {
         input.type = settingInfo?.type!;
         input.name = setting;
         input.id = setting;
-        input.style.maxWidth = '60px';
+        input.style.outline = 'none';
+        input.style.width = '60px';
+        input.style.height = '15px'
+        input.style.position = 'relative';
         input.className = 'modalOptionInput';
 
         input.value = settingInfo?.value!;
 
         if (settingInfo?.type === "checkbox") {
             input.checked = settingInfo?.value!;
+            input.style.top = '2px';
+
             input.oninput = (e: Event) => {
                 Builder.setSettingToggle(setting as keyof typeof config.settings, (e.target as HTMLInputElement).checked);
+                settingInfo.onchange?.(settingInfo?.value!);
             }
         }
 
@@ -53,7 +60,12 @@ openBtn.onclick = () => {
             input.valueAsNumber = settingInfo?.value!;
             input.oninput = (e: Event) => {
                 Builder.setSettingToggle(setting as keyof typeof config.settings, (e.target as HTMLInputElement).valueAsNumber);
+                settingInfo.onchange?.(settingInfo?.value!);
             }
+        }
+
+        else {
+            settingInfo.onchange?.(settingInfo?.value!);
         }
         
 
@@ -68,22 +80,6 @@ openBtn.onclick = () => {
         form.appendChild(input);
         form.appendChild(document.createElement("br"));
     }
-
-    /*
-    // Make submit button
-    const submit = document.createElement("input");
-    submit.type = "submit";
-    submit.value = "Close";
-
-    submit.onclick = () => {
-        modal.style.display = "none";
-    }
-
-    // Add submit button
-    form.appendChild(submit);
-    */
-
-    // No need for the submit button as of now
 };
 
 /**

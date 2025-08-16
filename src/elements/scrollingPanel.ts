@@ -19,6 +19,8 @@ export class DraggableScrollingPanel {
     public resizeStartY?: number;
     public slider: MinecraftSlider;
     public basePanel: HTMLElement;
+
+    public bindings: string = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -50,11 +52,8 @@ export class DraggableScrollingPanel {
 
         this.basePanel.style.width = `${rect.width * 0.8}px`;
         this.basePanel.style.height = `${rect.height * 0.8}px`;
-        this.panel.style.width = this.basePanel.style.width
-        this.panel.style.height = this.basePanel.style.height
-
-        console.log(`Left: ${rect.left}, Top: ${rect.top}`);
-        console.log(`Width: ${rect.width}, Height: ${rect.height}`);
+        this.panel.style.width = this.basePanel.style.width;
+        this.panel.style.height = this.basePanel.style.height;
 
         // Frist element and therefore needs different positioning to center
         this.basePanel.style.left = `${rect.width / 2 - parseFloat(this.basePanel.style.width) / 2}px`;
@@ -83,6 +82,7 @@ export class DraggableScrollingPanel {
         this.offsetY = 0;
 
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
 
     public initEvents(): void {
@@ -125,6 +125,7 @@ export class DraggableScrollingPanel {
         this.panel.style.outline = "2px solid blue";
 
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
@@ -133,6 +134,7 @@ export class DraggableScrollingPanel {
         this.panel.style.border = "2px solid black";
         this.panel.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
@@ -162,7 +164,6 @@ export class DraggableScrollingPanel {
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         if (config.settings.boundary_constraints!.value) {
-            console.log("Boudary");
             let newLeft: number = e.clientX - containerRect.left - this.offsetX;
             let newTop: number = e.clientY - containerRect.top - this.offsetY;
 
@@ -234,6 +235,20 @@ export class DraggableScrollingPanel {
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+
+    public grid(showGrid: boolean): void {
+        const element = this.getMainHTMLElement();
+
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');    
+        }
+
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }
 

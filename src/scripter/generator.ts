@@ -10,6 +10,13 @@ export interface FormButtonData {
 
 export class ScriptGenerator {
 
+    public static init(): void {
+        const generateJavaScriptButton: HTMLTextAreaElement = document.getElementById("generate_js_scripter") as HTMLTextAreaElement;
+        const generateTypeScriptButton: HTMLTextAreaElement = document.getElementById("generate_ts_scripter") as HTMLTextAreaElement;
+        generateJavaScriptButton?.addEventListener("click", () => this.generateScript('js'));
+        generateTypeScriptButton?.addEventListener("click", () => this.generateScript('ts'));
+    }
+
     /**
      * Generates a script based on the current state of the UI.
      * This function is called when the "Generate Scripter" button is clicked.
@@ -18,9 +25,8 @@ export class ScriptGenerator {
      * This function is intended to be called by the "Generate Scripter" button.
      */
     static generateScript(language: 'ts' | 'js'): void {
-        console.log('Generating script...');
         const buttons = document.getElementsByClassName("draggable-button");
-        const buttonInfo = Array.from(buttons).map((button) => ScriptGenerator.getButtonInfo(button as HTMLElement));
+        const buttonInfo = Array.from(buttons).map((button) => this.getButtonInfo(button as HTMLElement));
 
         let txt: string = '';
         if (language === 'ts') {
@@ -31,11 +37,7 @@ export class ScriptGenerator {
             txt = buttonDataToJavaScript(buttonInfo);
         }
 
-
-        console.log('Script generation complete.', txt);
-        console.log('Copying to clipboard...');
         navigator.clipboard.writeText(txt);
-        console.log('Copied to clipboard.');
     }
     
     /**
@@ -55,8 +57,3 @@ export class ScriptGenerator {
         }
     }
 }
-
-const generateJavaScriptButton: HTMLTextAreaElement = document.getElementById("generate_js_scripter") as HTMLTextAreaElement;
-const generateTypeScriptButton: HTMLTextAreaElement = document.getElementById("generate_ts_scripter") as HTMLTextAreaElement;
-generateJavaScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('js'));
-generateTypeScriptButton?.addEventListener("click", () => ScriptGenerator.generateScript('ts'));

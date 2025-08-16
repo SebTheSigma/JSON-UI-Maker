@@ -18,6 +18,7 @@ export declare class DraggableCanvas {
     resizeStartX?: number;
     resizeStartY?: number;
     isEditable: boolean;
+    bindings: string;
     /**
      * @param {HTMLElement} container
      */
@@ -44,4 +45,5 @@ export declare class DraggableCanvas {
     getMainHTMLElement(): HTMLElement;
     editable(isEditable: boolean): void;
     delete(): void;
+    grid(showGrid: boolean): void;
 }

@@ -1,3 +1,4 @@
+import { config } from "../CONFIG.js";
 /**
  * Generates a script in JavaScript that creates a custom form in Minecraft Bedrock server.
  * The form contains buttons with the specified text and texture.
@@ -14,6 +15,8 @@ import { ActionFormData } from '@minecraft/server-ui';
 
 function showCustomForm(player) {
     const form = new ActionFormData();
+    form.title("${config.title}");
+
 ${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
 
     form.show(player).then(r => {
@@ -47,6 +50,8 @@ import { ActionFormData } from '@minecraft/server-ui';
 
 function showCustomForm(player: Player) {
     const form = new ActionFormData();
+    form.title("${config.title}");
+
 ${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
 
     form.show(player).then(r => {

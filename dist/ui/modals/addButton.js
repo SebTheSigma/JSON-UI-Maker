@@ -54,7 +54,6 @@ export async function addButtonModal() {
     const fields = {};
     return new Promise((resolve) => {
         submit.onclick = () => {
-            console.log("Leaving Add Button Modal");
             modal.style.display = "none";
             for (let element of elements) {
                 fields[element.name] = element.value;

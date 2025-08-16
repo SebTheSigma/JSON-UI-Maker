@@ -1,5 +1,4 @@
 import { config } from "../CONFIG.js";
-import { GLOBAL_ELEMENT_MAP } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
 export const classToJsonUI = new Map([
@@ -9,12 +8,14 @@ export const classToJsonUI = new Map([
             const parent = element.parentElement;
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+            const panelClass = GeneralUtil.elementToClassElement(element);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
             if (parent?.className == "main_window") {
                 offset[0] = -processedWidth / 2;
                 offset[1] = -processedHeight / 2;
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
+            const bindings = GeneralUtil.tryParseBindings(panelClass.bindings) ?? [];
             const jsonUIElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -22,6 +23,7 @@ export const classToJsonUI = new Map([
                 type: "panel",
                 anchor_from: "top_left",
                 anchor_to: "top_left",
+                bindings: bindings,
             };
             const instructions = {
                 ContinuePath: true,
@@ -36,12 +38,14 @@ export const classToJsonUI = new Map([
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
             const collectionName = element.dataset.collectionName;
+            const collectionPanelClass = GeneralUtil.elementToClassElement(element);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
             if (parent?.className == "main_window") {
                 offset[0] = -processedWidth / 2;
                 offset[1] = -processedHeight / 2;
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
+            const bindings = GeneralUtil.tryParseBindings(collectionPanelClass.bindings) ?? [];
             const jsonUIElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -50,6 +54,7 @@ export const classToJsonUI = new Map([
                 anchor_from: "top_left",
                 anchor_to: "top_left",
                 collection_name: collectionName,
+                bindings: bindings,
             };
             const instructions = {
                 ContinuePath: true,
@@ -63,12 +68,14 @@ export const classToJsonUI = new Map([
             const parent = element.parentElement;
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+            const canvasClass = GeneralUtil.elementToClassElement(element);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
             if (parent?.className == "main_window") {
                 offset[0] = -processedWidth / 2;
                 offset[1] = -processedHeight / 2;
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
+            const bindings = GeneralUtil.tryParseBindings(canvasClass.bindings) ?? [];
             const jsonUIElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -77,6 +84,7 @@ export const classToJsonUI = new Map([
                 texture: `textures/ui/${element.dataset.imageName}`,
                 anchor_from: "top_left",
                 anchor_to: "top_left",
+                bindings: bindings,
             };
             const instructions = {
                 ContinuePath: true,
@@ -102,10 +110,8 @@ export const classToJsonUI = new Map([
                 offset[0] = -processedWidth / 2;
                 offset[1] = -processedHeight / 2;
             }
-            // Gets the display canvas
-            const id = element.dataset.id;
-            const buttonIdToDisplayCanvasJsonUi = (id) => {
-                const buttonClass = GLOBAL_ELEMENT_MAP.get(id);
+            const buttonClass = GeneralUtil.elementToClassElement(element);
+            const buttonIdToDisplayCanvasJsonUi = () => {
                 const displayCanvas = buttonClass.displayCanvas;
                 const transformationFunc = classToJsonUI.get("draggable-canvas");
                 if (!transformationFunc)
@@ -115,8 +121,7 @@ export const classToJsonUI = new Map([
                     return undefined;
                 return result.element;
             };
-            const buttonIdToDisplayTextJsonUi = (id) => {
-                const buttonClass = GLOBAL_ELEMENT_MAP.get(id);
+            const buttonIdToDisplayTextJsonUi = () => {
                 const displayCanvas = buttonClass.displayText;
                 const transformationFunc = classToJsonUI.get("draggable-label");
                 if (!transformationFunc)
@@ -126,18 +131,19 @@ export const classToJsonUI = new Map([
                     return undefined;
                 return result.element;
             };
-            const DisplayElementJsonUi = buttonIdToDisplayCanvasJsonUi(id);
-            const TextElementJsonUi = buttonIdToDisplayTextJsonUi(id);
+            const DisplayElementJsonUi = buttonIdToDisplayCanvasJsonUi();
+            const TextElementJsonUi = buttonIdToDisplayTextJsonUi();
             const ui_scaler = config.magicNumbers.UI_SCALAR;
+            const bindings = GeneralUtil.tryParseBindings(buttonClass.bindings) ?? [];
             const jsonUIElement = {
-                $offset_test: [offset[0] * ui_scaler, offset[1] * ui_scaler],
+                $default_button_background_texture: defaultTex,
+                $hover_button_background_texture: hoverTex,
+                $pressed_button_background_texture: pressedTex,
+                $button_offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 $button_size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 anchor_from: "top_left",
                 anchor_to: "top_left",
-                $default_button_background_texture: defaultTex,
-                $hover_button_background_texture: hoverTex,
-                $pressed_button_background_texture: pressedTex,
                 collection_index: collectionIndex,
                 $icon_offset: [
                     (DisplayElementJsonUi.offset[0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
@@ -146,9 +152,12 @@ export const classToJsonUI = new Map([
                 $icon_size: [DisplayElementJsonUi.size[0] ?? 45, DisplayElementJsonUi.size[1] ?? 45],
                 $font_size: TextElementJsonUi.font_scale_factor ?? 1,
                 $text_offset: [TextElementJsonUi.offset[0] ?? 0, TextElementJsonUi.offset[1] ?? 0],
+                $font_type: TextElementJsonUi.font_type ?? "MinecraftRegular",
+                $show_hover_text: false,
+                bindings: bindings,
             };
             const instructions = {
-                ContinuePath: true,
+                ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`,
             };
             return { element: jsonUIElement, instructions: instructions };
@@ -168,6 +177,7 @@ export const classToJsonUI = new Map([
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
             const getFontScaledOffsetY = config.magicNumbers.getFontScaledOffsetY;
+            const bindings = GeneralUtil.tryParseBindings(classElement.bindings) ?? [];
             const jsonUIElement = {
                 offset: [
                     (offset[0] + config.magicNumbers.fontOffsetX) * ui_scaler,
@@ -181,9 +191,9 @@ export const classToJsonUI = new Map([
                 font_scale_factor: parseFloat(element.style.fontSize) * config.magicNumbers.fontScalar * ui_scaler,
                 text_alignment: element.style.textAlign ?? "left",
                 font_type: element.style.fontFamily ?? "MinecraftRegular",
-                shadow: classElement.hasShadow
+                shadow: classElement.hasShadow,
+                bindings: bindings,
             };
-            console.log(JSON.stringify(jsonUIElement));
             const instructions = {
                 ContinuePath: false,
             };
@@ -193,11 +203,11 @@ export const classToJsonUI = new Map([
     [
         "draggable-scrolling_panel",
         (element, nameSpace) => {
-            console.log("SKIBIFIDO", element);
             // Has the position of the panel as the panel is strictly used for scrolling
             // and cant have positional properties
             const basePanel = element.parentElement;
             const parent = basePanel?.parentElement;
+            const elementClass = GeneralUtil.elementToClassElement(element);
             const processedWidth = StringUtil.cssDimToNumber(basePanel.style.width);
             const processedHeight = StringUtil.cssDimToNumber(basePanel.style.height);
             const offset = [StringUtil.cssDimToNumber(basePanel.style.left), StringUtil.cssDimToNumber(basePanel.style.top)];
@@ -219,7 +229,6 @@ export const classToJsonUI = new Map([
                 $scroll_bar_right_padding_size: [0, 0],
             };
             const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}-link`;
-            console.log(`New tree link: ${newTreeLink}`);
             const instructions = {
                 ContinuePath: true,
                 NewTree: {
@@ -227,6 +236,7 @@ export const classToJsonUI = new Map([
                     startingNode: "basicPanelScrollingContent",
                 },
             };
+            const bindings = GeneralUtil.tryParseBindings(elementClass.bindings) ?? [];
             const structure = {
                 type: "stack_panel",
                 size: jsonUIElement.size,
@@ -246,6 +256,7 @@ export const classToJsonUI = new Map([
                             $scrolling_pane_size: jsonUIElement.$scrolling_pane_size,
                             $scrolling_pane_offset: jsonUIElement.offset,
                             $scroll_bar_right_padding_size: jsonUIElement.$scroll_bar_right_padding_size,
+                            bindings: bindings
                         },
                     },
                 ],

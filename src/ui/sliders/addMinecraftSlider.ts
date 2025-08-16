@@ -99,7 +99,6 @@ export class MinecraftSlider {
 
     public startManualBarScroll(e: MouseEvent): void {
         e.stopPropagation();
-        console.log('Starting manual bar scroll');
         this.isDragging = true;
 
         // Get position relative to parent container
@@ -113,7 +112,6 @@ export class MinecraftSlider {
     public manualBarScroll(e: MouseEvent): void {
         if (!this.isDragging) return;
         e.stopPropagation();
-        console.log('Manual bar scroll');
 
         const containerRect: DOMRect = this.scrollingPanel.basePanel.getBoundingClientRect();
 

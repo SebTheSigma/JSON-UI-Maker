@@ -105,7 +105,6 @@ export const propertiesMap = new Map([
                     const elementClass = GeneralUtil.elementToClassElement(element)!;
 
                     if (elementClass instanceof DraggableCanvas) {
-                        console.warn("Changing image");
                         elementClass.changeImage(value);
                     }
                 },
@@ -177,7 +176,6 @@ export const propertiesMap = new Map([
                     const elementClass = GeneralUtil.elementToClassElement(element)!;
 
                     if (elementClass instanceof DraggableButton) {
-                        console.warn("Changing image");
                         elementClass.setDefaultImage(value);
                     }
                 },
@@ -195,7 +193,6 @@ export const propertiesMap = new Map([
                     const elementClass = GLOBAL_ELEMENT_MAP.get(id)!;
 
                     if (elementClass instanceof DraggableButton) {
-                        console.warn("Changing image");
                         elementClass.setHoverImage(value);
                     }
                 },
@@ -213,7 +210,6 @@ export const propertiesMap = new Map([
                     const elementClass = GLOBAL_ELEMENT_MAP.get(id)!;
 
                     if (elementClass instanceof DraggableButton) {
-                        console.warn("Changing image");
                         elementClass.setPressedImage(value);
                     }
                 },
@@ -239,7 +235,6 @@ export const propertiesMap = new Map([
                     const elementClass = GLOBAL_ELEMENT_MAP.get(id)!;
 
                     if (elementClass instanceof DraggableButton) {
-                        console.warn("Changing display image");
                         elementClass.setDisplayImage(value);
                     }
                 },
@@ -396,7 +391,7 @@ export const propertiesMap = new Map([
                         elementClass.shadowLabel.style.fontFamily = value;
                         elementClass.mirror.style.fontFamily = value;
                         elementClass.label.style.fontFamily = value;
-                        elementClass.updateSize();
+                        elementClass.label.dispatchEvent(new Event('input'));
                     }
                 },
             },
@@ -481,7 +476,7 @@ export function updatePropertiesArea(): void {
         input.oninput = null;
     }
 
-    const properties = propertiesMap.get(selectedElement?.className!)!;
+    const properties = propertiesMap.get(selectedElement?.classList[0]!)!;
 
     // Clear the old inputs
     currentInputs = [];

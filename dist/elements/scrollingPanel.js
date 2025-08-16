@@ -18,6 +18,7 @@ export class DraggableScrollingPanel {
     resizeStartY;
     slider;
     basePanel;
+    bindings = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -46,8 +47,6 @@ export class DraggableScrollingPanel {
         this.basePanel.style.height = `${rect.height * 0.8}px`;
         this.panel.style.width = this.basePanel.style.width;
         this.panel.style.height = this.basePanel.style.height;
-        console.log(`Left: ${rect.left}, Top: ${rect.top}`);
-        console.log(`Width: ${rect.width}, Height: ${rect.height}`);
         // Frist element and therefore needs different positioning to center
         this.basePanel.style.left = `${rect.width / 2 - parseFloat(this.basePanel.style.width) / 2}px`;
         this.basePanel.style.top = `${rect.height / 2 - parseFloat(this.basePanel.style.height) / 2}px`;
@@ -68,6 +67,7 @@ export class DraggableScrollingPanel {
         this.offsetX = 0;
         this.offsetY = 0;
         this.initEvents();
+        this.grid(config.settings.show_grid.value);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -102,6 +102,7 @@ export class DraggableScrollingPanel {
         this.panel.style.border = "2px solid blue";
         this.panel.style.outline = "2px solid blue";
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         this.selected = false;
@@ -109,6 +110,7 @@ export class DraggableScrollingPanel {
         this.panel.style.border = "2px solid black";
         this.panel.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
@@ -132,7 +134,6 @@ export class DraggableScrollingPanel {
             return;
         const containerRect = this.container.getBoundingClientRect();
         if (config.settings.boundary_constraints.value) {
-            console.log("Boudary");
             let newLeft = e.clientX - containerRect.left - this.offsetX;
             let newTop = e.clientY - containerRect.top - this.offsetY;
             // Constrain to container bounds
@@ -194,6 +195,17 @@ export class DraggableScrollingPanel {
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+    grid(showGrid) {
+        const element = this.getMainHTMLElement();
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');
+        }
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }
 //# sourceMappingURL=scrollingPanel.js.map

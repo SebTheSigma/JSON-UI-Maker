@@ -70,7 +70,6 @@ export class MinecraftSlider {
     }
     startManualBarScroll(e) {
         e.stopPropagation();
-        console.log('Starting manual bar scroll');
         this.isDragging = true;
         // Get position relative to parent container
         const canvasRect = this.handleCanvas.canvasHolder.getBoundingClientRect();
@@ -82,7 +81,6 @@ export class MinecraftSlider {
         if (!this.isDragging)
             return;
         e.stopPropagation();
-        console.log('Manual bar scroll');
         const containerRect = this.scrollingPanel.basePanel.getBoundingClientRect();
         // Calculate position relative to parent container
         let newTop = e.clientY - containerRect.top - this.offsetY;

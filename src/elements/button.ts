@@ -8,6 +8,7 @@ import { AllJsonUIElements } from "./elements.js";
 import { DraggableCanvas } from "./canvas.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { DraggableLabel } from "./label.js";
+import { Binding } from "../scripter/bindings/types.js";
 
 export interface ButtonOptions {
     collectionIndex?: string;
@@ -43,6 +44,8 @@ export class DraggableButton {
     public resizeStartY?: number;
     public isHovering: boolean = false;
     public isPressing: boolean = false;
+
+    public bindings: string = "[]";
     /**
      * @param {HTMLElement} container
      */
@@ -146,6 +149,7 @@ export class DraggableButton {
 
         this.initEvents();
         this.setDisplayText(buttonText ?? "Label");
+        this.grid(config.settings.show_grid.value);
     }
 
     public initEvents(): void {
@@ -168,8 +172,6 @@ export class DraggableButton {
 
     public select(e: MouseEvent): void {
         e.stopPropagation(); // Prevent the event from bubbling up to the parent
-
-        console.log(this.selected);
 
         if (selectedElement) {
             if (selectedElement !== this.button) {
@@ -195,6 +197,7 @@ export class DraggableButton {
         this.button.style.outline = "2px solid blue";
 
         updatePropertiesArea();
+        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
@@ -203,6 +206,7 @@ export class DraggableButton {
         this.button.style.border = "2px solid black";
         this.button.style.outline = "2px solid black";
         updatePropertiesArea();
+        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
@@ -406,7 +410,7 @@ export class DraggableButton {
      * @param {number} height
      */
     public drawImage(width: number, height: number, imageDataState: ImageDataState = this.imageDataDefault, _updateImage: boolean = false): void {
-        console.warn(`Draw image: ${width} x ${height}`);
+
         // Stops the canvas from being too small
         if (width <= 1) width = 1;
         if (height <= 1) height = 1;
@@ -522,7 +526,7 @@ export class DraggableButton {
     public setDisplayText(text: string): void {
         const id = StringUtil.generateRandomString(15);
 
-        this.displayText = new DraggableLabel(id, this.button, { text });
+        this.displayText = new DraggableLabel(id, this.button, { text: text, includeTextPrompt: false });
 
         this.displayText.setParse(false);
         this.button.dataset.displayText = text;
@@ -544,5 +548,19 @@ export class DraggableButton {
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
         document.removeEventListener("mouseup", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
+    }
+
+    public grid(showGrid: boolean): void {
+        const element = this.getMainHTMLElement();
+
+        if (!showGrid) {
+            element.style.removeProperty('--grid-cols');
+            element.style.removeProperty('--grid-rows');    
+        }
+
+        else {
+            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
+            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+        }
     }
 }

@@ -11,6 +11,7 @@ export declare class DraggablePanel {
     resizeStartHeight?: number;
     resizeStartX?: number;
     resizeStartY?: number;
+    bindings: string;
     /**
      * @param {HTMLElement} container
      */
@@ -26,4 +27,5 @@ export declare class DraggablePanel {
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
+    grid(showGrid: boolean): void;
 }

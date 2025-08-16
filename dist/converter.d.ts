@@ -41,6 +41,6 @@ export declare class Converter {
      * @param depth The current depth of the node in the tree, defaults to 0.
      * @returns A JSON object representing the json-ui structure.
      */
-    static test(node: Node, depth?: number): StringObjectMap;
+    static convertToJsonUi(node: Node, depth?: number): string;
 }
 export {};

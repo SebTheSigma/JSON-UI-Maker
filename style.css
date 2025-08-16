@@ -151,7 +151,7 @@ input[type="file"] {
     outline: rgb(162, 0, 255) 2px solid;
 }
 
-.utilElements > *:hover {
+.utilElement:hover {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
     outline: rgb(162, 0, 255) 2px solid;
 }
@@ -164,7 +164,7 @@ input[type="file"] {
     color: white;
 }
 
-.utilElements > * {
+.utilElement {
     margin-left: 5px;
     margin-right: 5px;
     padding: 5px;
@@ -349,6 +349,12 @@ input[type="file"] {
     font-weight: 500;
 }
 
+.modalOptionBody {
+    color: rgb(189, 189, 189);
+    text-align: left;
+    font-weight: 500;
+}
+
 .modalOptionInput {
     margin-left: 5px;
     margin-right: 5px;
@@ -454,6 +460,81 @@ input[type="file"] {
 .draggable-scrolling_panel::-webkit-scrollbar {
   display: none;
 }
+
+.bindings {
+    height: 260px;
+    width: calc(100% - 20px);
+    border-radius: 10px;
+    margin: 10px;
+    align-self: center;
+    text-align: left;
+    background-color: #424242;
+    outline: rgb(153, 0, 255) 2px solid;
+    color: white;
+    border: none;
+    resize: none;
+    white-space: pre;
+    overflow-x: auto;
+    font-size: 20px;
+    scrollbar-color: rgb(0, 0, 0) rgb(73, 73, 73);
+}
+
+.gridable {
+    position: relative; /* so absolute children still position relative to the panel */
+    background-image:
+        linear-gradient(to right, rgba(55, 55, 55, 1) 2px, transparent 2px),
+        linear-gradient(to bottom, rgba(55, 55, 55, 1) 2px, transparent 2px);
+    background-size:
+        calc(100% / var(--grid-cols))
+        calc(100% / var(--grid-rows));
+
+    background-position: -1px -1px; /* X offset, Y offset */
+}
+
+.textPrompt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 300px;
+    min-height: 40px;
+    max-height: 197px;
+    border-radius: 5px;
+    background-color: rgb(59, 56, 71);
+    color: white;
+    cursor: pointer;
+    border: none;
+    outline: rgb(174, 0, 255) 1px solid;
+    z-index: 100;
+
+    overflow: hidden;
+    overflow-y: scroll;
+    overflow-x: scroll;
+
+    scrollbar-width: thin;
+    scrollbar-color: rgb(0, 0, 0) rgb(73, 73, 73);
+}
+
+.textPromptOption {
+    position: relative;
+    left: 0px;
+    transition: all 0.3s ease;
+    padding: 5px;
+}
+
+.textPromptOption:hover {
+    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+    outline: rgb(162, 0, 255) 2px solid;
+    left: 4px;
+}
+
+.textPromptOptionHighlighted {
+    background: linear-gradient(45deg, rgb(104, 0, 104), rgb(58, 0, 145));
+    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+    position: relative;
+    left: 4px;
+    padding: 5px;
+}
+
 
 @font-face {
     font-family: 'MinecraftRegular';

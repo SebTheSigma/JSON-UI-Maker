@@ -1,4 +1,5 @@
-import { Builder } from "../index.js";
+import { Builder, selectedElement } from "../index.js";
+import { BindingsArea } from "../scripter/bindings/bindingsArea.js";
 import { triggerArrowMovement } from "./arrowKeyElementMovement.js";
 
 /**
@@ -11,6 +12,8 @@ window.addEventListener("keydown", (e) => {
     
     if (e?.key?.startsWith("Arrow")) triggerArrowMovement(e);
     if (e?.key === "Delete") Builder.deleteSelected();
+
+    if (BindingsArea.isBindingsTextAreaFocused && selectedElement) BindingsArea.handleKeyboardInput(e);
 });
 
 window.addEventListener("keypress", (e) => {
