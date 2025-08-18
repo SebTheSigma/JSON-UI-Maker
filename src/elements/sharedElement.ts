@@ -1,4 +1,4 @@
-import { isInMainWindow } from "../index.js";
+import { GlobalElementMapValue, isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
@@ -8,11 +8,16 @@ import { DraggableCanvas } from "./canvas.js";
 import { DraggableCollectionPanel } from "./collectionPanel.js";
 import { DraggablePanel } from "./panel.js";
 import { DraggableScrollingPanel } from "./scrollingPanel.js";
+import { DraggableLabel } from "./label.js";
+
+type selectableElements = DraggableButton | DraggablePanel | DraggableCanvas | DraggableCollectionPanel | DraggableScrollingPanel | DraggableLabel;
+type resizeableElements = DraggableButton | DraggablePanel | DraggableCanvas | DraggableCollectionPanel | DraggableScrollingPanel;
 
 export class ElementSharedFuncs {
+
     public static startResize(
         e: MouseEvent,
-        classElement: DraggableButton | DraggablePanel | DraggableCanvas | DraggableCollectionPanel | DraggableScrollingPanel,
+        classElement: resizeableElements,
         stopPropagation: boolean = true,
         preventDefault: boolean = true
     ): void {
@@ -32,7 +37,7 @@ export class ElementSharedFuncs {
 
     public static resize(
         e: MouseEvent,
-        classElement: DraggableButton | DraggablePanel | DraggableCanvas | DraggableCollectionPanel | DraggableScrollingPanel
+        classElement: resizeableElements
     ): void {
         const panel = classElement.getMainHTMLElement();
 
@@ -97,8 +102,48 @@ export class ElementSharedFuncs {
         }
     }
 
-    public static stopResize(classElement: DraggableButton | DraggablePanel | DraggableCanvas | DraggableCollectionPanel | DraggableScrollingPanel): void {
+    public static stopResize(classElement: resizeableElements): void {
         classElement.isResizing = false;
         if (isInMainWindow) updatePropertiesArea();
+    }
+
+    public static select(e: MouseEvent, classElement: selectableElements): void {
+        e.stopPropagation(); // Prevent the event from bubbling up to the parent
+
+        const element = classElement.getMainHTMLElement();
+
+        if (selectedElement) {
+            if (selectedElement !== element) {
+                selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
+                classElement.selected = true;
+                setSelectedElement(element);
+                element.style.border = "2px solid blue";
+                element.style.outline = "2px solid blue";
+                updatePropertiesArea();
+                return;
+            }
+        }
+
+        if (classElement.selected) {
+            classElement.unSelect(e);
+            return;
+        }
+
+        classElement.selected = true;
+        setSelectedElement(element);
+        element.style.border = "2px solid blue";
+        element.style.outline = "2px solid blue";
+
+        updatePropertiesArea();
+    }
+
+    public static unSelect(classElement: selectableElements): void {
+        classElement.selected = false;
+        setSelectedElement(undefined);
+        const element = classElement.getMainHTMLElement();
+        element.style.border = "2px solid black";
+        element.style.outline = "2px solid black";
+        updatePropertiesArea();
     }
 }

@@ -1,4 +1,4 @@
-import { GLOBAL_ELEMENT_MAP, isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { GLOBAL_ELEMENT_MAP, isInMainWindow, panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -125,36 +125,11 @@ export class DraggableButton {
         this.canvas.addEventListener("mouseup", this.stopPress.bind(this));
     }
     select(e) {
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        if (selectedElement) {
-            if (selectedElement !== this.button) {
-                selectedElement.style.border = "2px solid black";
-                selectedElement.style.outline = "2px solid black";
-                this.selected = true;
-                setSelectedElement(this.button);
-                this.button.style.border = "2px solid blue";
-                this.button.style.outline = "2px solid blue";
-                updatePropertiesArea();
-                return;
-            }
-        }
-        if (this.selected) {
-            this.unSelect(e);
-            return;
-        }
-        this.selected = true;
-        setSelectedElement(this.button);
-        this.button.style.border = "2px solid blue";
-        this.button.style.outline = "2px solid blue";
-        updatePropertiesArea();
+        ElementSharedFuncs.select(e, this);
         this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
-        this.selected = false;
-        setSelectedElement(undefined);
-        this.button.style.border = "2px solid black";
-        this.button.style.outline = "2px solid black";
-        updatePropertiesArea();
+        ElementSharedFuncs.unSelect(this);
         this.grid(false);
     }
     startDrag(e) {

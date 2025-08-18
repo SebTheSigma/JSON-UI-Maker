@@ -443,16 +443,16 @@ export const propertiesMap = new Map([
                 displayName: "Left",
                 editable: true,
 
-                get: (element: HTMLElement) => element.style.left,
-                set: (element: HTMLElement, value: string) => (element.style.left = value),
+                get: (element: HTMLElement) => element.parentElement!.style.left,
+                set: (element: HTMLElement, value: string) => (element.parentElement!.style.left = value),
             },
             {
                 type: "string",
                 displayName: "Top",
                 editable: true,
 
-                get: (element: HTMLElement) => element.style.top,
-                set: (element: HTMLElement, value: string) => (element.style.top = value),
+                get: (element: HTMLElement) => element.parentElement!.style.top,
+                set: (element: HTMLElement, value: string) => (element.parentElement!.style.top = value),
             },
             {
                 type: "string",

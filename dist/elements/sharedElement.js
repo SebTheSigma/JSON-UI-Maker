@@ -1,4 +1,4 @@
-import { isInMainWindow } from "../index.js";
+import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
@@ -80,6 +80,39 @@ export class ElementSharedFuncs {
         classElement.isResizing = false;
         if (isInMainWindow)
             updatePropertiesArea();
+    }
+    static select(e, classElement) {
+        e.stopPropagation(); // Prevent the event from bubbling up to the parent
+        const element = classElement.getMainHTMLElement();
+        if (selectedElement) {
+            if (selectedElement !== element) {
+                selectedElement.style.border = "2px solid black";
+                selectedElement.style.outline = "2px solid black";
+                classElement.selected = true;
+                setSelectedElement(element);
+                element.style.border = "2px solid blue";
+                element.style.outline = "2px solid blue";
+                updatePropertiesArea();
+                return;
+            }
+        }
+        if (classElement.selected) {
+            classElement.unSelect(e);
+            return;
+        }
+        classElement.selected = true;
+        setSelectedElement(element);
+        element.style.border = "2px solid blue";
+        element.style.outline = "2px solid blue";
+        updatePropertiesArea();
+    }
+    static unSelect(classElement) {
+        classElement.selected = false;
+        setSelectedElement(undefined);
+        const element = classElement.getMainHTMLElement();
+        element.style.border = "2px solid black";
+        element.style.outline = "2px solid black";
+        updatePropertiesArea();
     }
 }
 //# sourceMappingURL=sharedElement.js.map

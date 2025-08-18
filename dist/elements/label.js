@@ -1,4 +1,4 @@
-import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
@@ -6,6 +6,7 @@ import { StringUtil } from "../util/stringUtil.js";
 import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ElementSharedFuncs } from "./sharedElement.js";
 export class DraggableLabel {
     // Core elements
     container;
@@ -103,7 +104,6 @@ export class DraggableLabel {
             this.bindingsTextPrompt.detach();
         }
         this.initEvents();
-        this.grid(config.settings.show_grid.value);
     }
     updateSize(updateProperties = true) {
         const lines = this.label.value.split("\n");
@@ -249,37 +249,10 @@ export class DraggableLabel {
         this.updateSize();
     }
     select(e) {
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        if (selectedElement) {
-            if (selectedElement !== this.label) {
-                selectedElement.style.border = "2px solid black";
-                selectedElement.style.outline = "2px solid black";
-                this.selected = true;
-                setSelectedElement(this.label);
-                this.label.style.border = "2px solid blue";
-                this.label.style.outline = "2px solid blue";
-                updatePropertiesArea();
-                return;
-            }
-        }
-        if (this.selected) {
-            this.unSelect(e);
-            return;
-        }
-        this.selected = true;
-        setSelectedElement(this.label);
-        this.label.style.border = "2px solid blue";
-        this.label.style.outline = "2px solid blue";
-        updatePropertiesArea();
-        this.grid(config.settings.show_grid.value);
+        ElementSharedFuncs.select(e, this);
     }
     unSelect(_e) {
-        this.selected = false;
-        setSelectedElement(undefined);
-        this.label.style.border = "2px solid black";
-        this.label.style.outline = "2px solid black";
-        updatePropertiesArea();
-        this.grid(false);
+        ElementSharedFuncs.unSelect(this);
     }
     startDrag(e) {
         // Stop propagation for nested elements
@@ -351,17 +324,6 @@ export class DraggableLabel {
     shadow(shouldShadow) {
         this.hasShadow = shouldShadow;
         this.shadowLabel.style.display = shouldShadow ? "block" : "none";
-    }
-    grid(showGrid) {
-        const element = this.getMainHTMLElement();
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        }
-        else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
     }
 }
 //# sourceMappingURL=label.js.map

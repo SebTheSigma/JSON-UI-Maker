@@ -1,4 +1,4 @@
-import { images, isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { images, isInMainWindow, panelContainer } from "../index.js";
 import { Nineslice } from "../nineslice.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -106,38 +106,13 @@ export class DraggableCanvas {
     select(e) {
         if (!this.isEditable)
             return;
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        if (selectedElement) {
-            if (selectedElement !== this.canvasHolder) {
-                selectedElement.style.border = "2px solid black";
-                selectedElement.style.outline = "2px solid black";
-                this.selected = true;
-                setSelectedElement(this.canvasHolder);
-                this.canvasHolder.style.border = "2px solid blue";
-                this.canvasHolder.style.outline = "2px solid blue";
-                updatePropertiesArea();
-                return;
-            }
-        }
-        if (this.selected) {
-            this.unSelect(e);
-            return;
-        }
-        this.selected = true;
-        setSelectedElement(this.canvasHolder);
-        this.canvasHolder.style.border = "2px solid blue";
-        this.canvasHolder.style.outline = "2px solid blue";
-        updatePropertiesArea();
+        ElementSharedFuncs.select(e, this);
         this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         if (!this.isEditable)
             return;
-        this.selected = false;
-        setSelectedElement(undefined);
-        this.canvasHolder.style.border = "2px solid black";
-        this.canvasHolder.style.outline = "2px solid black";
-        updatePropertiesArea();
+        ElementSharedFuncs.unSelect(this);
         this.grid(false);
     }
     startDrag(e) {

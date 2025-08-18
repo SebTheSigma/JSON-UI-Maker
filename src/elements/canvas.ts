@@ -127,42 +127,13 @@ export class DraggableCanvas {
 
     public select(e: MouseEvent): void {
         if (!this.isEditable) return;
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
-
-        if (selectedElement) {
-            if (selectedElement !== this.canvasHolder) {
-                selectedElement.style.border = "2px solid black";
-                selectedElement.style.outline = "2px solid black";
-                this.selected = true;
-                setSelectedElement(this.canvasHolder);
-                this.canvasHolder.style.border = "2px solid blue";
-                this.canvasHolder.style.outline = "2px solid blue";
-                updatePropertiesArea();
-                return;
-            }
-        }
-
-        if (this.selected) {
-            this.unSelect(e);
-            return;
-        }
-
-        this.selected = true;
-        setSelectedElement(this.canvasHolder);
-        this.canvasHolder.style.border = "2px solid blue";
-        this.canvasHolder.style.outline = "2px solid blue";
-
-        updatePropertiesArea();
+        ElementSharedFuncs.select(e, this);
         this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
         if (!this.isEditable) return;
-        this.selected = false;
-        setSelectedElement(undefined);
-        this.canvasHolder.style.border = "2px solid black";
-        this.canvasHolder.style.outline = "2px solid black";
-        updatePropertiesArea();
+        ElementSharedFuncs.unSelect(this);
         this.grid(false);
     }
 

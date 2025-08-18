@@ -1,4 +1,4 @@
-import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
@@ -69,36 +69,11 @@ export class DraggablePanel {
         document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
     }
     select(e) {
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
-        if (selectedElement) {
-            if (selectedElement !== this.panel) {
-                selectedElement.style.border = "2px solid black";
-                selectedElement.style.outline = "2px solid black";
-                this.selected = true;
-                setSelectedElement(this.panel);
-                this.panel.style.border = "2px solid blue";
-                this.panel.style.outline = "2px solid blue";
-                updatePropertiesArea();
-                return;
-            }
-        }
-        if (this.selected) {
-            this.unSelect(e);
-            return;
-        }
-        this.selected = true;
-        setSelectedElement(this.panel);
-        this.panel.style.border = "2px solid blue";
-        this.panel.style.outline = "2px solid blue";
-        updatePropertiesArea();
+        ElementSharedFuncs.select(e, this);
         this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
-        this.selected = false;
-        setSelectedElement(undefined);
-        this.panel.style.border = "2px solid black";
-        this.panel.style.outline = "2px solid black";
-        updatePropertiesArea();
+        ElementSharedFuncs.unSelect(this);
         this.grid(false);
     }
     startDrag(e) {
