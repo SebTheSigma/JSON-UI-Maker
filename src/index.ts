@@ -17,7 +17,9 @@ import { JSON_TYPES_GENERATOR } from "./converterTypes/jsonUITypes.js";
 import { BindingsArea } from "./scripter/bindings/bindingsArea.js";
 import { ScriptGenerator } from "./scripter/generator.js";
 import { createFormModal } from "./ui/modals/createForm.js";
+import { Notification } from "./ui/notifs/noficationMaker.js";
 import "./ui/modals/settings.js";
+
 console.log("Script Loaded");
 
 BindingsArea.init();
@@ -26,13 +28,42 @@ console.log("Bindings-Area Loaded");
 ScriptGenerator.init();
 console.log("Script Generator Loaded");
 
+export let mainJsonUiPanelElement: HTMLElement | undefined = undefined;
+
 document.addEventListener("DOMContentLoaded", async (e) => {
     const createFormOptions = await createFormModal();
     const title = createFormOptions.title!;
 
     config.title = title;
     config.nameSpace = `${StringUtil.generateRandomString(6)}namespace`;
+
+    const mainPanelInfo = constructMainPanel();
+    mainJsonUiPanelElement = mainPanelInfo.mainPanel.getMainHTMLElement();
 });
+
+
+/**
+ * Constructs the main panel, which is a non-interactive draggable panel.
+ * The panel is added to the global element map.
+ * @returns An object containing the id of the main panel and the main panel element itself.
+ */
+function constructMainPanel(): { id: string, mainPanel: DraggablePanel } {
+    // A non interactable main panel
+    const id = StringUtil.generateRandomString(15);
+    const mainPanel = new DraggablePanel(id, panelContainer, false);
+    mainPanel.deleteable = false;
+    mainPanel.panel.style.width = '100%';
+    mainPanel.panel.style.height = '100%';
+    mainPanel.panel.style.top = '0px';
+    mainPanel.panel.style.left = '0px';
+
+    mainPanel.panel.style.visibility = "hidden";
+
+
+    GLOBAL_ELEMENT_MAP.set(id, mainPanel);
+
+    return { id, mainPanel };
+}
 
 export function setSelectedElement(element: HTMLElement | undefined): void {
     selectedElement = element;
@@ -77,6 +108,7 @@ export class Builder {
 
         if (type == "copy") {
             navigator.clipboard.writeText(func(config.nameSpace));
+            new Notification('Server-Form Copied to Clipboard!');
             return;
         }
 
@@ -90,8 +122,8 @@ export class Builder {
         URL.revokeObjectURL(url);
     }
 
-    public static handlePackUpload(): void {
-        FileUploader.handlePackUpload();
+    public static handleUiTexturesUpload(): void {
+        FileUploader.handleUiTexturesUpload();
     }
 
     public static generateAndCopyJsonUI(type: "copy" | "download"): void {
@@ -99,6 +131,7 @@ export class Builder {
 
         if (type == "copy") {
             navigator.clipboard.writeText(jsonUI);
+            new Notification('Json-UI Copied to Clipboard!');
             return;
         }
 
@@ -128,8 +161,10 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
-        const label = new DraggableLabel(id, selectedElement ?? panelContainer, { text: "Label", includeTextPrompt: true });
+        const label = new DraggableLabel(id, selectedElement ?? mainJsonUiPanelElement, { text: "Label", includeTextPrompt: true });
         GLOBAL_ELEMENT_MAP.set(id, label);
     }
 
@@ -138,8 +173,11 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        console.log(mainJsonUiPanelElement);
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
-        const panel = new DraggablePanel(id, selectedElement ?? panelContainer);
+        const panel = new DraggablePanel(id, selectedElement ?? mainJsonUiPanelElement);
         GLOBAL_ELEMENT_MAP.set(id, panel);
     }
 
@@ -148,8 +186,10 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
-        const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? panelContainer);
+        const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? mainJsonUiPanelElement);
         GLOBAL_ELEMENT_MAP.set(id, collectionPanel);
     }
 
@@ -158,8 +198,10 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, selectedElement ?? panelContainer, imageData, imageName, nineSlice);
+        const canvas = new DraggableCanvas(id, selectedElement ?? mainJsonUiPanelElement, imageData, imageName, nineSlice);
         GLOBAL_ELEMENT_MAP.set(id, canvas);
     }
 
@@ -168,10 +210,28 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
 
         const formFields = await addButtonModal();
-        const button = new DraggableButton(id, selectedElement ?? panelContainer, {
+
+        if (!formFields.defaultTexture || !FileUploader.isFileUploaded(formFields.defaultTexture)) {
+            new Notification("Please upload a texture for the default state!", 5000, "error");
+            return;
+        }
+
+        if (!formFields.hoverTexture || !FileUploader.isFileUploaded(formFields.hoverTexture)) {
+            new Notification("Please upload a texture for the hover state!", 5000, "error");
+            return;
+        }
+
+        if (!formFields.pressedTexture || !FileUploader.isFileUploaded(formFields.pressedTexture)) {
+            new Notification("Please upload a texture for the pressed state!", 5000, "error");
+            return;
+        }
+
+        const button = new DraggableButton(id, selectedElement ?? mainJsonUiPanelElement, {
             defaultTexture: formFields.defaultTexture,
             hoverTexture: formFields.hoverTexture,
             pressedTexture: formFields.pressedTexture,
@@ -186,8 +246,10 @@ export class Builder {
             if (!this.isValidPath(selectedElement)) return;
         }
 
+        if (!mainJsonUiPanelElement) return;
+
         const id = StringUtil.generateRandomString(15);
-        const panel = new DraggableScrollingPanel(id, selectedElement ?? panelContainer);
+        const panel = new DraggableScrollingPanel(id, selectedElement ?? mainJsonUiPanelElement);
         GLOBAL_ELEMENT_MAP.set(id, panel);
     }
 
@@ -200,7 +262,15 @@ export class Builder {
             selectedElementClass?.delete();
         }
 
-        panelContainer.innerHTML = `<img src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">`;
+        GLOBAL_ELEMENT_MAP.clear();
+
+        const bgImage = document.getElementById("bg_image")!;
+        panelContainer.innerHTML = "";
+        panelContainer.appendChild(bgImage);
+
+        const mainPanelInfo = constructMainPanel();
+        mainJsonUiPanelElement = mainPanelInfo.mainPanel.getMainHTMLElement();
+
         updatePropertiesArea();
     }
 
@@ -211,6 +281,8 @@ export class Builder {
         const id = selectedElement.dataset.id!;
 
         element.delete();
+
+        if (!element.deleteable) return;
 
         GLOBAL_ELEMENT_MAP.delete(id);
         updatePropertiesArea();
@@ -247,3 +319,18 @@ declare global {
 }
 
 window.Builder = Builder;
+
+
+/*
+
+TODO:
+- Finsish grid locking
+- Update pack uploader
+- Grid and scrolling panels
+- Scrolling panel offsets
+- Upload button
+
+BUGS:
+- Nineslice doesnt dynamically size using the uiscale
+
+*/

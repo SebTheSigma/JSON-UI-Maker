@@ -3,7 +3,7 @@ export declare class FileUploader {
      * Handles the event when a file is selected in the "Open Pack" dialog.
      * Loads the selected pack into the image map.
      */
-    static handlePackUpload(): void;
+    static handleUiTexturesUpload(): void;
     static processFileUpload(files: File[]): Promise<void>;
     private static readJsonFile;
     private static readImageAsImageData;

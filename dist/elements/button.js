@@ -1,4 +1,4 @@
-import { GLOBAL_ELEMENT_MAP, isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
+import { GLOBAL_ELEMENT_MAP, isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -8,37 +8,49 @@ import { AllJsonUIElements } from "./elements.js";
 import { DraggableCanvas } from "./canvas.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { DraggableLabel } from "./label.js";
+import { ElementSharedFuncs } from "./sharedElement.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 export class DraggableButton {
+    // Core data
     imageDataDefault;
     imageDataHover;
     imageDataPressed;
+    // Display
     displayCanvas;
     displayTexture;
     displayText;
+    aspectRatio;
+    // Core elements
     container;
     outlineDiv;
     button;
     canvas;
-    aspectRatio;
     resizeHandle;
-    isDragging;
-    isResizing;
-    selected;
-    offsetX;
-    offsetY;
+    // State flags
+    isDragging = false;
+    isResizing = false;
+    isHovering = false;
+    isPressing = false;
+    selected = false;
+    deleteable = true;
+    // Positioning & movement
+    offsetX = 0;
+    offsetY = 0;
+    // Resize state
     resizeStartWidth;
     resizeStartHeight;
     resizeStartX;
     resizeStartY;
-    isHovering = false;
-    isPressing = false;
-    bindings = "[]";
+    resizeStartLeft;
+    resizeStartTop;
+    // Data
+    bindings = "";
     /**
      * @param {HTMLElement} container
      */
     constructor(ID, container, buttonOptions) {
         const { defaultTexture, hoverTexture, pressedTexture, collectionIndex, displayTexture, buttonText } = buttonOptions ?? {};
-        this.displayTexture = displayTexture;
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
         // Saves parameters
         this._constructorArgs = [ID, container, buttonOptions];
         const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
@@ -47,38 +59,27 @@ export class DraggableButton {
         this.imageDataDefault = images.get(defaultTex);
         this.imageDataHover = images.get(hoverTex);
         this.imageDataPressed = images.get(pressedTex);
-        let lastParent = container;
-        let i = 0;
-        parent_loop: while (true) {
-            if (!lastParent)
-                break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
+        this.displayTexture = displayTexture;
+        this.aspectRatio = this.imageDataDefault.png?.width / this.imageDataDefault.png?.height;
         this.container = container;
+        const rect = container.getBoundingClientRect();
         // Holds the element in a div
         this.button = document.createElement("div");
         this.button.style.width = `${this.imageDataDefault.png?.width}px`;
         this.button.style.height = `${this.imageDataDefault.png?.height}px`;
         this.button.className = "draggable-button";
+        this.button.style.visibility = "visible";
         this.button.style.zIndex = String(i * 2);
-        //------ CUSTOM DATA ------
-        // Gives it a filename that can be read later while converting
+        this.button.style.position = "absolute";
         this.button.dataset.defaultImageName = defaultTex;
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
         this.button.dataset.displayImageName = displayTexture ?? "";
         this.button.dataset.id = ID;
         this.button.dataset.collectionIndex = collectionIndex ?? "0";
-        //-------------------------
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
-        const rect = container.getBoundingClientRect();
-        this.aspectRatio = this.imageDataDefault.png?.width / this.imageDataDefault.png?.height;
-        this.canvas.style.width = `${this.imageDataDefault.png?.width}px`;
-        this.canvas.style.height = `${this.imageDataDefault.png?.height}px`;
-        this.canvas.width = rect.width * 0.8;
-        this.canvas.height = rect.height * 0.8;
+        this.canvas.style.zIndex = String(2 * i);
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
             const scaledHeight = rect.height * 0.8;
@@ -91,27 +92,19 @@ export class DraggableButton {
         // First element and therefore needs different positioning to center
         this.button.style.left = `${rect.width / 2 - parseFloat(this.canvas.style.width) / 2}px`;
         this.button.style.top = `${rect.height / 2 - parseFloat(this.canvas.style.height) / 2}px`;
-        this.button.style.position = "absolute";
-        this.canvas.style.zIndex = String(2 * i);
-        this.button.appendChild(this.canvas);
         // Creates a resize handle and adds it to the canvas holder as a sibling to the canvas
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
         this.resizeHandle.style.zIndex = String(2 * i + 1);
         this.resizeHandle.style.top = "-15px";
-        this.button.appendChild(this.resizeHandle);
-        // Adds the canvas holder to the parent
-        this.container.appendChild(this.button);
-        this.isDragging = false;
-        this.isResizing = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
         this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
-        this.outlineDiv.style.zIndex = '1000';
+        this.outlineDiv.style.zIndex = "1000";
+        this.button.appendChild(this.canvas);
+        this.button.appendChild(this.resizeHandle);
+        this.container.appendChild(this.button);
         document.body.appendChild(this.outlineDiv);
         this.initEvents();
         this.setDisplayText(buttonText ?? "Label");
@@ -211,17 +204,11 @@ export class DraggableButton {
             updatePropertiesArea();
     }
     startResize(e) {
-        e.stopPropagation(); // Prevent event from bubbling to parent
-        this.isResizing = true;
-        this.resizeStartWidth = parseFloat(this.canvas.style.width);
-        this.resizeStartHeight = parseFloat(this.canvas.style.height);
-        this.resizeStartX = e.clientX;
-        this.resizeStartY = e.clientY;
+        ElementSharedFuncs.startResize(e, this);
         const rect = this.button.getBoundingClientRect();
         this.outlineDiv.style.top = `${rect.top + window.scrollY}px`;
         this.outlineDiv.style.left = `${rect.left + window.scrollX}px`;
         this.outlineDiv.style.display = "block";
-        e.preventDefault();
     }
     resize(e) {
         if (!this.isResizing)
@@ -295,14 +282,12 @@ export class DraggableButton {
             newWidth = this.resizeStartWidth + widthChange;
             newHeight = this.resizeStartHeight + heightChange;
         }
-        this.outlineDiv.style.width = `${newWidth - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
-        this.outlineDiv.style.height = `${newHeight - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+        this.outlineDiv.style.width = `${newWidth - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
+        this.outlineDiv.style.height = `${newHeight - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
     }
     stopResize() {
-        this.isResizing = false;
         this.outlineDiv.style.display = "none";
-        if (isInMainWindow)
-            updatePropertiesArea();
+        ElementSharedFuncs.stopResize(this);
     }
     startHover() {
         this.canvas.style.cursor = "pointer";
@@ -339,11 +324,16 @@ export class DraggableButton {
             return this.imageDataDefault;
     }
     /**
+     * Draws an image on the button canvas. If the image state is not specified, uses the default image state.
+     * If _updateImage is true, scales the image to fill the button container while maintaining aspect ratio.
      *
-     * @param {number} width
-     * @param {number} height
+     * @param {number} width - The width of the image to draw.
+     * @param {number} height - The height of the image to draw.
+     * @param {ImageDataState} [imageDataState=this.imageDataDefault] - The state of the image to draw.
+     * @param {boolean} [_updateImage=false] - Whether to update the image to fill the button container, only needed if the image has changed.
      */
     drawImage(width, height, imageDataState = this.imageDataDefault, _updateImage = false) {
+        console.log("drawImage", width, height, imageDataState, _updateImage, Date.now());
         // Stops the canvas from being too small
         if (width <= 1)
             width = 1;
@@ -353,12 +343,24 @@ export class DraggableButton {
         const floorHeight = Math.floor(height);
         const ctx = this.canvas.getContext("2d");
         if (imageDataState.json) {
+            // --- Nine-slice resize ---
             const pixels = Nineslice.ninesliceResize(imageDataState.json, imageDataState.png?.data, floorWidth, floorHeight);
             this.canvas.width = floorWidth;
             this.canvas.height = floorHeight;
             const newImageData = new ImageData(pixels, floorWidth, floorHeight);
-            // Draws the image
             ctx.putImageData(newImageData, 0, 0);
+        }
+        else {
+            // --- Standard scaling path ---
+            this.canvas.width = floorWidth;
+            this.canvas.height = floorHeight;
+            // Convert ImageData into a temporary canvas
+            const offscreen = document.createElement("canvas");
+            offscreen.width = imageDataState.png.width;
+            offscreen.height = imageDataState.png.height;
+            offscreen.getContext("2d").putImageData(imageDataState.png, 0, 0);
+            // Scale it into our target canvas
+            ctx.drawImage(offscreen, 0, 0, offscreen.width, offscreen.height, 0, 0, floorWidth, floorHeight);
         }
         // **Scale the display size (but keep internal resolution high)**
         this.canvas.style.width = `${width}px`;
@@ -372,12 +374,18 @@ export class DraggableButton {
             this.canvas.width = imageDataState.png?.width;
             this.canvas.height = imageDataState.png?.height;
             const rect = this.container.getBoundingClientRect();
-            ctx.putImageData(imageDataState.png, 0, 0);
+            // Reset full-res image
+            const offscreen = document.createElement("canvas");
+            offscreen.width = imageDataState.png.width;
+            offscreen.height = imageDataState.png.height;
+            offscreen.getContext("2d").putImageData(imageDataState.png, 0, 0);
+            ctx.drawImage(offscreen, 0, 0);
+            // Recalculate scaling based on container size
             if (rect.width > rect.height) {
                 const scaledHeight = rect.height * 0.8;
                 this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, imageDataState, false);
             }
-            else if (rect.width <= rect.height) {
+            else {
                 const scaledWidth = rect.width * 0.8;
                 this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, imageDataState, false);
             }
@@ -423,6 +431,7 @@ export class DraggableButton {
                 return;
             const id = StringUtil.generateRandomString(15);
             this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imageName, data.json);
+            this.displayCanvas.deleteable = false;
             GLOBAL_ELEMENT_MAP.set(id, this.displayCanvas);
         }
         this.displayCanvas.setParse(false);
@@ -431,6 +440,7 @@ export class DraggableButton {
     setDisplayText(text) {
         const id = StringUtil.generateRandomString(15);
         this.displayText = new DraggableLabel(id, this.button, { text: text, includeTextPrompt: false });
+        this.displayText.deleteable = false;
         this.displayText.setParse(false);
         this.button.dataset.displayText = text;
         GLOBAL_ELEMENT_MAP.set(id, this.displayText);
@@ -439,8 +449,18 @@ export class DraggableButton {
         return this.button;
     }
     delete() {
+        if (!this.deleteable)
+            return;
         if (this.selected)
             this.unSelect();
+        if (this.displayCanvas) {
+            this.displayCanvas.deleteable = true;
+            this.displayCanvas.delete();
+        }
+        if (this.displayText) {
+            this.displayText.deleteable = true;
+            this.displayText.delete();
+        }
         this.container.removeChild(this.getMainHTMLElement());
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
@@ -451,12 +471,12 @@ export class DraggableButton {
     grid(showGrid) {
         const element = this.getMainHTMLElement();
         if (!showGrid) {
-            element.style.removeProperty('--grid-cols');
-            element.style.removeProperty('--grid-rows');
+            element.style.removeProperty("--grid-cols");
+            element.style.removeProperty("--grid-rows");
         }
         else {
-            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
-            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
+            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
     }
 }

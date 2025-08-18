@@ -1,65 +1,67 @@
-import { images, isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
+import { images, isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
 import { Nineslice } from "../nineslice.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { ElementSharedFuncs } from "./sharedElement.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 export class DraggableCanvas {
+    // Core data
     imageData;
     nineSlice;
+    // Core elements
     container;
     outlineDiv;
     canvasHolder;
     canvas;
-    aspectRatio;
     resizeHandle;
-    isDragging;
-    isResizing;
-    selected;
-    offsetX;
-    offsetY;
+    // Display
+    aspectRatio;
+    // State flags
+    isDragging = false;
+    isResizing = false;
+    selected = false;
+    deleteable = true;
+    isEditable = true;
+    // Positioning & movement
+    offsetX = 0;
+    offsetY = 0;
+    // Resize state
     resizeStartWidth;
     resizeStartHeight;
     resizeStartX;
     resizeStartY;
-    isEditable;
-    bindings = "[]";
+    resizeStartLeft;
+    resizeStartTop;
+    // Data
+    bindings = "";
     /**
      * @param {HTMLElement} container
      */
     constructor(ID, container, imageData, imageName, nineSlice) {
-        this.isEditable = true;
-        let lastParent = container;
-        let i = 0;
-        parent_loop: while (true) {
-            if (!lastParent)
-                break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
         // Saves parameters
         this._constructorArgs = [ID, container, imageData, imageName, nineSlice];
         this.imageData = imageData;
+        this.aspectRatio = imageData.width / imageData.height;
         this.nineSlice = nineSlice;
         this.container = container;
+        const rect = container.getBoundingClientRect();
         // Holds the element in a div
         this.canvasHolder = document.createElement("div");
         this.canvasHolder.style.width = `${imageData.width}px`;
         this.canvasHolder.style.height = `${imageData.height}px`;
         this.canvasHolder.className = "draggable-canvas";
         this.canvasHolder.style.zIndex = String(i * 2);
-        // Creates the canvas and puts it in the canvas holder
-        this.canvas = document.createElement("canvas");
-        const rect = container.getBoundingClientRect();
-        this.aspectRatio = imageData.width / imageData.height;
-        this.canvas.style.width = `${imageData.width}px`;
-        this.canvas.style.height = `${imageData.height}px`;
-        this.canvas.width = imageData.width;
-        this.canvas.height = imageData.height;
-        // Gives it a filename that can be read later while converting
+        this.canvasHolder.style.visibility = "visible";
         this.canvasHolder.dataset.imageName = imageName;
         this.canvasHolder.dataset.id = ID;
+        this.canvasHolder.style.position = "absolute";
+        // Creates the canvas and puts it in the canvas holder
+        this.canvas = document.createElement("canvas");
+        this.canvas.style.zIndex = String(2 * i);
         // Draws the image
         const ctx = this.canvas.getContext("2d");
         ctx.putImageData(this.imageData, 0, 0);
@@ -72,30 +74,21 @@ export class DraggableCanvas {
             const scaledWidth = rect.width * 0.8;
             this.drawImage(scaledWidth, scaledWidth / this.aspectRatio);
         }
-        // First element and therefore needs different positioning to center
         this.canvasHolder.style.left = `${rect.width / 2 - parseFloat(this.canvas.style.width) / 2}px`;
         this.canvasHolder.style.top = `${rect.height / 2 - parseFloat(this.canvas.style.height) / 2}px`;
-        this.canvasHolder.style.position = "absolute";
-        this.canvas.style.zIndex = String(2 * i);
-        this.canvasHolder.appendChild(this.canvas);
         // Creates a resize handle and adds it to the canvas holder as a sibling to the canvas
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
         this.resizeHandle.style.zIndex = String(2 * i + 1);
         this.resizeHandle.style.top = "-15px";
-        this.canvasHolder.appendChild(this.resizeHandle);
-        // Adds the canvas holder to the parent
-        this.container.appendChild(this.canvasHolder);
-        this.isDragging = false;
-        this.isResizing = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
         this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
-        this.outlineDiv.style.zIndex = '1000';
+        this.outlineDiv.style.zIndex = "1000";
+        this.canvasHolder.appendChild(this.canvas);
+        this.canvasHolder.appendChild(this.resizeHandle);
+        this.container.appendChild(this.canvasHolder);
         document.body.appendChild(this.outlineDiv);
         this.initEvents();
         this.grid(config.settings.show_grid.value);
@@ -197,16 +190,11 @@ export class DraggableCanvas {
         e.stopPropagation(); // Prevent event from bubbling to parent
         if (!this.isEditable)
             return;
-        this.isResizing = true;
-        this.resizeStartWidth = parseFloat(this.canvas.style.width);
-        this.resizeStartHeight = parseFloat(this.canvas.style.height);
-        this.resizeStartX = e.clientX;
-        this.resizeStartY = e.clientY;
+        ElementSharedFuncs.startResize(e, this, false); // False because propagation is already called
         const rect = this.canvasHolder.getBoundingClientRect();
         this.outlineDiv.style.top = `${rect.top + window.scrollY}px`;
         this.outlineDiv.style.left = `${rect.left + window.scrollX}px`;
         this.outlineDiv.style.display = "block";
-        e.preventDefault();
     }
     resize(e) {
         e.stopPropagation(); // Prevent event from bubbling to parent
@@ -215,12 +203,11 @@ export class DraggableCanvas {
         const containerRect = this.container.getBoundingClientRect();
         const widthChange = e.clientX - this.resizeStartX;
         const heightChange = e.clientY - this.resizeStartY;
-        let newWidth;
-        let newHeight;
+        let newWidth = this.resizeStartWidth + widthChange;
+        let newHeight = this.resizeStartHeight + heightChange;
         // If shift key is pressed, maintain aspect ratio,
         // only if the image is a 9-slice
-        if (keyboardEvent?.shiftKey || !this.nineSlice) {
-            newWidth = this.resizeStartWidth + widthChange;
+        if (!this.nineSlice) {
             newHeight = newWidth / this.aspectRatio;
             if (config.settings.boundary_constraints.value) {
                 // Determine the maximum possible width while maintaining aspect ratio
@@ -239,9 +226,13 @@ export class DraggableCanvas {
                 }
             }
         }
-        else {
-            newWidth = this.resizeStartWidth + widthChange;
-            newHeight = this.resizeStartHeight + heightChange;
+        else if (keyboardEvent?.shiftKey) {
+            if (newHeight > newWidth) {
+                newWidth = newHeight;
+            }
+            else {
+                newHeight = newWidth;
+            }
         }
         this.drawImage(newWidth, newHeight);
     }
@@ -252,12 +243,11 @@ export class DraggableCanvas {
         const containerRect = this.container.getBoundingClientRect();
         const widthChange = e.clientX - this.resizeStartX;
         const heightChange = e.clientY - this.resizeStartY;
-        let newWidth;
-        let newHeight;
+        let newWidth = this.resizeStartWidth + widthChange;
+        let newHeight = this.resizeStartHeight + heightChange;
         // If shift key is pressed, maintain aspect ratio,
         // only if the image is a 9-slice
-        if (keyboardEvent?.shiftKey || !this.nineSlice) {
-            newWidth = this.resizeStartWidth + widthChange;
+        if (!this.nineSlice) {
             newHeight = newWidth / this.aspectRatio;
             if (config.settings.boundary_constraints.value) {
                 // Determine the maximum possible width while maintaining aspect ratio
@@ -276,18 +266,20 @@ export class DraggableCanvas {
                 }
             }
         }
-        else {
-            newWidth = this.resizeStartWidth + widthChange;
-            newHeight = this.resizeStartHeight + heightChange;
+        else if (keyboardEvent?.shiftKey) {
+            if (newHeight > newWidth) {
+                newWidth = newHeight;
+            }
+            else {
+                newHeight = newWidth;
+            }
         }
-        this.outlineDiv.style.width = `${newWidth - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
-        this.outlineDiv.style.height = `${newHeight - (StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth))}px`;
+        this.outlineDiv.style.width = `${newWidth - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
+        this.outlineDiv.style.height = `${newHeight - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
     }
     stopResize() {
-        this.isResizing = false;
         this.outlineDiv.style.display = "none";
-        if (isInMainWindow)
-            updatePropertiesArea();
+        ElementSharedFuncs.stopResize(this);
     }
     /**
      *
@@ -382,6 +374,8 @@ export class DraggableCanvas {
         this.isEditable = isEditable;
     }
     delete() {
+        if (!this.deleteable)
+            return;
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.getMainHTMLElement());
@@ -395,12 +389,12 @@ export class DraggableCanvas {
     grid(showGrid) {
         const element = this.getMainHTMLElement();
         if (!showGrid) {
-            element.style.removeProperty('--grid-cols');
-            element.style.removeProperty('--grid-rows');
+            element.style.removeProperty("--grid-cols");
+            element.style.removeProperty("--grid-rows");
         }
         else {
-            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
-            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
+            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
     }
 }

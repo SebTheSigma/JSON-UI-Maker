@@ -168,6 +168,9 @@ export class BindingsArea {
             this.errorMessage.style.visibility = "hidden";
             return true;
         } catch (e) {
+
+            if (this.bindingsTextArea.value === "") return false;
+            
             this.errorMessage.style.visibility = "visible";
             this.errorMessage.title = "Invalid JSON";
             return false;

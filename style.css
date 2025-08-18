@@ -8,12 +8,11 @@ body {
     font-family: sans-serif;
 }
 
-
 input[type="file"] {
     display: none;
 }
 
-.pack_importer {
+.ui_textures_importer {
     position: relative;
     left: 10px;
     width: 105px;
@@ -59,7 +58,6 @@ input[type="file"] {
     animation: rotateInfinitely 1.5s linear infinite;
 }
 
-
 .modalSettingsBtn {
     line-height: 20px;
     margin-left: 5px;
@@ -80,12 +78,12 @@ input[type="file"] {
 
 .modalSettingsBtn:hover {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
-    transform: scale(1.05);  /* 120% */
+    transform: scale(1.05); /* 120% */
 }
 
-.pack_importer:hover {
+.ui_textures_importer:hover {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
-    transform: scale(1.05);  /* 120% */
+    transform: scale(1.05); /* 120% */
 }
 
 .breaker {
@@ -403,7 +401,7 @@ input[type="file"] {
     color: white;
     flex: 1;
     height: calc(1510px / 1.7777777);
-    background-color:  rgb(39, 39, 39);
+    background-color: rgb(39, 39, 39);
     border-radius: 10px;
 }
 
@@ -451,14 +449,14 @@ input[type="file"] {
 }
 
 .draggable-scrolling_panel {
-  height: 300px;              /* Set a height */
-  overflow-y: scroll;         /* Enable vertical scrolling */
-  overflow-x: hidden;         /* Optional: hide horizontal scroll */
-  scroll-behavior: smooth;    /* Optional: smooth scrolling effect */
+    height: 300px; /* Set a height */
+    overflow-y: scroll; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Optional: hide horizontal scroll */
+    scroll-behavior: smooth; /* Optional: smooth scrolling effect */
 }
 
 .draggable-scrolling_panel::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
 
 .bindings {
@@ -481,12 +479,8 @@ input[type="file"] {
 
 .gridable {
     position: relative; /* so absolute children still position relative to the panel */
-    background-image:
-        linear-gradient(to right, rgba(55, 55, 55, 1) 2px, transparent 2px),
-        linear-gradient(to bottom, rgba(55, 55, 55, 1) 2px, transparent 2px);
-    background-size:
-        calc(100% / var(--grid-cols))
-        calc(100% / var(--grid-rows));
+    background-image: linear-gradient(to right, rgba(55, 55, 55, 1) 2px, transparent 2px), linear-gradient(to bottom, rgba(55, 55, 55, 1) 2px, transparent 2px);
+    background-size: calc(100% / var(--grid-cols)) calc(100% / var(--grid-rows));
 
     background-position: -1px -1px; /* X offset, Y offset */
 }
@@ -535,17 +529,69 @@ input[type="file"] {
     padding: 5px;
 }
 
+#mainWarningMessage {
+    position: fixed;
+    top: 20px;
+    left: calc(100% );
+    display: flex;
+    flex-direction: column; /* Stack vertically */
+    gap: 10px; /* Space between notifications */
+    z-index: 9999;
+}
+
+/* Container for all notifications */
+#notif-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column; /* Stack vertically */
+    gap: 10px; /* Space between notifications */
+    z-index: 9999;
+}
+
+/* Container for all notifications */
+#notif-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    flex-direction: column; /* Stack vertically */
+    gap: 10px; /* Space between notifications */
+    z-index: 9999;
+}
+
+/* Individual notification */
+.clipboard-notif {
+    opacity: 0;
+    background-color: #3f3f3f;
+    color: white;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    outline: rgb(174, 0, 255) 2px solid;
+    transform: translateX(300px); /* Start off-screen */
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    font-size: 20px;
+}
+
+/* Slide in */
+.clipboard-notif.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
 
 @font-face {
-    font-family: 'MinecraftRegular';
-    src: url('./fonts/MinecraftRegular.ttf') format('truetype');
+    font-family: "MinecraftRegular";
+    src: url("./fonts/MinecraftRegular.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'MinecraftTen';
-    src: url('./fonts/MinecraftTen.ttf') format('truetype');
+    font-family: "MinecraftTen";
+    src: url("./fonts/MinecraftTen.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
 }

@@ -1,85 +1,82 @@
-import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 import { MinecraftSlider } from "../ui/sliders/addMinecraftSlider.js";
+import { ElementSharedFuncs } from "./sharedElement.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 
 export class DraggableScrollingPanel {
+    // Core elements
     public container: HTMLElement;
+    public basePanel: HTMLElement;
     public panel: HTMLElement;
     public resizeHandle: HTMLElement;
-    public isDragging: boolean;
-    public isResizing: boolean;
-    public selected: boolean;
-    public offsetX: number;
-    public offsetY: number;
+    public slider: MinecraftSlider;
+
+    // State flags
+    public isDragging: boolean = false;
+    public isResizing: boolean = false;
+    public selected: boolean = false;
+    public deleteable: boolean = true;
+
+    // Positioning & movement
+    public offsetX: number = 0;
+    public offsetY: number = 0;
+
+    // Resize state
     public resizeStartWidth?: number;
     public resizeStartHeight?: number;
     public resizeStartX?: number;
     public resizeStartY?: number;
-    public slider: MinecraftSlider;
-    public basePanel: HTMLElement;
+    public resizeStartLeft?: number;
+    public resizeStartTop?: number;
 
-    public bindings: string = "[]";
+    // Data
+    public bindings: string = "";
     /**
      * @param {HTMLElement} container
      */
     public constructor(ID: string, container: HTMLElement) {
-        let lastParent: HTMLElement | null = container;
-        let i: number = 0;
-        parent_loop: while (true) {
-            if (!lastParent) break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
-
-        this.basePanel = document.createElement("div");
-        this.basePanel.style.position = "absolute";
-        this.basePanel.dataset.skip = "true";
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
 
         // Saves parameters
         (this as any)._constructorArgs = [ID, container];
 
         this.container = container;
-        this.panel = document.createElement("div");
-        this.panel.className = "draggable-scrolling_panel";
-        this.panel.style.position = "absolute";
-
-        // Custom data
-        this.panel.dataset.id = ID;
 
         const rect: DOMRect = container.getBoundingClientRect();
 
+        this.basePanel = document.createElement("div");
+        this.basePanel.style.position = "absolute";
+        this.basePanel.dataset.skip = "true";
+        this.basePanel.style.visibility = "visible";
         this.basePanel.style.width = `${rect.width * 0.8}px`;
         this.basePanel.style.height = `${rect.height * 0.8}px`;
-        this.panel.style.width = this.basePanel.style.width;
-        this.panel.style.height = this.basePanel.style.height;
-
-        // Frist element and therefore needs different positioning to center
         this.basePanel.style.left = `${rect.width / 2 - parseFloat(this.basePanel.style.width) / 2}px`;
         this.basePanel.style.top = `${rect.height / 2 - parseFloat(this.basePanel.style.height) / 2}px`;
 
+        this.panel = document.createElement("div");
+        this.panel.className = "draggable-scrolling_panel";
+        this.panel.style.position = "absolute";
+        this.panel.dataset.id = ID;
+        this.panel.style.width = this.basePanel.style.width;
+        this.panel.style.height = this.basePanel.style.height;
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.panel.style.border = "2px solid black";
+        this.panel.style.outline = "2px solid black";
         this.panel.style.zIndex = String(2 * i);
 
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
-
         this.resizeHandle.style.zIndex = String(2 * i + 2);
         this.resizeHandle.style.position = "sticky";
 
         this.panel.appendChild(this.resizeHandle);
-        this.basePanel.appendChild(this.panel)
+        this.basePanel.appendChild(this.panel);
         this.container.appendChild(this.basePanel);
 
         this.slider = new MinecraftSlider(this);
-
-        this.isDragging = false;
-        this.isResizing = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
 
         this.initEvents();
         this.grid(config.settings.show_grid.value);
@@ -191,34 +188,23 @@ export class DraggableScrollingPanel {
     }
 
     public startResize(e: MouseEvent): void {
-        e.stopPropagation(); // Prevent event from bubbling to parent
-        this.isResizing = true;
-        this.slider.setMoveType('instant')
-        this.resizeStartWidth = parseFloat(this.panel.style.width);
-        this.resizeStartHeight = parseFloat(this.panel.style.height);
-        this.resizeStartX = e.clientX;
-        this.resizeStartY = e.clientY;
-        e.preventDefault();
+        this.slider.setMoveType("instant");
+        ElementSharedFuncs.startResize(e, this);
     }
 
     public resize(e: MouseEvent): void {
-        if (!this.isResizing) return;
-        e.stopPropagation(); // Prevent event from bubbling to parent
         this.slider.updateHandle();
 
-        const widthChange: number = e.clientX - this.resizeStartX!;
-        const heightChange: number = e.clientY - this.resizeStartY!;
+        ElementSharedFuncs.resize(e, this);
 
-        this.basePanel.style.width = `${this.resizeStartWidth! + widthChange}px`;
-        this.basePanel.style.height = `${this.resizeStartHeight! + heightChange}px`;
-        this.panel.style.width = `${this.resizeStartWidth! + widthChange}px`;
-        this.panel.style.height = `${this.resizeStartHeight! + heightChange}px`;
+        this.basePanel.style.width = this.panel.style.width;
+        this.basePanel.style.height = this.panel.style.height;
     }
 
     public stopResize(): void {
-        this.isResizing = false;
-        this.slider.setMoveType('smooth')
-        if (isInMainWindow) updatePropertiesArea();
+        this.slider.setMoveType("smooth");
+
+        ElementSharedFuncs.stopResize(this);
     }
 
     public getMainHTMLElement(): HTMLElement {
@@ -226,7 +212,7 @@ export class DraggableScrollingPanel {
     }
 
     public delete(): void {
-
+        if (!this.deleteable) return;
         if (this.selected) this.unSelect();
 
         this.container.removeChild(this.basePanel);
@@ -241,14 +227,11 @@ export class DraggableScrollingPanel {
         const element = this.getMainHTMLElement();
 
         if (!showGrid) {
-            element.style.removeProperty('--grid-cols');
-            element.style.removeProperty('--grid-rows');    
-        }
-
-        else {
-            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
-            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+            element.style.removeProperty("--grid-cols");
+            element.style.removeProperty("--grid-rows");
+        } else {
+            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
+            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
     }
 }
-

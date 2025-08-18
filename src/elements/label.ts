@@ -3,11 +3,9 @@ import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
-import { Binding } from "../scripter/bindings/types.js";
 import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";
 import { GeneralUtil } from "../util/generalUtil.js";
-import { text } from "cheerio/dist/commonjs/static.js";
 
 interface LabelOptions {
     text: string;
@@ -18,44 +16,44 @@ interface LabelOptions {
 }
 
 export class DraggableLabel {
+    // Core elements
     public container: HTMLElement;
     public label: HTMLTextAreaElement;
     public mirror: HTMLElement;
-    public bindingsTextPrompt: TextPrompt | undefined;
-    public focussed: boolean = false;
-
-    public isDragging: boolean;
-    public selected: boolean;
-    public offsetX: number;
-    public offsetY: number;
-    public hasShadow: boolean = false;
     public shadowLabel: HTMLDivElement;
+
+    // UI helpers
+    public bindingsTextPrompt?: TextPrompt;
+
+    // State flags
+    public focussed: boolean = false;
+    public isDragging: boolean = false;
+    public selected: boolean = false;
+    public deleteable: boolean = true;
+    public hasShadow: boolean = false;
+
+    // Positioning & movement
+    public offsetX: number = 0;
+    public offsetY: number = 0;
+    public shadowOffsetX: number = 6;
+    public shadowOffsetY: number = 6;
+
+    // Data
     public lastValue: string;
-
-    public shadowOffsetX: number;
-    public shadowOffsetY: number;
-
-    public bindings: string = "[]";
+    public bindings: string = "";
 
     /**
      * @param {HTMLElement} container
      */
     public constructor(ID: string, container: HTMLElement, labelOptions?: LabelOptions) {
-        let lastParent: HTMLElement | null = container;
-        let i: number = 0;
-        parent_loop: while (true) {
-            if (!lastParent) break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
 
         // Saves parameters
         (this as any)._constructorArgs = [ID, container, labelOptions];
 
         this.container = container;
 
-        this.shadowOffsetX = 6;
-        this.shadowOffsetY = 6;
+        const parentRect: DOMRect = container.getBoundingClientRect();
 
         const textAlign = labelOptions?.textAlign ?? "left";
         const fontSize = labelOptions?.fontScale ?? 1;
@@ -64,9 +62,7 @@ export class DraggableLabel {
         // Create the textarea
         this.label = document.createElement("textarea");
         this.label.value = labelOptions ? labelOptions.text : "";
-
-        this.lastValue = this.label.value;
-
+        this.label.style.visibility = "visible";
         this.label.className = "draggable-label";
         this.label.style.overflow = "hidden";
         this.label.style.resize = "none";
@@ -82,6 +78,16 @@ export class DraggableLabel {
         this.label.style.fontFamily = "MinecraftRegular";
         this.label.spellcheck = false;
         this.label.style.color = `rgb(${(fontColor[0], fontColor[1], fontColor[2])})`;
+        this.label.style.textAlign = textAlign;
+        this.label.style.fontSize = `${fontSize}em`;
+        this.label.style.left = `${parentRect.width / 2}px`;
+        this.label.style.top = `${parentRect.height / 2}px`;
+        this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
+        this.label.style.position = "absolute";
+        this.label.style.zIndex = String(2 * i + 1);
+        this.label.dataset.id = ID;
+
+        this.lastValue = this.label.value;
 
         // Create a hidden mirror for sizing
         this.mirror = document.createElement("div");
@@ -95,44 +101,21 @@ export class DraggableLabel {
         this.mirror.style.padding = this.label.style.padding;
         this.mirror.style.border = this.label.style.border;
         this.mirror.style.boxSizing = "border-box";
-
-        // Properties
-        this.label.style.textAlign = textAlign;
-        this.label.style.fontSize = `${fontSize}em`;
-
         this.mirror.style.textAlign = textAlign;
         this.mirror.style.fontSize = `${fontSize}em`;
 
-        // Custom data
-        this.label.dataset.id = ID;
-
-        const parentRect: DOMRect = container.getBoundingClientRect();
-        const rect: DOMRect = this.label.getBoundingClientRect();
-
-        this.label.style.left = `${parentRect.width / 2}px`;
-        this.label.style.top = `${parentRect.height / 2}px`;
-
-        this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.label.style.position = "absolute";
-        this.label.style.zIndex = String(2 * i + 1);
-
-        this.isDragging = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
+        const offset = config.magicNumbers.labelToOffset(this.label);
 
         // Shadow label
         this.shadowLabel = document.createElement("div");
+        this.shadowLabel.style.visibility = "visible";
         this.shadowLabel.style.position = "absolute";
         this.shadowLabel.style.zIndex = String(2 * i);
         this.shadowLabel.style.color = "rgba(0, 0, 0, 0.5)";
         this.shadowLabel.style.display = "none";
         this.shadowLabel.style.fontFamily = this.label.style.fontFamily;
-
         this.shadowLabel.style.whiteSpace = "pre-wrap";
         this.shadowLabel.style.wordWrap = "break-word";
-
-        const offset = config.magicNumbers.labelToOffset(this.label);
         this.shadowLabel.style.left = `${StringUtil.cssDimToNumber(this.label.style.left) + this.shadowOffsetX + offset[0]}px`;
         this.shadowLabel.style.top = `${StringUtil.cssDimToNumber(this.label.style.top) + this.shadowOffsetY + offset[1]}px`;
 
@@ -424,6 +407,7 @@ export class DraggableLabel {
     }
 
     public delete(): void {
+        if (!this.deleteable) return;
         if (this.selected) this.unSelect();
 
         this.container.removeChild(this.label);

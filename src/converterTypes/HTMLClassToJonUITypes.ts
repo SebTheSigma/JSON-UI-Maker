@@ -6,7 +6,6 @@ import { DraggableCollectionPanel } from "../elements/collectionPanel.js";
 import { DraggableLabel } from "../elements/label.js";
 import { DraggablePanel } from "../elements/panel.js";
 import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
-import { GLOBAL_ELEMENT_MAP } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
 
@@ -20,8 +19,10 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
         "draggable-panel",
         (element: HTMLElement, nameSpace: string) => {
             const parent = element.parentElement!;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+
+            const rect = element.getBoundingClientRect();
+            const processedWidth = rect.width;
+            const processedHeight = rect.height;
 
             const panelClass = GeneralUtil.elementToClassElement(element) as DraggablePanel;
 
@@ -35,6 +36,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
             const bindings = GeneralUtil.tryParseBindings(panelClass.bindings) ?? [];
+
+            console.log(offset, processedHeight, processedWidth, element.style.width, element.style.height);
 
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
@@ -160,8 +163,12 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
             const buttonClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
+            console.log("buttonClass", buttonClass);
+
             const buttonIdToDisplayCanvasJsonUi = (): JsonUISimpleElement | undefined => {
                 const displayCanvas: DraggableCanvas = buttonClass.displayCanvas!;
+
+                if (!displayCanvas) return undefined;
 
                 const transformationFunc = classToJsonUI.get("draggable-canvas");
                 if (!transformationFunc) return undefined;
@@ -173,19 +180,22 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             };
 
             const buttonIdToDisplayTextJsonUi = (): JsonUISimpleElement | undefined => {
-                const displayCanvas: DraggableLabel = buttonClass.displayText!;
+                const displayText: DraggableLabel = buttonClass.displayText!;
+
+                if (!displayText) return undefined;
 
                 const transformationFunc = classToJsonUI.get("draggable-label");
                 if (!transformationFunc) return undefined;
 
-                const result = transformationFunc(displayCanvas.label!, nameSpace);
+                const result = transformationFunc(displayText.label!, nameSpace);
                 if (!result) return undefined;
 
                 return result.element!;
             };
 
-            const DisplayElementJsonUi: JsonUISimpleElement = buttonIdToDisplayCanvasJsonUi()!;
-            const TextElementJsonUi: JsonUISimpleElement = buttonIdToDisplayTextJsonUi()!;
+            const DisplayElementJsonUi: JsonUISimpleElement | undefined = buttonIdToDisplayCanvasJsonUi()!;
+            const TextElementJsonUi: JsonUISimpleElement | undefined = buttonIdToDisplayTextJsonUi()!;
+
             const ui_scaler = config.magicNumbers.UI_SCALAR as number;
 
             const bindings = GeneralUtil.tryParseBindings(buttonClass.bindings) ?? [];
@@ -204,14 +214,14 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 collection_index: collectionIndex,
 
                 $icon_offset: [
-                    (DisplayElementJsonUi.offset![0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
-                    (DisplayElementJsonUi.offset![1] ?? 0) + config.magicNumbers.buttonImageOffsetY,
+                    (DisplayElementJsonUi?.offset?.[0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
+                    (DisplayElementJsonUi?.offset?.[1] ?? 0) + config.magicNumbers.buttonImageOffsetY,
                 ],
-                $icon_size: [DisplayElementJsonUi.size![0] ?? 45, DisplayElementJsonUi.size![1] ?? 45],
+                $icon_size: [DisplayElementJsonUi?.size?.[0] ?? 45, DisplayElementJsonUi?.size?.[1] ?? 45],
 
-                $font_size: TextElementJsonUi.font_scale_factor ?? 1,
-                $text_offset: [TextElementJsonUi.offset![0] ?? 0, TextElementJsonUi.offset![1] ?? 0],
-                $font_type: TextElementJsonUi.font_type ?? "MinecraftRegular",
+                $font_size: TextElementJsonUi?.font_scale_factor ?? 1,
+                $text_offset: [TextElementJsonUi?.offset?.[0] ?? 0, TextElementJsonUi?.offset?.[1] ?? 0],
+                $font_type: TextElementJsonUi?.font_type ?? "MinecraftRegular",
 
                 $show_hover_text: false,
 
@@ -222,6 +232,12 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`,
             };
+
+            if (!DisplayElementJsonUi || !TextElementJsonUi) {
+                instructions.Warning = {
+                    message: "No display image or display text found for button",
+                };
+            }
 
             return { element: jsonUIElement, instructions: instructions };
         },
@@ -275,7 +291,6 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
     [
         "draggable-scrolling_panel",
         (element: HTMLElement, nameSpace: string) => {
-
             // Has the position of the panel as the panel is strictly used for scrolling
             // and cant have positional properties
             const basePanel = element.parentElement!;
@@ -340,7 +355,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                             $scrolling_pane_offset: jsonUIElement.offset,
                             $scroll_bar_right_padding_size: jsonUIElement.$scroll_bar_right_padding_size,
 
-                            bindings: bindings
+                            bindings: bindings,
                         },
                     },
                 ],

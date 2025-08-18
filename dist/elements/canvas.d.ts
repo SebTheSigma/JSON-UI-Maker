@@ -6,18 +6,21 @@ export declare class DraggableCanvas {
     outlineDiv: HTMLDivElement;
     canvasHolder: HTMLDivElement;
     canvas: HTMLCanvasElement;
-    aspectRatio: number;
     resizeHandle: HTMLDivElement;
+    aspectRatio: number;
     isDragging: boolean;
     isResizing: boolean;
     selected: boolean;
+    deleteable: boolean;
+    isEditable: boolean;
     offsetX: number;
     offsetY: number;
     resizeStartWidth?: number;
     resizeStartHeight?: number;
     resizeStartX?: number;
     resizeStartY?: number;
-    isEditable: boolean;
+    resizeStartLeft?: number;
+    resizeStartTop?: number;
     bindings: string;
     /**
      * @param {HTMLElement} container

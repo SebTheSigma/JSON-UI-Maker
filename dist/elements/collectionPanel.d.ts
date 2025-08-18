@@ -5,12 +5,15 @@ export declare class DraggableCollectionPanel {
     isDragging: boolean;
     isResizing: boolean;
     selected: boolean;
+    deleteable: boolean;
     offsetX: number;
     offsetY: number;
     resizeStartWidth?: number;
     resizeStartHeight?: number;
     resizeStartX?: number;
     resizeStartY?: number;
+    resizeStartLeft?: number;
+    resizeStartTop?: number;
     bindings: string;
     /**
      * @param {HTMLElement} container
@@ -22,9 +25,6 @@ export declare class DraggableCollectionPanel {
     startDrag(e: MouseEvent): void;
     drag(e: MouseEvent): void;
     stopDrag(): void;
-    startResize(e: MouseEvent): void;
-    resize(e: MouseEvent): void;
-    stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
     grid(showGrid: boolean): void;

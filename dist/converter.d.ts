@@ -6,6 +6,9 @@ export interface TreeInstructions {
         link: string;
         startingNode: string;
     };
+    Warning?: {
+        message: string;
+    };
 }
 export interface TreeData {
     element?: JsonUISimpleElement;

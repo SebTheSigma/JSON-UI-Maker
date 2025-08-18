@@ -6,8 +6,9 @@ export const classToJsonUI = new Map([
         "draggable-panel",
         (element, nameSpace) => {
             const parent = element.parentElement;
-            const processedWidth = StringUtil.cssDimToNumber(element.style.width);
-            const processedHeight = StringUtil.cssDimToNumber(element.style.height);
+            const rect = element.getBoundingClientRect();
+            const processedWidth = rect.width;
+            const processedHeight = rect.height;
             const panelClass = GeneralUtil.elementToClassElement(element);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
             if (parent?.className == "main_window") {
@@ -16,6 +17,7 @@ export const classToJsonUI = new Map([
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
             const bindings = GeneralUtil.tryParseBindings(panelClass.bindings) ?? [];
+            console.log(offset, processedHeight, processedWidth, element.style.width, element.style.height);
             const jsonUIElement = {
                 offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
@@ -111,8 +113,11 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const buttonClass = GeneralUtil.elementToClassElement(element);
+            console.log("buttonClass", buttonClass);
             const buttonIdToDisplayCanvasJsonUi = () => {
                 const displayCanvas = buttonClass.displayCanvas;
+                if (!displayCanvas)
+                    return undefined;
                 const transformationFunc = classToJsonUI.get("draggable-canvas");
                 if (!transformationFunc)
                     return undefined;
@@ -122,11 +127,13 @@ export const classToJsonUI = new Map([
                 return result.element;
             };
             const buttonIdToDisplayTextJsonUi = () => {
-                const displayCanvas = buttonClass.displayText;
+                const displayText = buttonClass.displayText;
+                if (!displayText)
+                    return undefined;
                 const transformationFunc = classToJsonUI.get("draggable-label");
                 if (!transformationFunc)
                     return undefined;
-                const result = transformationFunc(displayCanvas.label, nameSpace);
+                const result = transformationFunc(displayText.label, nameSpace);
                 if (!result)
                     return undefined;
                 return result.element;
@@ -146,13 +153,13 @@ export const classToJsonUI = new Map([
                 anchor_to: "top_left",
                 collection_index: collectionIndex,
                 $icon_offset: [
-                    (DisplayElementJsonUi.offset[0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
-                    (DisplayElementJsonUi.offset[1] ?? 0) + config.magicNumbers.buttonImageOffsetY,
+                    (DisplayElementJsonUi?.offset?.[0] ?? 0) + config.magicNumbers.buttonImageOffsetX,
+                    (DisplayElementJsonUi?.offset?.[1] ?? 0) + config.magicNumbers.buttonImageOffsetY,
                 ],
-                $icon_size: [DisplayElementJsonUi.size[0] ?? 45, DisplayElementJsonUi.size[1] ?? 45],
-                $font_size: TextElementJsonUi.font_scale_factor ?? 1,
-                $text_offset: [TextElementJsonUi.offset[0] ?? 0, TextElementJsonUi.offset[1] ?? 0],
-                $font_type: TextElementJsonUi.font_type ?? "MinecraftRegular",
+                $icon_size: [DisplayElementJsonUi?.size?.[0] ?? 45, DisplayElementJsonUi?.size?.[1] ?? 45],
+                $font_size: TextElementJsonUi?.font_scale_factor ?? 1,
+                $text_offset: [TextElementJsonUi?.offset?.[0] ?? 0, TextElementJsonUi?.offset?.[1] ?? 0],
+                $font_type: TextElementJsonUi?.font_type ?? "MinecraftRegular",
                 $show_hover_text: false,
                 bindings: bindings,
             };
@@ -160,6 +167,11 @@ export const classToJsonUI = new Map([
                 ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`,
             };
+            if (!DisplayElementJsonUi || !TextElementJsonUi) {
+                instructions.Warning = {
+                    message: "No display image or display text found for button",
+                };
+            }
             return { element: jsonUIElement, instructions: instructions };
         },
     ],
@@ -256,7 +268,7 @@ export const classToJsonUI = new Map([
                             $scrolling_pane_size: jsonUIElement.$scrolling_pane_size,
                             $scrolling_pane_offset: jsonUIElement.offset,
                             $scroll_bar_right_padding_size: jsonUIElement.$scroll_bar_right_padding_size,
-                            bindings: bindings
+                            bindings: bindings,
                         },
                     },
                 ],

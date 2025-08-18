@@ -1,74 +1,74 @@
-import { isInMainWindow, selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { AllJsonUIElements } from "./elements.js";
-import { Binding } from "../scripter/bindings/types.js";
+import { ElementSharedFuncs } from "./sharedElement.js";
+import { GeneralUtil } from "../util/generalUtil.js";
 
 export class DraggablePanel {
+
+    // Core elements
     public container: HTMLElement;
     public panel: HTMLElement;
-    public resizeHandle: HTMLElement;
-    public isDragging: boolean;
-    public isResizing: boolean;
-    public selected: boolean;
-    public offsetX: number;
-    public offsetY: number;
+    public resizeHandle?: HTMLElement;
+
+    // State flags
+    public isDragging: boolean = false;
+    public isResizing: boolean = false;
+    public selected: boolean = false;
+    public deleteable: boolean = true;
+
+    // Positioning & movement
+    public offsetX: number = 0;
+    public offsetY: number = 0;
+
+    // Resize state
     public resizeStartWidth?: number;
     public resizeStartHeight?: number;
     public resizeStartX?: number;
     public resizeStartY?: number;
+    public resizeStartLeft?: number;
+    public resizeStartTop?: number;
 
-    public bindings: string = "[]";
+    // Data
+    public bindings: string = "";
     /**
      * @param {HTMLElement} container
      */
-    public constructor(ID: string, container: HTMLElement) {
-        let lastParent: HTMLElement | null = container;
-        let i: number = 0;
-        parent_loop: while (true) {
-            if (!lastParent) break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
+    public constructor(ID: string, container: HTMLElement, interactable: boolean = true) {
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
 
         // Saves parameters
         (this as any)._constructorArgs = [ID, container];
 
         this.container = container;
-        this.panel = document.createElement("div");
-        this.panel.classList.add("draggable-panel"); // Needs to be added before gridable
-        this.panel.classList.add("gridable");
-
-        // Custom data
-        this.panel.dataset.id = ID;
 
         const rect: DOMRect = container.getBoundingClientRect();
 
+        this.panel = document.createElement("div");
+        this.panel.classList.add("draggable-panel"); // Needs to be added before gridable
+        this.panel.classList.add("gridable");
+        this.panel.style.visibility = "visible";
+        this.panel.dataset.id = ID;
         this.panel.style.height = `${rect.height * 0.8}px`;
         this.panel.style.width = `${rect.width * 0.8}px`;
-
-        // Frist element and therefore needs different positioning to center
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
         this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
-
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
         this.panel.style.border = "2px solid black";
         this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
 
-        this.resizeHandle = document.createElement("div");
-        this.resizeHandle.className = "resize-handle";
-        this.panel.appendChild(this.resizeHandle);
+        if (interactable) {
+            this.resizeHandle = document.createElement("div");
+            this.resizeHandle.className = "resize-handle";
+            this.resizeHandle.style.zIndex = String(2 * i + 1);
+            this.panel.appendChild(this.resizeHandle);
+        }
+
         this.container.appendChild(this.panel);
-        this.resizeHandle.style.zIndex = String(2 * i + 1);
 
-        this.isDragging = false;
-        this.isResizing = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
-
-        this.initEvents();
+        if (interactable) this.initEvents();
         this.grid(config.settings.show_grid.value);
     }
 
@@ -78,9 +78,9 @@ export class DraggablePanel {
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
 
-        this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
+        this.resizeHandle!.addEventListener("mousedown", (e) => ElementSharedFuncs.startResize(e, this));
+        document.addEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
+        document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
     }
 
     public select(e: MouseEvent): void {
@@ -176,61 +176,31 @@ export class DraggablePanel {
         if (isInMainWindow) updatePropertiesArea();
     }
 
-    public startResize(e: MouseEvent): void {
-        e.stopPropagation(); // Prevent event from bubbling to parent
-        this.isResizing = true;
-        this.resizeStartWidth = parseFloat(this.panel.style.width);
-        this.resizeStartHeight = parseFloat(this.panel.style.height);
-        this.resizeStartX = e.clientX;
-        this.resizeStartY = e.clientY;
-        e.preventDefault();
-    }
-
-    public resize(e: MouseEvent): void {
-        if (!this.isResizing) return;
-        e.stopPropagation(); // Prevent event from bubbling to parent
-
-        const widthChange: number = e.clientX - this.resizeStartX!;
-        const heightChange: number = e.clientY - this.resizeStartY!;
-
-        this.panel.style.width = `${this.resizeStartWidth! + widthChange}px`;
-        this.panel.style.height = `${this.resizeStartHeight! + heightChange}px`;
-    }
-
-    public stopResize(): void {
-        this.isResizing = false;
-        if (isInMainWindow) updatePropertiesArea();
-    }
-
-
     public getMainHTMLElement(): HTMLElement {
         return this.panel;
     }
 
     public delete(): void {
-
+        if (!this.deleteable) return;
         if (this.selected) this.unSelect();
 
         this.container.removeChild(this.getMainHTMLElement());
 
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
-        document.removeEventListener("mousemove", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
+        document.addEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
+        document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
     }
 
     public grid(showGrid: boolean): void {
         const element = this.getMainHTMLElement();
 
         if (!showGrid) {
-            element.style.removeProperty('--grid-cols');
-            element.style.removeProperty('--grid-rows');    
-        }
-
-        else {
-            element.style.setProperty('--grid-cols', String(config.settings.grid_lock_columns.value));
-            element.style.setProperty('--grid-rows', String(config.settings.grid_lock_rows.value));
+            element.style.removeProperty("--grid-cols");
+            element.style.removeProperty("--grid-rows");
+        } else {
+            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
+            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
     }
 }
-

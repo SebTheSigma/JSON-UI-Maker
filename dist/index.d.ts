@@ -8,6 +8,7 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { DraggableLabel } from "./elements/label.js";
 import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 import "./ui/modals/settings.js";
+export declare let mainJsonUiPanelElement: HTMLElement | undefined;
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let selectedElement: HTMLElement | undefined;
 export declare const panelContainer: HTMLElement;
@@ -19,7 +20,7 @@ export declare function setCopiedElement(element: HTMLElement | undefined): void
 export declare class Builder {
     static formatBindingsArea(): void;
     static downloadServerForm(type: "copy" | "download"): void;
-    static handlePackUpload(): void;
+    static handleUiTexturesUpload(): void;
     static generateAndCopyJsonUI(type: "copy" | "download"): void;
     static isValidPath(parent: HTMLElement): boolean;
     static addLabel(): void;

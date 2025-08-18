@@ -7,45 +7,43 @@ import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 export class DraggableLabel {
+    // Core elements
     container;
     label;
     mirror;
-    bindingsTextPrompt;
-    focussed = false;
-    isDragging;
-    selected;
-    offsetX;
-    offsetY;
-    hasShadow = false;
     shadowLabel;
+    // UI helpers
+    bindingsTextPrompt;
+    // State flags
+    focussed = false;
+    isDragging = false;
+    selected = false;
+    deleteable = true;
+    hasShadow = false;
+    // Positioning & movement
+    offsetX = 0;
+    offsetY = 0;
+    shadowOffsetX = 6;
+    shadowOffsetY = 6;
+    // Data
     lastValue;
-    shadowOffsetX;
-    shadowOffsetY;
-    bindings = "[]";
+    bindings = "";
     /**
      * @param {HTMLElement} container
      */
     constructor(ID, container, labelOptions) {
-        let lastParent = container;
-        let i = 0;
-        parent_loop: while (true) {
-            if (!lastParent)
-                break parent_loop;
-            lastParent = lastParent.parentElement;
-            i++;
-        }
+        const i = GeneralUtil.getElementDepth(container, panelContainer);
         // Saves parameters
         this._constructorArgs = [ID, container, labelOptions];
         this.container = container;
-        this.shadowOffsetX = 6;
-        this.shadowOffsetY = 6;
+        const parentRect = container.getBoundingClientRect();
         const textAlign = labelOptions?.textAlign ?? "left";
         const fontSize = labelOptions?.fontScale ?? 1;
         const fontColor = labelOptions?.fontColor ?? [255, 255, 255];
         // Create the textarea
         this.label = document.createElement("textarea");
         this.label.value = labelOptions ? labelOptions.text : "";
-        this.lastValue = this.label.value;
+        this.label.style.visibility = "visible";
         this.label.className = "draggable-label";
         this.label.style.overflow = "hidden";
         this.label.style.resize = "none";
@@ -61,6 +59,15 @@ export class DraggableLabel {
         this.label.style.fontFamily = "MinecraftRegular";
         this.label.spellcheck = false;
         this.label.style.color = `rgb(${(fontColor[0], fontColor[1], fontColor[2])})`;
+        this.label.style.textAlign = textAlign;
+        this.label.style.fontSize = `${fontSize}em`;
+        this.label.style.left = `${parentRect.width / 2}px`;
+        this.label.style.top = `${parentRect.height / 2}px`;
+        this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
+        this.label.style.position = "absolute";
+        this.label.style.zIndex = String(2 * i + 1);
+        this.label.dataset.id = ID;
+        this.lastValue = this.label.value;
         // Create a hidden mirror for sizing
         this.mirror = document.createElement("div");
         this.mirror.style.position = "absolute";
@@ -73,26 +80,12 @@ export class DraggableLabel {
         this.mirror.style.padding = this.label.style.padding;
         this.mirror.style.border = this.label.style.border;
         this.mirror.style.boxSizing = "border-box";
-        // Properties
-        this.label.style.textAlign = textAlign;
-        this.label.style.fontSize = `${fontSize}em`;
         this.mirror.style.textAlign = textAlign;
         this.mirror.style.fontSize = `${fontSize}em`;
-        // Custom data
-        this.label.dataset.id = ID;
-        const parentRect = container.getBoundingClientRect();
-        const rect = this.label.getBoundingClientRect();
-        this.label.style.left = `${parentRect.width / 2}px`;
-        this.label.style.top = `${parentRect.height / 2}px`;
-        this.label.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.label.style.position = "absolute";
-        this.label.style.zIndex = String(2 * i + 1);
-        this.isDragging = false;
-        this.selected = false;
-        this.offsetX = 0;
-        this.offsetY = 0;
+        const offset = config.magicNumbers.labelToOffset(this.label);
         // Shadow label
         this.shadowLabel = document.createElement("div");
+        this.shadowLabel.style.visibility = "visible";
         this.shadowLabel.style.position = "absolute";
         this.shadowLabel.style.zIndex = String(2 * i);
         this.shadowLabel.style.color = "rgba(0, 0, 0, 0.5)";
@@ -100,7 +93,6 @@ export class DraggableLabel {
         this.shadowLabel.style.fontFamily = this.label.style.fontFamily;
         this.shadowLabel.style.whiteSpace = "pre-wrap";
         this.shadowLabel.style.wordWrap = "break-word";
-        const offset = config.magicNumbers.labelToOffset(this.label);
         this.shadowLabel.style.left = `${StringUtil.cssDimToNumber(this.label.style.left) + this.shadowOffsetX + offset[0]}px`;
         this.shadowLabel.style.top = `${StringUtil.cssDimToNumber(this.label.style.top) + this.shadowOffsetY + offset[1]}px`;
         this.container.appendChild(this.label);
@@ -346,6 +338,8 @@ export class DraggableLabel {
         return this.label;
     }
     delete() {
+        if (!this.deleteable)
+            return;
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.label);

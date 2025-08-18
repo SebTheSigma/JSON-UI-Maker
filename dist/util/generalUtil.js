@@ -1,9 +1,22 @@
 import { GLOBAL_ELEMENT_MAP } from "../index.js";
 export class GeneralUtil {
+    static getElementDepth(el, stopsAtElement = null) {
+        let depth = 0;
+        while (el) {
+            if (el === stopsAtElement)
+                return depth;
+            depth++;
+            el = el.parentElement;
+        }
+        return depth;
+    }
     static elementToClassElement(element) {
         const id = element.dataset.id;
         if (!id)
             return undefined;
+        return GLOBAL_ELEMENT_MAP.get(id);
+    }
+    static idToClassElement(id) {
         return GLOBAL_ELEMENT_MAP.get(id);
     }
     static getCaretScreenPosition(textarea) {

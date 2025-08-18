@@ -5,8 +5,8 @@ export class FileUploader {
      * Handles the event when a file is selected in the "Open Pack" dialog.
      * Loads the selected pack into the image map.
      */
-    static handlePackUpload() {
-        const fileInput = document.getElementById("pack_importer");
+    static handleUiTexturesUpload() {
+        const fileInput = document.getElementById("ui_textures_importer");
         if (!fileInput?.files)
             return;
         const files = Array.from(fileInput.files);

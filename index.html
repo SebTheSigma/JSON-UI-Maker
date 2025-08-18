@@ -10,10 +10,10 @@
 
 <body>
 
-    <label class="pack_importer">
-        <input title="Import Pack" type="file" id="pack_importer" onchange="Builder.handlePackUpload()"
+    <label class="ui_textures_importer">
+        <input title="Import Textures" type="file" id="ui_textures_importer" onchange="Builder.handleUiTexturesUpload()"
             webkitdirectory directory multiple />
-        Import Pack
+        Import Textures
     </label>
 
     <!-- The Settings Modal -->
@@ -123,7 +123,7 @@
             <div class="scripter_title_label">Bindings</div>
             <div style="color: rgb(139, 139, 139);">Advanced Feature</div>
             <div id="errorMessage" title="Default Error Message" style="visibility: hidden; color: #7e0000;">Warnings ⚠️</div>
-            <textarea spellcheck="false" class="bindings" id="bindings"></textarea>
+            <textarea spellcheck="false" readonly class="bindings" id="bindings"></textarea>
 
             <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                 <div style="font-size: 20px; color: rgb(39, 165, 255);">TAB</div>&nbsp To indent
@@ -136,6 +136,10 @@
 
 
     <div id="properties" class="properties"></div>
+
+    <div id="notif-container"></div>
+
+    <div id="mainWarningMessage"></div>
 
     <script src="./dist/index.js" type="module"></script>
 

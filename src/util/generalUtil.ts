@@ -2,10 +2,25 @@ import { GlobalElementMapValue, GLOBAL_ELEMENT_MAP } from "../index.js";
 import { Binding } from "../scripter/bindings/types.js";
 
 export class GeneralUtil {
+    public static getElementDepth(el: HTMLElement | null, stopsAtElement: HTMLElement | null = null): number {
+        let depth = 0;
+        while (el) {
+            if (el === stopsAtElement) return depth;
+
+            depth++;
+            el = el.parentElement;
+        }
+        return depth;
+    }
+
     public static elementToClassElement(element: HTMLElement): GlobalElementMapValue | undefined {
         const id = element.dataset.id!;
         if (!id) return undefined;
 
+        return GLOBAL_ELEMENT_MAP.get(id);
+    }
+
+    public static idToClassElement(id: string): GlobalElementMapValue | undefined {
         return GLOBAL_ELEMENT_MAP.get(id);
     }
 

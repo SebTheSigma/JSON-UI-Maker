@@ -10,17 +10,18 @@ export declare class DraggableLabel {
     container: HTMLElement;
     label: HTMLTextAreaElement;
     mirror: HTMLElement;
-    bindingsTextPrompt: TextPrompt | undefined;
+    shadowLabel: HTMLDivElement;
+    bindingsTextPrompt?: TextPrompt;
     focussed: boolean;
     isDragging: boolean;
     selected: boolean;
+    deleteable: boolean;
+    hasShadow: boolean;
     offsetX: number;
     offsetY: number;
-    hasShadow: boolean;
-    shadowLabel: HTMLDivElement;
-    lastValue: string;
     shadowOffsetX: number;
     shadowOffsetY: number;
+    lastValue: string;
     bindings: string;
     /**
      * @param {HTMLElement} container
