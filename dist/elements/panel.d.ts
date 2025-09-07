@@ -2,6 +2,8 @@ export declare class DraggablePanel {
     container: HTMLElement;
     panel: HTMLElement;
     resizeHandle?: HTMLElement;
+    gridElement?: HTMLElement;
+    centerCircle?: HTMLElement;
     isDragging: boolean;
     isResizing: boolean;
     selected: boolean;
@@ -25,7 +27,11 @@ export declare class DraggablePanel {
     startDrag(e: MouseEvent): void;
     drag(e: MouseEvent): void;
     stopDrag(): void;
+    startResize(e: MouseEvent): void;
+    resize(e: MouseEvent): void;
+    stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
     grid(showGrid: boolean): void;
+    detach(): void;
 }

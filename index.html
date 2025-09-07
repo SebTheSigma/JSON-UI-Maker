@@ -10,18 +10,28 @@
 
 <body>
 
-    <label class="ui_textures_importer">
-        <input title="Import Textures" type="file" id="ui_textures_importer" onchange="Builder.handleUiTexturesUpload()"
-            webkitdirectory directory multiple />
-        Import Textures
-    </label>
+    <div class="importers">
+        <label class="ui_textures_importer">
+            <input title="Import Textures" type="file" id="ui_textures_importer"
+                onchange="Builder.handleUiTexturesUpload()" webkitdirectory directory multiple />
+            Import Textures
+        </label>
+
+        <label class="form_importer">
+            <input title="Upload Form" type="file" id="form_importer"
+                onchange="Builder.uploadForm()" accept=".json"/>
+            Upload Form
+        </label>
+
+    </div>
+
 
     <!-- The Settings Modal -->
     <button class="modalSettingsBtn" id="modalSettingsBtn">
         <label class="settings_label">
             Settings
         </label>
-        
+
         <img class="settings_img" src="settings_cog.png"></img>
     </button>
 
@@ -80,21 +90,33 @@
             <div class="breaker"></div>
 
             <div class="utilElements">
-                <button class="utilElement" type="button" onclick="Builder.reset()">Reset <img style="width: 17px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/reset.webp"> </button>
-                <button class="utilElement" type="button" onclick="Builder.deleteSelected()">Delete Selected <img style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/bin.webp"> </button>
+                <button class="utilElement" type="button" onclick="Builder.reset()">Reset <img
+                        style="width: 17px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/reset.webp"> </button>
+                <button class="utilElement" type="button" onclick="Builder.deleteSelected()">Delete Selected <img
+                        style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/bin.webp"> </button>
 
                 <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                     <div class="utilElement" style="width: 100%;">Form</div>
-                    
-                    <img class="utilElement" title="Copy" onclick="Builder.generateAndCopyJsonUI('copy')" style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/clipboard.webp">
-                    <img class="utilElement" title="Download" onclick="Builder.generateAndCopyJsonUI('download')" style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" tooltip="Download" src="icons/download.webp">
+
+                    <img class="utilElement" title="Copy" onclick="Builder.generateAndCopyJsonUI('copy')"
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/clipboard.webp">
+                    <img class="utilElement" title="Download" onclick="Builder.generateAndCopyJsonUI('download')"
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        tooltip="Download" src="icons/download.webp">
                 </div>
 
                 <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                     <div class="utilElement" style="width: 100%;">Server-Form</div>
-                    
-                    <img class="utilElement" title="Copy" onclick="Builder.downloadServerForm('copy')" style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/clipboard.webp">
-                    <img class="utilElement" title="Download" onclick="Builder.downloadServerForm('download')" style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" tooltip="Download" src="icons/download.webp">
+
+                    <img class="utilElement" title="Copy" onclick="Builder.downloadServerForm('copy')"
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/clipboard.webp">
+                    <img class="utilElement" title="Download" onclick="Builder.downloadServerForm('download')"
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        tooltip="Download" src="icons/download.webp">
                 </div>
 
             </div>
@@ -114,20 +136,28 @@
 
             <div style="color: rgb(139, 139, 139);">For Fixed Collection Index Forms Only</div>
             <div class="scripter_buttons">
-                <button class="generate_js_scripter" id="generate_js_scripter">Copy <img style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/js.webp"> To Clipboard</button>
-                <button class="generate_ts_scripter" id="generate_ts_scripter">Copy <img style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/ts.webp"> To Clipboard</button>
+                <button class="generate_js_scripter" id="generate_js_scripter">Copy <img
+                        style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/js.webp"> To Clipboard</button>
+                <button class="generate_ts_scripter" id="generate_ts_scripter">Copy <img
+                        style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/ts.webp"> To Clipboard</button>
             </div>
 
             <br><br><br>
 
             <div class="scripter_title_label">Bindings</div>
             <div style="color: rgb(139, 139, 139);">Advanced Feature</div>
-            <div id="errorMessage" title="Default Error Message" style="visibility: hidden; color: #7e0000;">Warnings ⚠️</div>
+            <div id="errorMessage" title="Default Error Message" style="visibility: hidden; color: #7e0000;">Warnings ⚠️
+            </div>
             <textarea spellcheck="false" readonly class="bindings" id="bindings"></textarea>
 
             <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                 <div style="font-size: 20px; color: rgb(39, 165, 255);">TAB</div>&nbsp To indent
-                <div onclick="Builder.formatBindingsArea()" style="position: relative; margin-left: 15px;" class="utilElement">Format <img style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);" src="icons/curly_brackets.webp"></div>
+                <div onclick="Builder.formatBindingsArea()" style="position: relative; margin-left: 15px;"
+                    class="utilElement">Format <img
+                        style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
+                        src="icons/curly_brackets.webp"></div>
             </div>
         </div>
     </div>

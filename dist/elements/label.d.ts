@@ -48,5 +48,6 @@ export declare class DraggableLabel {
     getMainHTMLElement(): HTMLElement;
     delete(): void;
     shadow(shouldShadow: boolean): void;
+    detach(): void;
 }
 export {};

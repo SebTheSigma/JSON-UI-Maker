@@ -8,46 +8,30 @@ export class MinecraftSlider {
     public backgroundBar: HTMLElement;
     public scrollingPanel: DraggableScrollingPanel;
     public scrollBarWidth: number;
-    
+    public backgroundBarWidth: number;
+
+    public imageName: string = "ScrollHandle";
+
     public offsetX: number = 0;
     public offsetY: number = 0;
     public isDragging: boolean;
 
     private handleCanvas: DraggableCanvas | undefined;
-    private handleNinesliceInfo: {
-        img: {
-            path: string;
-            name: string;
-        };
-        json: {
-            path: string;
-            name: string;
-        };
-    };
 
     constructor(scrollingPanel: DraggableScrollingPanel) {
-        this.handleNinesliceInfo = {
-            img: {
-                path: "assets/sliders/ScrollHandle.png",
-                name: "ScrollHandle.png",
-            },
-            json: {
-                path: "assets/sliders/ScrollHandle.json",
-                name: "ScrollHandle.json",
-            },
-        };
 
-        this.scrollBarWidth = 8;
+        this.scrollBarWidth = 10;
+        this.backgroundBarWidth = 6;
 
         this.scrollingPanel = scrollingPanel;
         this.backgroundBar = document.createElement("div");
         this.backgroundBar.className = "minecraft-slider";
         this.backgroundBar.style.height = `100%`;
-        this.backgroundBar.style.width = `${this.scrollBarWidth}px`;
+        this.backgroundBar.style.width = `${this.backgroundBarWidth}px`;
 
-        this.backgroundBar.style.position = 'absolute';
+        this.backgroundBar.style.position = "absolute";
         this.backgroundBar.style.right = `0px`;
-        this.backgroundBar.style.top = '0px';
+        this.backgroundBar.style.top = "0px";
 
         this.backgroundBar.style.backgroundColor = "#434343";
         this.scrollingPanel.basePanel.appendChild(this.backgroundBar);
@@ -60,43 +44,44 @@ export class MinecraftSlider {
     }
 
     public async initHandle(): Promise<void> {
-        const imageName = StringUtil.removeFileExtension(this.handleNinesliceInfo.img.name);
-
-        if (!FileUploader.isFileUploaded(imageName)) {
-            const image = await FileUploader.getAssetAsFile(this.handleNinesliceInfo.img.path, this.handleNinesliceInfo.img.name);
-            const json = await FileUploader.getAssetAsFile(this.handleNinesliceInfo.json.path, this.handleNinesliceInfo.json.name);
-
-            await FileUploader.processFileUpload([image, json]);
-        }
-
-        const imageData = images.get(imageName)!;
+        const imageData = images.get(this.imageName)!;
         if (!imageData) return;
 
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png!, imageName, imageData.json!);
+        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png!, this.imageName, imageData.json!);
         canvas.setParse(false);
         canvas.editable(false);
 
         GLOBAL_ELEMENT_MAP.set(id, canvas);
         this.handleCanvas = canvas;
-        this.handleCanvas.canvas.style.transition = 'height 0.5s ease';
+        this.handleCanvas.canvas.style.transition = "height 0.5s ease";
 
         this.backgroundBar.style.zIndex = String(Number(this.scrollingPanel.resizeHandle.style.zIndex) - 1);
         this.handleCanvas.canvas.style.zIndex = String(Number(this.scrollingPanel.resizeHandle.style.zIndex) - 1);
 
-        this.updateHandle()
-        this.handleCanvas.canvas.addEventListener('mousedown', (e) => this.startManualBarScroll(e));
-        document.addEventListener('mousemove', (e) => this.manualBarScroll(e));
-        document.addEventListener('mouseup', () => this.stopManualBarScroll());
+        this.updateHandle();
+
+        /*
+        this.handleCanvas.canvas.addEventListener("mousedown", (e) => this.startManualBarScroll(e));
+        document.addEventListener("mousemove", (e) => this.manualBarScroll(e));
+        document.addEventListener("mouseup", () => this.stopManualBarScroll());
+        */
     }
 
     public updateHandle(): void {
         if (this.isDragging) return;
-        this.handleCanvas!.drawImage(this.scrollBarWidth + 2, this.backgroundBar.clientHeight * ( this.scrollingPanel.panel.clientHeight / this.scrollingPanel.panel.scrollHeight ));
-        this.handleCanvas!.canvasHolder.style.left = '-1px';
-        this.handleCanvas!.canvasHolder.style.top = `${ this.backgroundBar.clientHeight * ( this.scrollingPanel.panel.scrollTop / this.scrollingPanel.panel.scrollHeight)}px`;
+        console.log(this.scrollBarWidth, this.backgroundBar.clientHeight * (this.scrollingPanel.panel.clientHeight / this.scrollingPanel.panel.scrollHeight));
+        this.handleCanvas!.drawImage(
+            this.scrollBarWidth,
+            this.backgroundBar.clientHeight * (this.scrollingPanel.panel.clientHeight / this.scrollingPanel.panel.scrollHeight)
+        );
+        this.handleCanvas!.canvasHolder.style.left = `-${(this.scrollBarWidth - this.backgroundBarWidth) / 2}px`;
+        this.handleCanvas!.canvasHolder.style.top = `${
+            this.backgroundBar.clientHeight * (this.scrollingPanel.panel.scrollTop / this.scrollingPanel.panel.scrollHeight)
+        }px`;
     }
 
+    /*
     public startManualBarScroll(e: MouseEvent): void {
         e.stopPropagation();
         this.isDragging = true;
@@ -130,7 +115,19 @@ export class MinecraftSlider {
         this.isDragging = false;
     }
 
-    public setMoveType(moveType: 'smooth' | 'instant'): void {
-        this.handleCanvas!.canvas.style.transition =  (moveType === 'smooth') ? 'height 0.5s ease' : 'none';
+    */
+
+    public setMoveType(moveType: "smooth" | "instant"): void {
+        this.handleCanvas!.canvas.style.transition = moveType === "smooth" ? "height 0.5s ease" : "none";
+    }
+
+    public delete(): void {
+        this.handleCanvas!.delete();
+        this.backgroundBar.remove();
+
+        /*
+        document.removeEventListener("mousemove", (e) => this.manualBarScroll(e));
+        document.removeEventListener("mouseup", () => this.stopManualBarScroll());
+        */
     }
 }

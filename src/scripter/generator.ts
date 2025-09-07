@@ -1,6 +1,7 @@
 import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
 import { DraggableButton } from "../elements/button.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { Notification } from "../ui/notifs/noficationMaker.js";
 
 export interface FormButtonData {
     texture: string,
@@ -31,12 +32,13 @@ export class ScriptGenerator {
         let txt: string = '';
         if (language === 'ts') {
             txt = buttonDataToTypeScript(buttonInfo);
-            new Notification('JS Copied to Clipboard!');
+            console.log(txt);
+            new Notification('TS Copied to Clipboard!');
         }
 
         else if (language === 'js') {
             txt = buttonDataToJavaScript(buttonInfo);
-            new Notification('TS Copied to Clipboard!');
+            new Notification('JS Copied to Clipboard!');
         }
 
         navigator.clipboard.writeText(txt);

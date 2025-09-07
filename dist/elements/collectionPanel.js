@@ -1,7 +1,5 @@
-import { isInMainWindow, panelContainer } from "../index.js";
+import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
-import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 export class DraggableCollectionPanel {
@@ -9,6 +7,8 @@ export class DraggableCollectionPanel {
     container;
     panel;
     resizeHandle;
+    gridElement;
+    centerCircle;
     // State flags
     isDragging = false;
     isResizing = false;
@@ -45,77 +45,62 @@ export class DraggableCollectionPanel {
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
         this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.panel.style.border = "2px solid black";
-        this.panel.style.outline = "2px solid black";
+        this.panel.style.border = `${config.settings.element_outline.value}px solid black`;
+        this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
         this.resizeHandle.style.zIndex = String(2 * i + 1);
+        this.gridElement = ElementSharedFuncs.generateGridElement();
+        this.centerCircle = ElementSharedFuncs.generateCenterPoint();
         this.panel.appendChild(this.resizeHandle);
+        this.panel.appendChild(this.gridElement);
+        this.panel.appendChild(this.centerCircle);
         this.container.appendChild(this.panel);
         this.initEvents();
-        this.grid(config.settings.show_grid.value);
+        this.grid(false);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
         this.panel.addEventListener("dblclick", (e) => this.select(e));
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
-        this.resizeHandle.addEventListener("mousedown", (e) => ElementSharedFuncs.startResize(e, this));
-        document.addEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
-        document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
+        this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
+        document.addEventListener("mousemove", (e) => this.resize(e));
+        document.addEventListener("mouseup", () => this.stopResize());
     }
     select(e) {
         ElementSharedFuncs.select(e, this);
-        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         ElementSharedFuncs.unSelect(this);
-        this.grid(false);
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
             return;
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-        this.isDragging = true;
-        // Get position relative to parent container
-        const panelRect = this.panel.getBoundingClientRect();
-        this.offsetX = e.clientX - panelRect.left;
-        this.offsetY = e.clientY - panelRect.top;
-        this.panel.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
+        this.centerCircle.style.display = "block";
     }
     drag(e) {
-        if (!this.isDragging || this.isResizing)
-            return;
-        const containerRect = this.container.getBoundingClientRect();
-        if (config.settings.boundary_constraints.value) {
-            let newLeft = e.clientX - containerRect.left - this.offsetX;
-            let newTop = e.clientY - containerRect.top - this.offsetY;
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - this.panel.offsetWidth));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - this.panel.offsetHeight));
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
-        }
-        else {
-            // Calculate position relative to parent container
-            const newLeft = e.clientX - containerRect.left - this.offsetX;
-            const newTop = e.clientY - containerRect.top - this.offsetY;
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this);
     }
     stopDrag() {
-        this.isDragging = false;
-        this.panel.style.cursor = "grab";
-        if (isInMainWindow)
-            updatePropertiesArea();
+        ElementSharedFuncs.stopDrag(this);
+        this.centerCircle.style.display = "none";
+    }
+    startResize(e) {
+        ElementSharedFuncs.startResize(e, this);
+    }
+    resize(e) {
+        if (!this.isResizing)
+            return;
+        ElementSharedFuncs.resize(e, this);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
+    }
+    stopResize() {
+        ElementSharedFuncs.stopResize(this);
     }
     getMainHTMLElement() {
         return this.panel;
@@ -126,21 +111,16 @@ export class DraggableCollectionPanel {
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.getMainHTMLElement());
+        this.detach();
+    }
+    detach() {
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
-        document.removeEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
-        document.removeEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
+        document.removeEventListener("mousemove", (e) => this.resize(e));
+        document.removeEventListener("mouseup", () => this.stopResize());
     }
     grid(showGrid) {
-        const element = this.getMainHTMLElement();
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        }
-        else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
+        ElementSharedFuncs.grid(showGrid, this);
     }
 }
 //# sourceMappingURL=collectionPanel.js.map

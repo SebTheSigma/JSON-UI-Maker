@@ -1,5 +1,5 @@
 import { config } from "./CONFIG.js";
-import { classToJsonUI, JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
+import { classToJsonUI, classToTagName, JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
 import { JSON_TYPES } from "./converterTypes/jsonUITypes.js";
 import { Notification } from "./ui/notifs/noficationMaker.js";
 import { StringUtil } from "./util/stringUtil.js";
@@ -21,8 +21,8 @@ export interface TreeData {
     instructions?: TreeInstructions;
 }
 
-interface StringObjectMap {
-    [key: string]: object | string;
+export interface StringObjectMap {
+    [key: string]: object | string | [] | number;
 }
 
 export class Converter {
@@ -69,7 +69,7 @@ export class Converter {
 
         console.log('startNodeTree', startNodeTree);
 
-        for (let node of Array.from(startNodeTree.childNodes)) {
+        for (let node of Array.from(startNodeTree.childNodes) as HTMLElement[]) {
 
             // Skips the node and goes to its children
             if ((node as HTMLElement)?.dataset?.skip == "true") {
@@ -89,9 +89,11 @@ export class Converter {
                 new Notification(treeData.instructions.Warning.message, 5000, 'warning');
             }
 
+            const type: string = classToTagName.get(node.classList?.[0]!)!;
+
             // Makes the new tree if needed
             if (treeData.instructions.NewTree) {
-                jsonNodes[StringUtil.generateRandomString(8)] = treeData.element!;
+                jsonNodes[`${StringUtil.generateRandomString(8)}-${type}`] = treeData.element!;
                 const panel: JsonUISimpleElement = JSON_TYPES.get(treeData.instructions.NewTree.startingNode)!;
 
                 // Links the element to the panel which starts a new tree
@@ -127,7 +129,7 @@ export class Converter {
                     }
                 }
 
-                const randomString: string = StringUtil.generateRandomString(8);
+                const randomString: string = `${StringUtil.generateRandomString(8)}-${type}`;
                 const link = treeData.instructions?.CommonElementLink ?? "";
 
                 // Adds the node to the jsonUI
@@ -148,9 +150,9 @@ export class Converter {
     public static convertToJsonUi(node: Node, depth: number = 0): string {
         const tree: StringObjectMap = Converter.tree(node, depth);
 
-        console.log('tree', tree)
-
-        console.log('node', node)
+        tree['config'] = {
+            magicNumbers: config.magicNumbers
+        }
 
         const stringifiedTree: string = JSON.stringify(tree, null, 2);
         let commentedStringifiedTree =
@@ -159,4 +161,8 @@ export class Converter {
 
         return commentedStringifiedTree;
     }
+}
+
+export interface SavedConfig {
+    magicNumbers: typeof config.magicNumbers;
 }

@@ -5,15 +5,15 @@ export class GeneralUtil {
         while (el) {
             if (el === stopsAtElement)
                 return depth;
-            depth++;
+            if (el.dataset.skip !== "true") {
+                depth++;
+            }
             el = el.parentElement;
         }
         return depth;
     }
     static elementToClassElement(element) {
         const id = element.dataset.id;
-        if (!id)
-            return undefined;
         return GLOBAL_ELEMENT_MAP.get(id);
     }
     static idToClassElement(id) {

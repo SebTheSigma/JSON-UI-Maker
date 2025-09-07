@@ -17,8 +17,12 @@ import { BindingsArea } from "./scripter/bindings/bindingsArea.js";
 import { ScriptGenerator } from "./scripter/generator.js";
 import { createFormModal } from "./ui/modals/createForm.js";
 import { Notification } from "./ui/notifs/noficationMaker.js";
+import { FormUploader } from "./upload.js";
 import "./ui/modals/settings.js";
+import { initDefaultImages } from "./files/initDefaultImages.js";
 console.log("Script Loaded");
+initDefaultImages();
+console.log("Image-Files Loaded");
 BindingsArea.init();
 console.log("Bindings-Area Loaded");
 ScriptGenerator.init();
@@ -42,19 +46,24 @@ function constructMainPanel() {
     const id = StringUtil.generateRandomString(15);
     const mainPanel = new DraggablePanel(id, panelContainer, false);
     mainPanel.deleteable = false;
-    mainPanel.panel.style.width = '100%';
-    mainPanel.panel.style.height = '100%';
-    mainPanel.panel.style.top = '0px';
-    mainPanel.panel.style.left = '0px';
-    mainPanel.panel.style.visibility = "hidden";
+    mainPanel.panel.style.width = 'calc(100% + 3px)';
+    mainPanel.panel.style.height = 'calc(100% + 3px)';
+    mainPanel.panel.style.top = '-3px';
+    mainPanel.panel.style.left = '-3px';
+    mainPanel.gridElement.style.setProperty("--grid-cols", '2');
+    mainPanel.gridElement.style.setProperty("--grid-rows", '2');
     GLOBAL_ELEMENT_MAP.set(id, mainPanel);
     return { id, mainPanel };
 }
+export let selectedElement = undefined;
 export function setSelectedElement(element) {
     selectedElement = element;
     BindingsArea.updateBindingsEditor();
 }
-export let selectedElement = undefined;
+export let copiedElementData = undefined;
+export function setCopiedElementData(data) {
+    copiedElementData = data;
+}
 export const panelContainer = document.getElementById("main_window");
 export let isInMainWindow = false;
 panelContainer.addEventListener("mouseenter", () => {
@@ -69,11 +78,21 @@ panelContainer.addEventListener("mouseleave", () => {
  * The id is used to access the element.
  */
 export const GLOBAL_ELEMENT_MAP = new Map();
-export let copiedElement = undefined;
-export function setCopiedElement(element) {
-    copiedElement = element;
-}
 export class Builder {
+    static uploadForm() {
+        console.log('Uploading form');
+        const input = document.getElementById("form_importer");
+        const file = input.files[0]; // ✅ first (and only) file
+        if (!file)
+            return;
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            const text = event.target?.result;
+            FormUploader.uploadForm(text);
+            input.value = "";
+        };
+        reader.readAsText(file);
+    }
     static formatBindingsArea() {
         BindingsArea.format();
     }
@@ -140,7 +159,6 @@ export class Builder {
             if (!this.isValidPath(selectedElement))
                 return;
         }
-        console.log(mainJsonUiPanelElement);
         if (!mainJsonUiPanelElement)
             return;
         const id = StringUtil.generateRandomString(15);
@@ -210,10 +228,22 @@ export class Builder {
         GLOBAL_ELEMENT_MAP.set(id, panel);
     }
     static reset() {
+        const elements = Array.from(GLOBAL_ELEMENT_MAP.values());
+        // Removes events
+        for (const element of elements) {
+            if (element.getMainHTMLElement().dataset.id == selectedElement?.dataset.id)
+                continue;
+            element.detach();
+        }
         if (selectedElement) {
             const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
             // Unselectes the element
             selectedElementClass?.delete();
+        }
+        // Removes the elements that are attached to the body
+        const bodyAttachedElements = document.getElementsByClassName("body-attched");
+        for (const element of Array.from(bodyAttachedElements)) {
+            element.remove();
         }
         GLOBAL_ELEMENT_MAP.clear();
         const bgImage = document.getElementById("bg_image");

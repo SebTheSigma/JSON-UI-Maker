@@ -11,6 +11,8 @@ export class DraggablePanel {
     public container: HTMLElement;
     public panel: HTMLElement;
     public resizeHandle?: HTMLElement;
+    public gridElement?: HTMLElement;
+    public centerCircle?: HTMLElement;
 
     // State flags
     public isDragging: boolean = false;
@@ -55,7 +57,7 @@ export class DraggablePanel {
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
         this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.panel.style.border = "2px solid black";
+        this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
 
@@ -66,10 +68,18 @@ export class DraggablePanel {
             this.panel.appendChild(this.resizeHandle);
         }
 
+        this.gridElement = ElementSharedFuncs.generateGridElement();
+
+        this.centerCircle = ElementSharedFuncs.generateCenterPoint();
+        
+        this.panel.appendChild(this.gridElement);
+        this.panel.appendChild(this.centerCircle);
         this.container.appendChild(this.panel);
 
         if (interactable) this.initEvents();
-        this.grid(config.settings.show_grid.value);
+        this.grid(false);
+
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public initEvents(): void {
@@ -78,72 +88,46 @@ export class DraggablePanel {
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
 
-        this.resizeHandle!.addEventListener("mousedown", (e) => ElementSharedFuncs.startResize(e, this));
-        document.addEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
-        document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
+        this.resizeHandle!.addEventListener("mousedown", (e) => this.startResize(e));
+        document.addEventListener("mousemove", (e) => this.resize(e));
+        document.addEventListener("mouseup", () => this.stopResize());
     }
 
     public select(e: MouseEvent): void {
         ElementSharedFuncs.select(e, this);
-        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
         ElementSharedFuncs.unSelect(this);
-        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
         if (e.target === this.resizeHandle) return;
-
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-
-        this.isDragging = true;
-
-        // Get position relative to parent container
-        const panelRect: DOMRect = this.panel.getBoundingClientRect();
-
-        this.offsetX = e.clientX - panelRect.left;
-        this.offsetY = e.clientY - panelRect.top;
-
-        this.panel.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
+        this.centerCircle!.style.display = "block";
     }
 
     public drag(e: MouseEvent): void {
-        e.stopPropagation();
-        if (!this.isDragging || this.isResizing) return;
-        const containerRect: DOMRect = this.container.getBoundingClientRect();
-
-        if (config.settings.boundary_constraints!.value) {
-            let newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            let newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - this.panel.offsetWidth));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - this.panel.offsetHeight));
-
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
-        } else {
-            // Calculate position relative to parent container
-            const newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            const newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            this.panel.style.left = `${newLeft}px`;
-            this.panel.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this);
     }
 
     public stopDrag(): void {
-        this.isDragging = false;
-        this.panel.style.cursor = "grab";
+        ElementSharedFuncs.stopDrag(this);
+        this.centerCircle!.style.display = "none";
+    }
 
-        if (isInMainWindow) updatePropertiesArea();
+    public startResize(e: MouseEvent): void {
+        ElementSharedFuncs.startResize(e, this);
+    }
+
+    public resize(e: MouseEvent): void {
+        if (!this.isResizing) return;
+        ElementSharedFuncs.resize(e, this);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
+    }
+
+    public stopResize(): void {
+        ElementSharedFuncs.stopResize(this);
     }
 
     public getMainHTMLElement(): HTMLElement {
@@ -156,21 +140,17 @@ export class DraggablePanel {
 
         this.container.removeChild(this.getMainHTMLElement());
 
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
-        document.addEventListener("mousemove", (e) => ElementSharedFuncs.resize(e, this));
-        document.addEventListener("mouseup", () => ElementSharedFuncs.stopResize(this));
+        this.detach();
     }
 
     public grid(showGrid: boolean): void {
-        const element = this.getMainHTMLElement();
+        ElementSharedFuncs.grid(showGrid, this);
+    }
 
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        } else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
+    public detach(): void {
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        document.addEventListener("mousemove", (e) => this.resize(e));
+        document.addEventListener("mouseup", () => this.stopResize());
     }
 }

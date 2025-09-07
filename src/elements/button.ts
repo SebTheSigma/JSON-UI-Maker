@@ -3,8 +3,6 @@ import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { images, ImageDataState } from "../index.js";
-import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { DraggableCanvas } from "./canvas.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { DraggableLabel } from "./label.js";
@@ -32,6 +30,7 @@ export class DraggableButton {
     public displayTexture?: string;
     public displayText?: DraggableLabel;
     public aspectRatio: number;
+    public centerCircle?: HTMLElement;
 
     // Core elements
     public container: HTMLElement;
@@ -39,6 +38,7 @@ export class DraggableButton {
     public button: HTMLElement;
     public canvas: HTMLCanvasElement;
     public resizeHandle: HTMLDivElement;
+    public gridElement: HTMLElement;
 
     // State flags
     public isDragging: boolean = false;
@@ -90,12 +90,14 @@ export class DraggableButton {
 
         // Holds the element in a div
         this.button = document.createElement("div");
+        this.button.className = "draggable-button";
         this.button.style.width = `${this.imageDataDefault.png?.width}px`;
         this.button.style.height = `${this.imageDataDefault.png?.height}px`;
-        this.button.className = "draggable-button";
         this.button.style.visibility = "visible";
         this.button.style.zIndex = String(i * 2);
         this.button.style.position = "absolute";
+        this.button.style.outline = `${config.settings.element_outline.value}px solid black`;
+        this.button.style.border = `${config.settings.element_outline.value}px solid black`;
         this.button.dataset.defaultImageName = defaultTex;
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
@@ -106,6 +108,7 @@ export class DraggableButton {
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
         this.canvas.style.zIndex = String(2 * i);
+        this.canvas.style.imageRendering = "pixelated";
 
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
@@ -116,7 +119,6 @@ export class DraggableButton {
             this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, this.imageDataDefault, true);
         }
 
-        // First element and therefore needs different positioning to center
         this.button.style.left = `${rect.width / 2 - parseFloat(this.canvas.style.width) / 2}px`;
         this.button.style.top = `${rect.height / 2 - parseFloat(this.canvas.style.height) / 2}px`;
 
@@ -124,27 +126,37 @@ export class DraggableButton {
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
         this.resizeHandle.style.zIndex = String(2 * i + 1);
-        this.resizeHandle.style.top = "-15px";
+        this.resizeHandle.style.bottom = "-15px";
 
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
+        this.outlineDiv.classList.add("body-attched");
         this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
         this.outlineDiv.style.zIndex = "1000";
 
+        this.gridElement = ElementSharedFuncs.generateGridElement();
+        this.gridElement.style.top = `0px`;
+
+        this.centerCircle = ElementSharedFuncs.generateCenterPoint();
+
         this.button.appendChild(this.canvas);
         this.button.appendChild(this.resizeHandle);
+        this.button.appendChild(this.gridElement);
+        this.button.appendChild(this.centerCircle);
         this.container.appendChild(this.button);
         document.body.appendChild(this.outlineDiv);
 
         this.initEvents();
         this.setDisplayText(buttonText ?? "Label");
-        this.grid(config.settings.show_grid.value);
+        this.grid(false);
+
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public initEvents(): void {
-        this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
-        this.canvas.addEventListener("dblclick", (e) => this.select(e));
+        this.gridElement.addEventListener("mousedown", (e) => this.startDrag(e));
+        this.gridElement.addEventListener("dblclick", (e) => this.select(e));
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
 
@@ -156,18 +168,16 @@ export class DraggableButton {
         this.button.addEventListener("mouseenter", this.startHover.bind(this));
         this.button.addEventListener("mouseleave", this.stopHover.bind(this));
 
-        this.canvas.addEventListener("mousedown", this.startPress.bind(this));
-        this.canvas.addEventListener("mouseup", this.stopPress.bind(this));
+        this.gridElement.addEventListener("mousedown", this.startPress.bind(this));
+        this.gridElement.addEventListener("mouseup", this.stopPress.bind(this));
     }
 
     public select(e: MouseEvent): void {
         ElementSharedFuncs.select(e, this);
-        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
         ElementSharedFuncs.unSelect(this);
-        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
@@ -175,52 +185,17 @@ export class DraggableButton {
         this.outlineDiv.style.display = "none";
         if (this.isResizing) this.stopResize();
 
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-
-        this.isDragging = true;
-
-        // Get position relative to parent container
-        const canvasRect: DOMRect = this.button.getBoundingClientRect();
-
-        this.offsetX = e.clientX - canvasRect.left;
-        this.offsetY = e.clientY - canvasRect.top;
-
-        this.canvas.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
+        this.centerCircle!.style.display = "block";
     }
 
     public drag(e: MouseEvent): void {
-        if (!this.isDragging || this.isResizing) return;
-        const containerRect: DOMRect = this.container.getBoundingClientRect();
-
-        if (config.settings.boundary_constraints!.value) {
-            let newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            let newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - Number(this.button.style.width.replace("px", ""))));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - Number(this.button.style.height.replace("px", ""))));
-
-            this.button.style.left = `${newLeft}px`;
-            this.button.style.top = `${newTop}px`;
-        } else {
-            // Calculate position relative to parent container
-            const newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            const newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            this.button.style.left = `${newLeft}px`;
-            this.button.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this);
     }
 
     public stopDrag(): void {
-        this.isDragging = false;
-        this.canvas.style.cursor = "grab";
-        if (isInMainWindow) updatePropertiesArea();
+        ElementSharedFuncs.stopDrag(this);
+        this.centerCircle!.style.display = "none";
     }
 
     public startResize(e: MouseEvent): void {
@@ -235,42 +210,11 @@ export class DraggableButton {
     public resize(e: MouseEvent): void {
         if (!this.isResizing) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
-        const containerRect: DOMRect = this.container.getBoundingClientRect();
+        const newWidth: number = this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0;
+        const newHeight: number = this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0;
 
-        const widthChange: number = e.clientX - this.resizeStartX!;
-        const heightChange: number = e.clientY - this.resizeStartY!;
-
-        let newWidth: number;
-        let newHeight: number;
-
-        // If shift key is pressed, maintain aspect ratio,
-        // only if the image is a 9-slice
-        if (keyboardEvent?.shiftKey || !this.getCurrentlyRenderedState().json) {
-            newWidth = this.resizeStartWidth! + widthChange;
-            newHeight = newWidth / this.aspectRatio;
-
-            if (config.settings.boundary_constraints!.value) {
-                // Determine the maximum possible width while maintaining aspect ratio
-                const maxWidth: number = containerRect.width - parseFloat(this.button.style.left);
-                const maxHeight: number = containerRect.height - parseFloat(this.button.style.top);
-
-                // Adjust width and height proportionally
-                if (newWidth > maxWidth || newHeight > maxHeight) {
-                    if (newWidth / maxWidth > newHeight / maxHeight) {
-                        newWidth = maxWidth;
-                        newHeight = newWidth / this.aspectRatio;
-                    } else {
-                        newHeight = maxHeight;
-                        newWidth = newHeight * this.aspectRatio;
-                    }
-                }
-            }
-        } else {
-            newWidth = this.resizeStartWidth! + widthChange;
-            newHeight = this.resizeStartHeight! + heightChange;
-        }
-
-        this.drawImage(newWidth, newHeight);
+        this.drawImage(newWidth, newHeight, this.getCurrentlyRenderedState());
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public outlineResize(e: MouseEvent): void {
@@ -281,38 +225,51 @@ export class DraggableButton {
         const widthChange: number = e.clientX - this.resizeStartX!;
         const heightChange: number = e.clientY - this.resizeStartY!;
 
-        let newWidth: number;
-        let newHeight: number;
+        let newWidth: number = this.resizeStartWidth! + widthChange;
+        let newHeight: number = this.resizeStartHeight! + heightChange;
+        const maxWidth: number = containerRect.width - parseFloat(this.button.style.left);
+        const maxHeight: number = containerRect.height - parseFloat(this.button.style.top);
 
         // If shift key is pressed, maintain aspect ratio,
         // only if the image is a 9-slice
-        if (keyboardEvent?.shiftKey || !this.getCurrentlyRenderedState().json) {
-            newWidth = this.resizeStartWidth! + widthChange;
+        const currentRenderState = this.getCurrentlyRenderedState() ?? this.imageDataDefault;
+
+        if (!currentRenderState!.json) {
             newHeight = newWidth / this.aspectRatio;
+        }
 
-            if (config.settings.boundary_constraints!.value) {
-                // Determine the maximum possible width while maintaining aspect ratio
-                const maxWidth: number = containerRect.width - parseFloat(this.button.style.left);
-                const maxHeight: number = containerRect.height - parseFloat(this.button.style.top);
+        else if (keyboardEvent?.shiftKey) {
+            if (newHeight > newWidth) {
+                newWidth = newHeight;
+            } else {
+                newHeight = newWidth;
+            }
+        }
 
+        const borderWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth);
+        if (config.settings.boundary_constraints!.value) {
+
+            if (!currentRenderState.json) {
                 // Adjust width and height proportionally
                 if (newWidth > maxWidth || newHeight > maxHeight) {
                     if (newWidth / maxWidth > newHeight / maxHeight) {
                         newWidth = maxWidth;
                         newHeight = newWidth / this.aspectRatio;
-                    } else {
+                    }
+
+                    else {
                         newHeight = maxHeight;
                         newWidth = newHeight * this.aspectRatio;
                     }
                 }
             }
-        } else {
-            newWidth = this.resizeStartWidth! + widthChange;
-            newHeight = this.resizeStartHeight! + heightChange;
-        }
 
-        this.outlineDiv.style.width = `${newWidth - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
-        this.outlineDiv.style.height = `${newHeight - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
+            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - borderWidth}px`;
+            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - borderWidth}px`;
+        } else {
+            this.outlineDiv.style.width = `${newWidth - borderWidth}px`;
+            this.outlineDiv.style.height = `${newHeight - borderWidth}px`;
+        }
     }
 
     public stopResize(): void {
@@ -323,13 +280,15 @@ export class DraggableButton {
     public startHover() {
         this.canvas.style.cursor = "pointer";
         this.isHovering = true;
+        this.aspectRatio = this.imageDataHover.png?.width! / this.imageDataHover.png?.height!;
 
-        this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
+        this.drawImage(this.canvas.width, this.canvas.height * this.aspectRatio, this.imageDataHover);
     }
 
     public stopHover() {
         this.canvas.style.cursor = "default";
         this.isHovering = false;
+        this.aspectRatio = this.imageDataDefault.png?.width! / this.imageDataDefault.png?.height!;
 
         this.drawImage(this.canvas.width, this.canvas.height);
     }
@@ -337,6 +296,7 @@ export class DraggableButton {
     public startPress() {
         this.canvas.style.cursor = "grab";
         this.isPressing = true;
+        this.aspectRatio = this.imageDataPressed.png?.width! / this.imageDataPressed.png?.height!;
 
         this.drawImage(this.canvas.width, this.canvas.height, this.imageDataPressed);
     }
@@ -344,8 +304,14 @@ export class DraggableButton {
     public stopPress() {
         this.isPressing = false;
 
-        if (this.isHovering) this.canvas.style.cursor = "pointer";
-        else this.canvas.style.cursor = "default";
+        if (this.isHovering) {
+            this.canvas.style.cursor = "pointer";
+            this.aspectRatio = this.imageDataDefault.png?.width! / this.imageDataDefault.png?.height!;
+        }
+        else {
+            this.canvas.style.cursor = "default";
+            this.aspectRatio = this.imageDataHover.png?.width! / this.imageDataHover.png?.height!;
+        }
 
         if (this.isHovering) this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
         else this.drawImage(this.canvas.width, this.canvas.height);
@@ -373,8 +339,8 @@ export class DraggableButton {
         if (width <= 1) width = 1;
         if (height <= 1) height = 1;
 
-        const floorWidth: number = Math.floor(width);
-        const floorHeight: number = Math.floor(height);
+        let floorWidth: number = Math.floor(width);
+        let floorHeight: number = Math.floor(height);
 
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
 
@@ -388,18 +354,42 @@ export class DraggableButton {
             const newImageData: ImageData = new ImageData(pixels, floorWidth, floorHeight);
             ctx.putImageData(newImageData, 0, 0);
         } else {
-            // --- Standard scaling path ---
-            this.canvas.width = floorWidth;
-            this.canvas.height = floorHeight;
+            // Desired max bounding box
+            const maxWidth = floorWidth;
+            const maxHeight = floorHeight;
 
-            // Convert ImageData into a temporary canvas
+            // Original image size
+            const imgW = imageDataState.png!.width;
+            const imgH = imageDataState.png!.height;
+
+            // Compute scale factor so image fits inside box
+            const scale = Math.min(maxWidth / imgW, maxHeight / imgH);
+
+            // New scaled dimensions
+            floorWidth = Math.floor(imgW * scale);
+            floorHeight = Math.floor(imgH * scale);
+
+            // Resize canvas to match scaled size
+            this.canvas.width = maxWidth;
+            this.canvas.height = maxHeight;
+
+            // Draw image scaled into canvas
             const offscreen = document.createElement("canvas");
-            offscreen.width = imageDataState.png!.width;
-            offscreen.height = imageDataState.png!.height;
+            offscreen.width = imgW;
+            offscreen.height = imgH;
             offscreen.getContext("2d")!.putImageData(imageDataState.png!, 0, 0);
 
-            // Scale it into our target canvas
-            ctx.drawImage(offscreen, 0, 0, offscreen.width, offscreen.height, 0, 0, floorWidth, floorHeight);
+            // Compute centering offsets
+            const dx = (maxWidth - floorWidth) / 2;
+            const dy = (maxHeight - floorHeight) / 2;
+
+            // Draw image scaled into canvas, centered
+            ctx.drawImage(
+                offscreen,
+                0, 0, imgW, imgH,        // source rect
+                dx, dy, floorWidth, floorHeight // destination rect
+            );
+
         }
 
         // **Scale the display size (but keep internal resolution high)**
@@ -523,7 +513,12 @@ export class DraggableButton {
         }
 
         this.container.removeChild(this.getMainHTMLElement());
+        document.body.removeChild(this.outlineDiv);
 
+        this.detach();
+    }
+
+    public detach(): void {
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
@@ -532,14 +527,6 @@ export class DraggableButton {
     }
 
     public grid(showGrid: boolean): void {
-        const element = this.getMainHTMLElement();
-
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        } else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
+        ElementSharedFuncs.grid(showGrid, this);
     }
 }

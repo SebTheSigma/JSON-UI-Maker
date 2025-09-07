@@ -7,6 +7,8 @@ export declare class DraggableCanvas {
     canvasHolder: HTMLDivElement;
     canvas: HTMLCanvasElement;
     resizeHandle: HTMLDivElement;
+    gridElement: HTMLElement;
+    centerCircle?: HTMLElement;
     aspectRatio: number;
     isDragging: boolean;
     isResizing: boolean;
@@ -44,9 +46,10 @@ export declare class DraggableCanvas {
     drawImage(width: number, height: number, _updateImage?: boolean): void;
     changeImage(imageName: string): void;
     setParse(shouldParse: boolean): void;
-    detatchEvents(): void;
+    detatchAllEvents(): void;
     getMainHTMLElement(): HTMLElement;
     editable(isEditable: boolean): void;
     delete(): void;
+    detach(): void;
     grid(showGrid: boolean): void;
 }

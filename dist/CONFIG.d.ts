@@ -26,6 +26,12 @@ export declare const config: {
             displayName: string;
             onchange: (value: number) => void;
         };
+        grid_lock_radius: {
+            type: string;
+            editable: boolean;
+            value: number;
+            displayName: string;
+        };
         grid_lock: {
             type: string;
             editable: boolean;
@@ -39,6 +45,13 @@ export declare const config: {
             value: boolean;
             displayName: string;
             onchange: (value: boolean) => void;
+        };
+        element_outline: {
+            type: string;
+            editable: boolean;
+            value: number;
+            displayName: string;
+            onchange: (value: number) => void;
         };
     };
     magicNumbers: {

@@ -1,7 +1,5 @@
-import { isInMainWindow, panelContainer } from "../index.js";
+import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
-import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { MinecraftSlider } from "../ui/sliders/addMinecraftSlider.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
@@ -53,8 +51,7 @@ export class DraggableScrollingPanel {
         this.panel.style.width = this.basePanel.style.width;
         this.panel.style.height = this.basePanel.style.height;
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.panel.style.border = "2px solid black";
-        this.panel.style.outline = "2px solid black";
+        this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.zIndex = String(2 * i);
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
@@ -65,7 +62,6 @@ export class DraggableScrollingPanel {
         this.container.appendChild(this.basePanel);
         this.slider = new MinecraftSlider(this);
         this.initEvents();
-        this.grid(config.settings.show_grid.value);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -79,61 +75,28 @@ export class DraggableScrollingPanel {
     }
     select(e) {
         ElementSharedFuncs.select(e, this);
-        this.grid(config.settings.show_grid.value);
     }
     unSelect(_e) {
         ElementSharedFuncs.unSelect(this);
-        this.grid(false);
     }
     startDrag(e) {
         if (e.target === this.resizeHandle)
             return;
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-        this.isDragging = true;
-        // Get position relative to parent container
-        const panelRect = this.panel.getBoundingClientRect();
-        this.offsetX = e.clientX - panelRect.left;
-        this.offsetY = e.clientY - panelRect.top;
-        this.panel.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
     }
     drag(e) {
-        e.stopPropagation();
-        if (!this.isDragging || this.isResizing)
-            return;
-        const containerRect = this.container.getBoundingClientRect();
-        if (config.settings.boundary_constraints.value) {
-            let newLeft = e.clientX - containerRect.left - this.offsetX;
-            let newTop = e.clientY - containerRect.top - this.offsetY;
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - this.panel.offsetWidth));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - this.panel.offsetHeight));
-            this.basePanel.style.left = `${newLeft}px`;
-            this.basePanel.style.top = `${newTop}px`;
-        }
-        else {
-            // Calculate position relative to parent container
-            const newLeft = e.clientX - containerRect.left - this.offsetX;
-            const newTop = e.clientY - containerRect.top - this.offsetY;
-            this.basePanel.style.left = `${newLeft}px`;
-            this.basePanel.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this, this.basePanel);
     }
     stopDrag() {
-        this.isDragging = false;
-        this.panel.style.cursor = "grab";
-        if (isInMainWindow)
-            updatePropertiesArea();
+        ElementSharedFuncs.stopDrag(this);
     }
     startResize(e) {
         this.slider.setMoveType("instant");
         ElementSharedFuncs.startResize(e, this);
     }
     resize(e) {
+        if (!this.isResizing)
+            return;
         this.slider.updateHandle();
         ElementSharedFuncs.resize(e, this);
         this.basePanel.style.width = this.panel.style.width;
@@ -152,21 +115,15 @@ export class DraggableScrollingPanel {
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.basePanel);
+        this.slider.delete();
+        this.panel.removeEventListener("scroll", () => this.slider.updateHandle());
+        this.detach();
+    }
+    detach() {
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.resize(e));
         document.removeEventListener("mouseup", () => this.stopResize());
-    }
-    grid(showGrid) {
-        const element = this.getMainHTMLElement();
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        }
-        else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
     }
 }
 //# sourceMappingURL=scrollingPanel.js.map

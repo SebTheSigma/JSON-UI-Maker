@@ -7,7 +7,9 @@ export class GeneralUtil {
         while (el) {
             if (el === stopsAtElement) return depth;
 
-            depth++;
+            if (el.dataset.skip !== "true") {
+                depth++;
+            }
             el = el.parentElement;
         }
         return depth;
@@ -15,7 +17,6 @@ export class GeneralUtil {
 
     public static elementToClassElement(element: HTMLElement): GlobalElementMapValue | undefined {
         const id = element.dataset.id!;
-        if (!id) return undefined;
 
         return GLOBAL_ELEMENT_MAP.get(id);
     }
@@ -144,4 +145,5 @@ export class GeneralUtil {
 
         return typeof input[Symbol.iterator] === 'function'
     }
+
 }

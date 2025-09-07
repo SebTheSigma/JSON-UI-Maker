@@ -19,6 +19,8 @@ export class DraggableCanvas {
     public canvasHolder: HTMLDivElement;
     public canvas: HTMLCanvasElement;
     public resizeHandle: HTMLDivElement;
+    public gridElement: HTMLElement;
+    public centerCircle?: HTMLElement;
 
     // Display
     public aspectRatio: number;
@@ -74,7 +76,7 @@ export class DraggableCanvas {
 
         // Creates the canvas and puts it in the canvas holder
         this.canvas = document.createElement("canvas");
-        this.canvas.style.zIndex = String(2 * i);
+        this.canvas.style.zIndex = String(i * 2);
 
         // Draws the image
         const ctx: CanvasRenderingContext2D = this.canvas.getContext("2d")!;
@@ -83,10 +85,10 @@ export class DraggableCanvas {
         // Always fits the image into the parent container
         if (rect.width > rect.height) {
             const scaledHeight: number = rect.height * 0.8;
-            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight);
+            this.drawImage(scaledHeight * this.aspectRatio, scaledHeight, true);
         } else if (rect.width <= rect.height) {
             const scaledWidth: number = rect.width * 0.8;
-            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio);
+            this.drawImage(scaledWidth, scaledWidth / this.aspectRatio, true);
         }
 
         this.canvasHolder.style.left = `${rect.width / 2 - parseFloat(this.canvas.style.width) / 2}px`;
@@ -96,26 +98,38 @@ export class DraggableCanvas {
         this.resizeHandle = document.createElement("div");
         this.resizeHandle.className = "resize-handle";
         this.resizeHandle.style.zIndex = String(2 * i + 1);
-        this.resizeHandle.style.top = "-15px";
 
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
+        this.outlineDiv.classList.add("body-attched");
         this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
         this.outlineDiv.style.zIndex = "1000";
 
+        this.gridElement = ElementSharedFuncs.generateGridElement();
+        this.gridElement.style.top = `0px`;
+
+        this.centerCircle = ElementSharedFuncs.generateCenterPoint();
+
         this.canvasHolder.appendChild(this.canvas);
         this.canvasHolder.appendChild(this.resizeHandle);
+        this.canvasHolder.appendChild(this.gridElement);
+        this.canvasHolder.appendChild(this.centerCircle);
         this.container.appendChild(this.canvasHolder);
         document.body.appendChild(this.outlineDiv);
 
         this.initEvents();
-        this.grid(config.settings.show_grid.value);
+        this.grid(false);
+
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public initEvents(): void {
-        this.canvas.addEventListener("mousedown", (e) => this.startDrag(e));
-        this.canvas.addEventListener("dblclick", (e) => this.select(e));
+
+        // Using the grid element as a drag target, i cant seem
+        // to get the canvas to accept input through the grid so this is a workaround
+        this.gridElement.addEventListener("mousedown", (e) => this.startDrag(e));
+        this.gridElement.addEventListener("dblclick", (e) => this.select(e));
         document.addEventListener("mousemove", (e) => this.drag(e));
         document.addEventListener("mouseup", () => this.stopDrag());
 
@@ -128,67 +142,29 @@ export class DraggableCanvas {
     public select(e: MouseEvent): void {
         if (!this.isEditable) return;
         ElementSharedFuncs.select(e, this);
-        this.grid(config.settings.show_grid.value);
     }
 
     public unSelect(_e?: MouseEvent): void {
         if (!this.isEditable) return;
         ElementSharedFuncs.unSelect(this);
-        this.grid(false);
     }
 
     public startDrag(e: MouseEvent): void {
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-
         if (e.target === this.resizeHandle || !this.isEditable) return;
-
         this.outlineDiv.style.display = "none";
         if (this.isResizing) this.stopResize();
 
-        this.isDragging = true;
-
-        // Get position relative to parent container
-        const canvasRect: DOMRect = this.canvasHolder.getBoundingClientRect();
-
-        this.offsetX = e.clientX - canvasRect.left;
-        this.offsetY = e.clientY - canvasRect.top;
-
-        this.canvas.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
+        this.centerCircle!.style.display = "block";
     }
 
     public drag(e: MouseEvent): void {
-        if (!this.isDragging || this.isResizing || !this.isEditable) return;
-        const containerRect: DOMRect = this.container.getBoundingClientRect();
-
-        if (config.settings.boundary_constraints!.value) {
-            let newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            let newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - Number(this.canvasHolder.style.width.replace("px", ""))));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - Number(this.canvasHolder.style.height.replace("px", ""))));
-
-            this.canvasHolder.style.left = `${newLeft}px`;
-            this.canvasHolder.style.top = `${newTop}px`;
-        } else {
-            // Calculate position relative to parent container
-            const newLeft: number = e.clientX - containerRect.left - this.offsetX;
-            const newTop: number = e.clientY - containerRect.top - this.offsetY;
-
-            this.canvasHolder.style.left = `${newLeft}px`;
-            this.canvasHolder.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this);
     }
 
     public stopDrag(): void {
-        this.isDragging = false;
-        this.canvas.style.cursor = "grab";
-        if (isInMainWindow) updatePropertiesArea();
+        ElementSharedFuncs.stopDrag(this);
+        this.centerCircle!.style.display = "none";
     }
 
     public startResize(e: MouseEvent): void {
@@ -204,51 +180,18 @@ export class DraggableCanvas {
     }
 
     public resize(e: MouseEvent): void {
-        e.stopPropagation(); // Prevent event from bubbling to parent
         if (!this.isResizing || !this.isEditable) return;
-        const containerRect: DOMRect = this.container.getBoundingClientRect();
-
-        const widthChange: number = e.clientX - this.resizeStartX!;
-        const heightChange: number = e.clientY - this.resizeStartY!;
-
-        let newWidth: number = this.resizeStartWidth! + widthChange;
-        let newHeight: number = this.resizeStartHeight! + heightChange;
-
-        // If shift key is pressed, maintain aspect ratio,
-        // only if the image is a 9-slice
-        if (!this.nineSlice) {
-            newHeight = newWidth / this.aspectRatio;
-
-            if (config.settings.boundary_constraints!.value) {
-                // Determine the maximum possible width while maintaining aspect ratio
-                const maxWidth: number = containerRect.width - parseFloat(this.canvasHolder.style.left);
-                const maxHeight: number = containerRect.height - parseFloat(this.canvasHolder.style.top);
-
-                // Adjust width and height proportionally
-                if (newWidth > maxWidth || newHeight > maxHeight) {
-                    if (newWidth / maxWidth > newHeight / maxHeight) {
-                        newWidth = maxWidth;
-                        newHeight = newWidth / this.aspectRatio;
-                    } else {
-                        newHeight = maxHeight;
-                        newWidth = newHeight * this.aspectRatio;
-                    }
-                }
-            }
-        } else if (keyboardEvent?.shiftKey) {
-            if (newHeight > newWidth) {
-                newWidth = newHeight;
-            } else {
-                newHeight = newWidth;
-            }
-        }
+        e.stopPropagation(); // Prevent event from bubbling to parent
+        const newWidth: number = this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0;
+        const newHeight: number = this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0;
 
         this.drawImage(newWidth, newHeight);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public outlineResize(e: MouseEvent): void {
-        e.stopPropagation(); // Prevent event from bubbling to parent
         if (!this.isResizing || !this.isEditable) return;
+        e.stopPropagation(); // Prevent event from bubbling to parent
         const containerRect: DOMRect = this.container.getBoundingClientRect();
 
         const widthChange: number = e.clientX - this.resizeStartX!;
@@ -256,29 +199,16 @@ export class DraggableCanvas {
 
         let newWidth: number = this.resizeStartWidth! + widthChange;
         let newHeight: number = this.resizeStartHeight! + heightChange;
+        const maxWidth: number = containerRect.width - parseFloat(this.canvasHolder.style.left);
+        const maxHeight: number = containerRect.height - parseFloat(this.canvasHolder.style.top);
 
         // If shift key is pressed, maintain aspect ratio,
         // only if the image is a 9-slice
         if (!this.nineSlice) {
             newHeight = newWidth / this.aspectRatio;
+        }
 
-            if (config.settings.boundary_constraints!.value) {
-                // Determine the maximum possible width while maintaining aspect ratio
-                const maxWidth: number = containerRect.width - parseFloat(this.canvasHolder.style.left);
-                const maxHeight: number = containerRect.height - parseFloat(this.canvasHolder.style.top);
-
-                // Adjust width and height proportionally
-                if (newWidth > maxWidth || newHeight > maxHeight) {
-                    if (newWidth / maxWidth > newHeight / maxHeight) {
-                        newWidth = maxWidth;
-                        newHeight = newWidth / this.aspectRatio;
-                    } else {
-                        newHeight = maxHeight;
-                        newWidth = newHeight * this.aspectRatio;
-                    }
-                }
-            }
-        } else if (keyboardEvent?.shiftKey) {
+        else if (keyboardEvent?.shiftKey) {
             if (newHeight > newWidth) {
                 newWidth = newHeight;
             } else {
@@ -286,8 +216,30 @@ export class DraggableCanvas {
             }
         }
 
-        this.outlineDiv.style.width = `${newWidth - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
-        this.outlineDiv.style.height = `${newHeight - StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth)}px`;
+        const borderWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth);
+        if (config.settings.boundary_constraints!.value) {
+
+            if (!this.nineSlice) {
+                // Adjust width and height proportionally
+                if (newWidth > maxWidth || newHeight > maxHeight) {
+                    if (newWidth / maxWidth > newHeight / maxHeight) {
+                        newWidth = maxWidth;
+                        newHeight = newWidth / this.aspectRatio;
+                    }
+
+                    else {
+                        newHeight = maxHeight;
+                        newWidth = newHeight * this.aspectRatio;
+                    }
+                }
+            }
+
+            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - borderWidth}px`;
+            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - borderWidth}px`;
+        } else {
+            this.outlineDiv.style.width = `${newWidth - borderWidth}px`;
+            this.outlineDiv.style.height = `${newHeight - borderWidth}px`;
+        }
     }
 
     public stopResize(): void {
@@ -375,7 +327,7 @@ export class DraggableCanvas {
         this.canvasHolder.dataset.shouldParse = `${shouldParse}`.toLowerCase();
     }
 
-    public detatchEvents(): void {
+    public detatchAllEvents(): void {
         this.canvas.removeEventListener("mousedown", (e) => this.startDrag(e));
         this.canvas.removeEventListener("dblclick", (e) => this.select(e));
         document.removeEventListener("mousemove", (e) => this.drag(e));
@@ -395,7 +347,7 @@ export class DraggableCanvas {
         if (!isEditable) {
             this.stopDrag();
             this.stopResize();
-            this.detatchEvents();
+            this.detatchAllEvents();
 
             if (this.selected) this.unSelect();
         } else {
@@ -403,8 +355,8 @@ export class DraggableCanvas {
         }
 
         this.resizeHandle.style.display = isEditable ? "block" : "none";
-        this.canvasHolder.style.outline = isEditable ? "2px solid black" : "none";
-        this.canvasHolder.style.border = isEditable ? "2px solid black" : "none";
+        this.canvasHolder.style.outline = isEditable ? `${config.settings.element_outline.value}px solid black` : "none";
+        this.canvasHolder.style.border = isEditable ? `${config.settings.element_outline.value}px solid black` : "none";
 
         this.isEditable = isEditable;
     }
@@ -416,6 +368,10 @@ export class DraggableCanvas {
         this.container.removeChild(this.getMainHTMLElement());
         document.body.removeChild(this.outlineDiv);
 
+        this.detach();
+    }
+
+    public detach(): void {
         document.removeEventListener("mousemove", (e) => this.drag(e));
         document.removeEventListener("mouseup", () => this.stopDrag());
         document.removeEventListener("mousemove", (e) => this.outlineResize(e));
@@ -424,14 +380,6 @@ export class DraggableCanvas {
     }
 
     public grid(showGrid: boolean): void {
-        const element = this.getMainHTMLElement();
-
-        if (!showGrid) {
-            element.style.removeProperty("--grid-cols");
-            element.style.removeProperty("--grid-rows");
-        } else {
-            element.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
-            element.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
-        }
+        ElementSharedFuncs.grid(showGrid, this);
     }
 }

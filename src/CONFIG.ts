@@ -1,6 +1,6 @@
-import { selectedElement } from "./index.js";
+import { GLOBAL_ELEMENT_MAP, GlobalElementMapValue, selectedElement } from "./index.js";
 import { GeneralUtil } from "./util/generalUtil.js";
-
+import { isGridableElement, isResizeableElement } from "./elements/sharedElement.js";
 
 export const config = {
     settings: {
@@ -25,6 +25,7 @@ export const config = {
             onchange: (value: number) => {
                 if (!selectedElement) return;
                 const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (!isGridableElement(selectedElementClass)) return;
 
                 if (selectedElementClass) selectedElementClass.grid(config.settings.show_grid.value);
             }
@@ -38,9 +39,16 @@ export const config = {
             onchange: (value: number) => {
                 if (!selectedElement) return;
                 const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (!isGridableElement(selectedElementClass)) return;
 
                 if (selectedElementClass) selectedElementClass.grid(config.settings.show_grid.value);
             }
+        },
+        grid_lock_radius: {
+            type: "number",
+            editable: true,
+            value: 10,
+            displayName: "Grid Lock Radius"  
         },
         grid_lock: {
             type: "checkbox",
@@ -51,6 +59,7 @@ export const config = {
             onchange: (value: boolean) => {
                 if (!selectedElement) return;
                 const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (!isGridableElement(selectedElementClass)) return;
 
                 if (selectedElementClass) selectedElementClass.grid(config.settings.show_grid.value);
             }
@@ -64,8 +73,25 @@ export const config = {
             onchange: (value: boolean) => {
                 if (!selectedElement) return;
                 const selectedElementClass = GeneralUtil.elementToClassElement(selectedElement);
+                if (!isGridableElement(selectedElementClass)) return;
 
                 if (selectedElementClass) selectedElementClass.grid(value);
+            }
+        },
+        element_outline: {
+            type: "number",
+            editable: true,
+            value: 2,
+            displayName: "Element Outline",
+
+            onchange: (value: number) => {
+                const elements: GlobalElementMapValue[] = Array.from(GLOBAL_ELEMENT_MAP.values());
+
+                for (const element of elements) {
+                    const getMainHTMLElement = element.getMainHTMLElement();
+                    getMainHTMLElement.style.outlineWidth = `${value}px`;
+                    getMainHTMLElement.style.borderWidth = `${value}px`;
+                }
             }
         }
     },

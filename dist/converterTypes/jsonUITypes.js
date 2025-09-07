@@ -157,7 +157,7 @@ export const JSON_TYPES_GENERATOR = new Map([
         "size": ["100%", "100%"],
         "controls": [
             {
-                "long_form@common_dialogs.${config.nameSpace}_panel_no_buttons": {
+                "long_form@common_dialogs.main_panel_no_buttons": {
                     "$title_panel": "common_dialogs.standard_title_label",
                     "$title_size": ["100% - 15px", 10],
                     "$title_max_size": ["100% - 15px", 10],

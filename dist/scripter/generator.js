@@ -1,5 +1,6 @@
 import { buttonDataToJavaScript, buttonDataToTypeScript } from "./scriptFormText.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { Notification } from "../ui/notifs/noficationMaker.js";
 export class ScriptGenerator {
     static init() {
         const generateJavaScriptButton = document.getElementById("generate_js_scripter");
@@ -20,11 +21,12 @@ export class ScriptGenerator {
         let txt = '';
         if (language === 'ts') {
             txt = buttonDataToTypeScript(buttonInfo);
-            new Notification('JS Copied to Clipboard!');
+            console.log(txt);
+            new Notification('TS Copied to Clipboard!');
         }
         else if (language === 'js') {
             txt = buttonDataToJavaScript(buttonInfo);
-            new Notification('TS Copied to Clipboard!');
+            new Notification('JS Copied to Clipboard!');
         }
         navigator.clipboard.writeText(txt);
     }

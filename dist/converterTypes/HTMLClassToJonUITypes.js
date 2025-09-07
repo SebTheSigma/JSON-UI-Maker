@@ -193,7 +193,7 @@ export const classToJsonUI = new Map([
             const jsonUIElement = {
                 offset: [
                     (offset[0] + config.magicNumbers.fontOffsetX) * ui_scaler,
-                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler + getFontScaledOffsetY(parseFloat(element.style.fontSize)),
+                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler,
                 ],
                 layer: Number(element.style.zIndex),
                 type: "label",
@@ -235,12 +235,12 @@ export const classToJsonUI = new Map([
                 type: "panel",
                 anchor_from: "top_left",
                 anchor_to: "top_left",
-                $scroll_size: [5 * ui_scaler, (processedHeight - 4) * ui_scaler],
-                $scrolling_pane_size: [(processedWidth - 4) * ui_scaler, (processedHeight - 0) * ui_scaler],
+                $scroll_size: [10 * ui_scaler, processedHeight * ui_scaler],
+                $scrolling_pane_size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 $scrolling_pane_offset: [0, 0],
                 $scroll_bar_right_padding_size: [0, 0],
             };
-            const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}-link`;
+            const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}-skip`;
             const instructions = {
                 ContinuePath: true,
                 NewTree: {
@@ -258,7 +258,7 @@ export const classToJsonUI = new Map([
                 anchor_from: "top_left",
                 controls: [
                     {
-                        [`${StringUtil.generateRandomString(8)}@common.scrolling_panel`]: {
+                        [`${StringUtil.generateRandomString(8)}-sc_linker_panel@common.scrolling_panel`]: {
                             anchor_to: "top_left",
                             anchor_from: "top_left",
                             $show_background: false,
@@ -276,5 +276,13 @@ export const classToJsonUI = new Map([
             return { element: structure, instructions: instructions };
         },
     ],
+]);
+export const classToTagName = new Map([
+    ["draggable-panel", "panel"],
+    ["draggable-canvas", "image"],
+    ["draggable-button", "button"],
+    ["draggable-collection_panel", "collection_panel"],
+    ["draggable-label", "label"],
+    ["draggable-scrolling_panel", "scrolling_panel"],
 ]);
 //# sourceMappingURL=HTMLClassToJonUITypes.js.map

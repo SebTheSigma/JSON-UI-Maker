@@ -19,12 +19,13 @@ export class FileUploader {
     }
 
     public static async processFileUpload(files: File[]): Promise<void> {
-        const pngFiles = files.filter((file) => file.name.endsWith(".png"));
+        const pngFiles = files.filter((file) => file.name.endsWith(".png") || file.name.endsWith(".jpg") || file.name.endsWith(".jpeg") || file.name.endsWith(".webp"));
 
         const tasks = pngFiles.map(async (pngFile) => {
             const baseName = pngFile.name.replace(/\.[^.]*$/, "");
 
             const imageData = await this.readImageAsImageData(pngFile);
+            console.warn(imageData);
 
             const existingData = images.get(baseName) ?? {};
             existingData.png = imageData;

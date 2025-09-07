@@ -1,3 +1,4 @@
+import { config } from "./CONFIG.js";
 import { JsonUISimpleElement } from "./converterTypes/HTMLClassToJonUITypes.js";
 export interface TreeInstructions {
     ContinuePath: boolean;
@@ -14,8 +15,8 @@ export interface TreeData {
     element?: JsonUISimpleElement;
     instructions?: TreeInstructions;
 }
-interface StringObjectMap {
-    [key: string]: object | string;
+export interface StringObjectMap {
+    [key: string]: object | string | [] | number;
 }
 export declare class Converter {
     /**
@@ -46,4 +47,6 @@ export declare class Converter {
      */
     static convertToJsonUi(node: Node, depth?: number): string;
 }
-export {};
+export interface SavedConfig {
+    magicNumbers: typeof config.magicNumbers;
+}

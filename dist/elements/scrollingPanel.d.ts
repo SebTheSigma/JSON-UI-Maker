@@ -33,5 +33,5 @@ export declare class DraggableScrollingPanel {
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
-    grid(showGrid: boolean): void;
+    detach(): void;
 }

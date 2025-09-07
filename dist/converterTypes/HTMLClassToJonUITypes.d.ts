@@ -4,3 +4,4 @@ export interface JsonUISimpleElement {
     controls?: object[];
 }
 export declare const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string) => TreeData>;
+export declare const classToTagName: Map<string, string>;

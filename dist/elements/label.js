@@ -1,7 +1,6 @@
-import { isInMainWindow, panelContainer } from "../index.js";
+import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";
@@ -51,7 +50,8 @@ export class DraggableLabel {
         this.label.style.minWidth = "10px";
         this.label.style.minHeight = "20px";
         this.label.style.maxWidth = `${panelContainer.getBoundingClientRect().width}px`;
-        this.label.style.border = "2px solid black";
+        this.label.style.border = `${config.settings.element_outline.value}px solid black`;
+        this.label.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.label.style.font = "16px sans-serif";
         this.label.style.padding = "4px";
         this.label.wrap = "off";
@@ -83,6 +83,7 @@ export class DraggableLabel {
         this.mirror.style.boxSizing = "border-box";
         this.mirror.style.textAlign = textAlign;
         this.mirror.style.fontSize = `${fontSize}em`;
+        this.mirror.textContent = this.label.value;
         const offset = config.magicNumbers.labelToOffset(this.label);
         // Shadow label
         this.shadowLabel = document.createElement("div");
@@ -94,6 +95,9 @@ export class DraggableLabel {
         this.shadowLabel.style.fontFamily = this.label.style.fontFamily;
         this.shadowLabel.style.whiteSpace = "pre-wrap";
         this.shadowLabel.style.wordWrap = "break-word";
+        this.shadowLabel.style.fontSize = `${fontSize}em`;
+        this.shadowLabel.style.textAlign = textAlign;
+        this.shadowLabel.textContent = this.label.value;
         this.shadowLabel.style.left = `${StringUtil.cssDimToNumber(this.label.style.left) + this.shadowOffsetX + offset[0]}px`;
         this.shadowLabel.style.top = `${StringUtil.cssDimToNumber(this.label.style.top) + this.shadowOffsetY + offset[1]}px`;
         this.container.appendChild(this.label);
@@ -122,7 +126,6 @@ export class DraggableLabel {
         else
             this.label.style.color = 'white';
         const mirrorRect = this.mirror.getBoundingClientRect();
-        const scalar = parseFloat(this.label.style.fontSize);
         this.label.style.width = `${mirrorRect.width}px`;
         this.label.style.height = `${mirrorRect.height}px`;
         const offset = config.magicNumbers.labelToOffset(this.label);
@@ -255,49 +258,18 @@ export class DraggableLabel {
         ElementSharedFuncs.unSelect(this);
     }
     startDrag(e) {
-        // Stop propagation for nested elements
-        for (let elementName of AllJsonUIElements) {
-            if (this.container.classList.contains(elementName)) {
-                e.stopPropagation();
-            }
-        }
-        this.isDragging = true;
-        // Get position relative to parent container
-        const labelRect = this.label.getBoundingClientRect();
-        this.offsetX = e.clientX - labelRect.left;
-        this.offsetY = e.clientY - labelRect.top;
-        this.label.style.cursor = "grabbing";
+        ElementSharedFuncs.startDrag(e, this);
     }
     drag(e) {
-        e.stopPropagation();
         if (!this.isDragging)
             return;
-        const containerRect = this.container.getBoundingClientRect();
-        if (config.settings.boundary_constraints.value) {
-            let newLeft = e.clientX - containerRect.left - this.offsetX;
-            let newTop = e.clientY - containerRect.top - this.offsetY;
-            // Constrain to container bounds
-            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - this.label.offsetWidth));
-            newTop = Math.max(0, Math.min(newTop, containerRect.height - this.label.offsetHeight));
-            this.label.style.left = `${newLeft}px`;
-            this.label.style.top = `${newTop}px`;
-        }
-        else {
-            // Calculate position relative to parent container
-            const newLeft = e.clientX - containerRect.left - this.offsetX;
-            const newTop = e.clientY - containerRect.top - this.offsetY;
-            this.label.style.left = `${newLeft}px`;
-            this.label.style.top = `${newTop}px`;
-        }
+        ElementSharedFuncs.drag(e, this);
         const offset = config.magicNumbers.labelToOffset(this.label);
         this.shadowLabel.style.left = `${StringUtil.cssDimToNumber(this.label.style.left) + this.shadowOffsetX + offset[0]}px`;
         this.shadowLabel.style.top = `${StringUtil.cssDimToNumber(this.label.style.top) + this.shadowOffsetY + offset[1]}px`;
     }
     stopDrag() {
-        this.isDragging = false;
-        this.label.style.cursor = "grab";
-        if (isInMainWindow)
-            updatePropertiesArea();
+        ElementSharedFuncs.stopDrag(this);
     }
     setParse(shouldParse) {
         this.label.dataset.shouldParse = `${shouldParse}`.toLowerCase();
@@ -318,12 +290,20 @@ export class DraggableLabel {
         this.container.removeChild(this.label);
         this.container.removeChild(this.mirror);
         this.container.removeChild(this.shadowLabel);
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
+        this.detach();
     }
     shadow(shouldShadow) {
         this.hasShadow = shouldShadow;
+        console.log(this.shadowLabel, shouldShadow);
         this.shadowLabel.style.display = shouldShadow ? "block" : "none";
+    }
+    detach() {
+        document.removeEventListener("mousemove", (e) => this.drag(e));
+        document.removeEventListener("mouseup", () => this.stopDrag());
+        window.removeEventListener("keydown", (e) => {
+            if (this.focussed)
+                this.handleKeyboardInput(e);
+        });
     }
 }
 //# sourceMappingURL=label.js.map

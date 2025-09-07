@@ -18,11 +18,13 @@ export declare class DraggableButton {
     displayTexture?: string;
     displayText?: DraggableLabel;
     aspectRatio: number;
+    centerCircle?: HTMLElement;
     container: HTMLElement;
     outlineDiv: HTMLDivElement;
     button: HTMLElement;
     canvas: HTMLCanvasElement;
     resizeHandle: HTMLDivElement;
+    gridElement: HTMLElement;
     isDragging: boolean;
     isResizing: boolean;
     isHovering: boolean;
@@ -74,5 +76,6 @@ export declare class DraggableButton {
     setDisplayText(text: string): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
+    detach(): void;
     grid(showGrid: boolean): void;
 }
