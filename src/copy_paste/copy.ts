@@ -6,9 +6,33 @@ import { DraggableCollectionPanel } from "../elements/collectionPanel.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { DraggableButton } from "../elements/button.js";
+import { config } from "../CONFIG.js";
+import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
 
 export interface CopiedElementData {
     [key: string]: any;
+    children?: CopiedElementData[];
+}
+
+function processChildren(mainElement: HTMLElement): CopiedElementData[] {
+    const children: HTMLElement[] = Array.from(mainElement.children) as HTMLElement[];
+
+    // Processes the children of the element being copied
+    const childrenCopiedData: CopiedElementData[] = [];
+    for (const child of children) {
+        if (child.dataset.skip == "true") continue;
+        const childClassElement: GlobalElementMapValue | undefined = GeneralUtil.elementToClassElement(child);
+        if (!childClassElement) continue;
+
+        const getChildCopiedData = conversionMap.get(childClassElement.getMainHTMLElement().classList[0]!);
+
+        if (!getChildCopiedData) continue;
+        const childCopiedData: CopiedElementData | undefined = getChildCopiedData(childClassElement);
+
+        if (childCopiedData) childrenCopiedData.push(childCopiedData);
+    }
+
+    return childrenCopiedData;
 }
 
 export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) => CopiedElementData | undefined> = new Map([
@@ -41,7 +65,7 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
             const mainElement: HTMLTextAreaElement = elementClass.getMainHTMLElement() as HTMLTextAreaElement;
             if (!(elementClass instanceof DraggablePanel)) return undefined;
 
-            return {
+            const data: CopiedElementData = {
                 type: "draggable-panel",
                 oldId: mainElement.dataset.id,
 
@@ -50,6 +74,12 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 left: StringUtil.cssDimToNumber(mainElement.style.left),
                 top: StringUtil.cssDimToNumber(mainElement.style.top),
             };
+
+            const childrenCopiedData = processChildren(mainElement);
+
+            if (childrenCopiedData.length > 0) data.children = childrenCopiedData;
+
+            return data;
         },
     ],
     [
@@ -58,7 +88,7 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
             const mainElement: HTMLTextAreaElement = elementClass.getMainHTMLElement() as HTMLTextAreaElement;
             if (!(elementClass instanceof DraggableCollectionPanel)) return undefined;
 
-            return {
+            const data: CopiedElementData = {
                 type: "draggable-collection_panel",
                 oldId: mainElement.dataset.id,
 
@@ -68,6 +98,12 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 top: StringUtil.cssDimToNumber(mainElement.style.top),
                 collectionName: mainElement.dataset.collectionName,
             };
+
+            const childrenCopiedData = processChildren(mainElement);
+
+            if (childrenCopiedData.length > 0) data.children = childrenCopiedData;
+
+            return data;
         },
     ],
     [
@@ -76,7 +112,7 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
             const mainElement: HTMLTextAreaElement = elementClass.getMainHTMLElement() as HTMLTextAreaElement;
             if (!(elementClass instanceof DraggableCanvas)) return undefined;
 
-            return {
+            const data: CopiedElementData = {
                 type: "draggable-canvas",
                 oldId: mainElement.dataset.id,
 
@@ -86,6 +122,12 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 top: StringUtil.cssDimToNumber(mainElement.style.top),
                 imageName: mainElement.dataset.imageName,
             };
+
+            const childrenCopiedData = processChildren(mainElement);
+
+            if (childrenCopiedData.length > 0) data.children = childrenCopiedData;
+
+            return data;
         },
     ],
     [
@@ -107,7 +149,7 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 hoverTexture: mainElement.dataset.hoverImageName,
                 pressedTexture: mainElement.dataset.pressedImageName,
                 displayTexture: mainElement.dataset.displayImageName,
-                collectionIndex: mainElement.dataset.collectionIndex
+                collectionIndex: mainElement.dataset.collectionIndex,
             };
 
             if (elementClass.displayText) {
@@ -121,14 +163,36 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
             return copyData;
         },
     ],
+    [
+        "draggable-scrolling_panel",
+        (elementClass: GlobalElementMapValue): CopiedElementData | undefined => {
+            const mainElement: HTMLTextAreaElement = elementClass.getMainHTMLElement() as HTMLTextAreaElement;
+            if (!(elementClass instanceof DraggableScrollingPanel)) return undefined;
+
+            const data: CopiedElementData = {
+                type: "draggable-scrolling_panel",
+                oldId: mainElement.dataset.id,
+
+                width: StringUtil.cssDimToNumber(mainElement.style.width),
+                height: StringUtil.cssDimToNumber(mainElement.style.height),
+                left: StringUtil.cssDimToNumber(mainElement.style.left),
+                top: StringUtil.cssDimToNumber(mainElement.style.top),
+            };
+
+            const childrenCopiedData = processChildren(mainElement);
+
+            if (childrenCopiedData.length > 0) data.children = childrenCopiedData;
+
+            return data;
+        },
+    ],
 ]);
 
 export class Copier {
-    public static copyElement(): void {
-        if (!selectedElement) return;
-        console.log(selectedElement, "selectedElement");
+    public static copyElement(id: string): void {
 
-        const elementClass: GlobalElementMapValue = GeneralUtil.elementToClassElement(selectedElement)!;
+        const elementClass: GlobalElementMapValue = GeneralUtil.idToClassElement(id)!;
+        if (!elementClass) return;
 
         const copiedElementConversionFunction: (elementClass: GlobalElementMapValue) => CopiedElementData | undefined = conversionMap.get(
             elementClass.getMainHTMLElement().classList[0]!

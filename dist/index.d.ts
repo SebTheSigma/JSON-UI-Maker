@@ -8,12 +8,17 @@ import { DraggableCollectionPanel } from "./elements/collectionPanel.js";
 import { DraggableLabel } from "./elements/label.js";
 import { DraggableScrollingPanel } from "./elements/scrollingPanel.js";
 import { CopiedElementData } from "./copy_paste/copy.js";
+import { ResizeableElements } from "./elements/sharedElement.js";
 import "./ui/modals/settings.js";
-export declare let mainJsonUiPanelElement: HTMLElement | undefined;
+import "./elements/groupedEventlisteners.js";
 export declare let selectedElement: HTMLElement | undefined;
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let copiedElementData: CopiedElementData | undefined;
 export declare function setCopiedElementData(data: CopiedElementData | undefined): void;
+export declare let draggedElement: GlobalElementMapValue | undefined;
+export declare function setDraggedElement(classElement: GlobalElementMapValue | undefined): void;
+export declare let resizedElement: ResizeableElements | undefined;
+export declare function setResizedElement(classElement: ResizeableElements | undefined): void;
 export declare const panelContainer: HTMLElement;
 export declare let isInMainWindow: boolean;
 export type GlobalElementMapValue = DraggableButton | DraggableCanvas | DraggablePanel | DraggableCollectionPanel | DraggableLabel | DraggableScrollingPanel;
@@ -24,7 +29,7 @@ export declare class Builder {
     static downloadServerForm(type: "copy" | "download"): void;
     static handleUiTexturesUpload(): void;
     static generateAndCopyJsonUI(type: "copy" | "download"): void;
-    static isValidPath(parent: HTMLElement): boolean;
+    static isValidPath(parent: HTMLElement, childType?: "scrolling_panel" | "collection_panel" | "label" | "button" | "canvas" | "panel"): boolean;
     static addLabel(): void;
     static addPanel(): void;
     static addCollectionPanel(): void;
@@ -33,8 +38,10 @@ export declare class Builder {
     static addScrollingPanel(): void;
     static reset(): void;
     static deleteSelected(): void;
+    static delete(id: string): void;
     static setSettingToggle(setting: keyof typeof config.settings, value: any): void;
     static addImage(imageName: string): void;
+    static updateExplorer(): void;
 }
 export interface ImageDataState {
     png?: ImageData;

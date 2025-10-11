@@ -5,6 +5,7 @@ import { AllJsonUIElements } from "./elements.js";
 import { MinecraftSlider } from "../ui/sliders/addMinecraftSlider.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 
 export class DraggableScrollingPanel {
     // Core elements
@@ -78,17 +79,16 @@ export class DraggableScrollingPanel {
         this.slider = new MinecraftSlider(this);
 
         this.initEvents();
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
 
     public initEvents(): void {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
         this.panel.addEventListener("dblclick", (e) => this.select(e));
-        document.addEventListener("mousemove", (e) => this.drag(e));
-        document.addEventListener("mouseup", () => this.stopDrag());
 
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
 
         this.panel.addEventListener("scroll", () => this.slider.updateHandle());
     }
@@ -147,14 +147,19 @@ export class DraggableScrollingPanel {
         this.slider.delete();
 
         this.panel.removeEventListener("scroll", () => this.slider.updateHandle());
-
-        this.detach();
     }
 
-    public detach(): void {
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
-        document.removeEventListener("mousemove", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
+    public detach(): void {}
+
+    public hide(): void {
+        this.panel.style.outline = "0px solid black";
+        this.resizeHandle.style.visibility = "hidden";
+        this.slider.hide();
+    }
+
+    public show(): void {
+        this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
+        this.resizeHandle.style.visibility = "visible";
+        this.slider.show();
     }
 }

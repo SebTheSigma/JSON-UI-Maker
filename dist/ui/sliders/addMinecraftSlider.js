@@ -102,5 +102,13 @@ export class MinecraftSlider {
         document.removeEventListener("mouseup", () => this.stopManualBarScroll());
         */
     }
+    hide() {
+        this.backgroundBar.style.visibility = "hidden";
+        this.handleCanvas?.hide();
+    }
+    show() {
+        this.backgroundBar.style.visibility = "visible";
+        this.handleCanvas?.show();
+    }
 }
 //# sourceMappingURL=addMinecraftSlider.js.map

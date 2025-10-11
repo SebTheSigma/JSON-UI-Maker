@@ -8,10 +8,21 @@ import { config } from "../CONFIG.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { Notification } from "../ui/notifs/noficationMaker.js";
 import { DraggableButton } from "../elements/button.js";
+import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
+function processChildren(copiedElement, elementClassMainHTMLElement) {
+    if (copiedElement.children && copiedElement.children.length > 0) {
+        for (const child of copiedElement.children) {
+            const paste = pasteConversionMap.get(child.type);
+            if (!paste)
+                continue;
+            paste(child, elementClassMainHTMLElement, true);
+        }
+    }
+}
 export const pasteConversionMap = new Map([
     [
         "draggable-label",
-        (copiedElement, parent) => {
+        (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
             const label = new DraggableLabel(id, parent, {
                 text: copiedElement.text,
@@ -23,55 +34,81 @@ export const pasteConversionMap = new Map([
             label.shadowLabel.style.fontFamily = copiedElement.fontFamily;
             label.mirror.style.fontFamily = copiedElement.fontFamily;
             label.label.style.fontFamily = copiedElement.fontFamily;
-            label.label.dispatchEvent(new Event("input"));
+            if (isChild) {
+                label.label.style.left = `${copiedElement.left}px`;
+                label.label.style.top = `${copiedElement.top}px`;
+                const offset = config.magicNumbers.labelToOffset(label.label);
+                label.shadowLabel.style.left = `${StringUtil.cssDimToNumber(label.label.style.left) + label.shadowOffsetX + offset[0]}px`;
+                label.shadowLabel.style.top = `${StringUtil.cssDimToNumber(label.label.style.top) + label.shadowOffsetY + offset[1]}px`;
+            }
             label.shadow(copiedElement.hasShadow);
+            label.updateSize(true);
             GLOBAL_ELEMENT_MAP.set(id, label);
-            return label;
+            if (!label)
+                new Notification("Error pasting element", 5000, "error");
         },
     ],
     [
         "draggable-panel",
-        (copiedElement, parent) => {
+        (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
             const panel = new DraggablePanel(id, parent);
             panel.panel.style.width = `${copiedElement.width}px`;
             panel.panel.style.height = `${copiedElement.height}px`;
+            if (isChild) {
+                panel.panel.style.left = `${copiedElement.left}px`;
+                panel.panel.style.top = `${copiedElement.top}px`;
+            }
             ElementSharedFuncs.updateCenterCirclePosition(panel);
             GLOBAL_ELEMENT_MAP.set(id, panel);
-            return panel;
+            if (!panel)
+                new Notification("Error pasting element", 5000, "error");
+            processChildren(copiedElement, panel.panel);
         },
     ],
     [
         "draggable-collection_panel",
-        (copiedElement, parent) => {
+        (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
             const panel = new DraggableCollectionPanel(id, parent, copiedElement.collectionName ?? config.defaultCollectionName);
             panel.panel.style.width = `${copiedElement.width}px`;
             panel.panel.style.height = `${copiedElement.height}px`;
+            if (isChild) {
+                panel.panel.style.left = `${copiedElement.left}px`;
+                panel.panel.style.top = `${copiedElement.top}px`;
+            }
             ElementSharedFuncs.updateCenterCirclePosition(panel);
             GLOBAL_ELEMENT_MAP.set(id, panel);
-            return panel;
+            if (!panel)
+                new Notification("Error pasting element", 5000, "error");
+            processChildren(copiedElement, panel.panel);
         },
     ],
     [
         "draggable-canvas",
-        (copiedElement, parent) => {
+        (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
             const imageInfo = images.get(copiedElement.imageName);
             if (!imageInfo) {
                 new Notification("Image name not found", 5000, "error");
                 return undefined;
             }
-            const panel = new DraggableCanvas(id, parent, imageInfo?.png, copiedElement.imageName, imageInfo?.json);
-            panel.drawImage(copiedElement.width, copiedElement.height);
-            ElementSharedFuncs.updateCenterCirclePosition(panel);
-            GLOBAL_ELEMENT_MAP.set(id, panel);
-            return panel;
+            const canvas = new DraggableCanvas(id, parent, imageInfo?.png, copiedElement.imageName, imageInfo?.json);
+            canvas.drawImage(copiedElement.width, copiedElement.height);
+            if (isChild) {
+                canvas.canvasHolder.style.left = `${copiedElement.left}px`;
+                canvas.canvasHolder.style.top = `${copiedElement.top}px`;
+            }
+            ElementSharedFuncs.updateCenterCirclePosition(canvas);
+            GLOBAL_ELEMENT_MAP.set(id, canvas);
+            if (!canvas)
+                new Notification("Error pasting element", 5000, "error");
+            processChildren(copiedElement, canvas.canvasHolder);
         },
     ],
     [
         "draggable-button",
-        (copiedElement, parent) => {
+        (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
             const displayimageInfo = images.get(copiedElement.displayTexture);
             if (!displayimageInfo) {
@@ -80,19 +117,19 @@ export const pasteConversionMap = new Map([
             const defaultimageInfo = images.get(copiedElement.defaultTexture);
             if (!defaultimageInfo) {
                 new Notification("Default-Image name not found", 5000, "error");
-                return undefined;
+                return;
             }
             const hoverimageInfo = images.get(copiedElement.hoverTexture);
             if (!hoverimageInfo) {
                 new Notification("Hover-Image name not found", 5000, "error");
-                return undefined;
+                return;
             }
             const pressedimageInfo = images.get(copiedElement.pressedTexture);
             if (!pressedimageInfo) {
                 new Notification("Pressed-Image name not found", 5000, "error");
-                return undefined;
+                return;
             }
-            const panel = new DraggableButton(id, parent, {
+            const button = new DraggableButton(id, parent, {
                 defaultTexture: copiedElement.defaultTexture,
                 hoverTexture: copiedElement.hoverTexture,
                 pressedTexture: copiedElement.pressedTexture,
@@ -100,9 +137,9 @@ export const pasteConversionMap = new Map([
                 collectionIndex: copiedElement.collectionIndex,
                 buttonText: copiedElement.buttonLabel.text,
             });
-            panel.drawImage(copiedElement.width, copiedElement.height);
+            button.drawImage(copiedElement.width, copiedElement.height);
             if (copiedElement.buttonLabel) {
-                const displayLabel = panel.displayText;
+                const displayLabel = button.displayText;
                 const labels = [displayLabel.label, displayLabel.mirror, displayLabel.shadowLabel];
                 for (const label of labels) {
                     label.style.fontFamily = copiedElement.buttonLabel.fontFamily;
@@ -119,35 +156,58 @@ export const pasteConversionMap = new Map([
             }
             if (copiedElement.displayCanvas) {
                 console.log(copiedElement);
-                panel.setDisplayImage(copiedElement.displayTexture);
-                const canvas = panel.displayCanvas;
+                button.setDisplayImage(copiedElement.displayTexture);
+                const canvas = button.displayCanvas;
                 canvas.drawImage(copiedElement.displayCanvas.width, copiedElement.displayCanvas.height);
                 canvas.canvasHolder.style.left = `${copiedElement.displayCanvas.left}px`;
                 canvas.canvasHolder.style.top = `${copiedElement.displayCanvas.top}px`;
             }
-            const rect = panel.container.getBoundingClientRect();
-            panel.button.style.left = `${rect.width / 2 - parseFloat(panel.canvas.style.width) / 2}px`;
-            panel.button.style.top = `${rect.height / 2 - parseFloat(panel.canvas.style.height) / 2}px`;
-            ElementSharedFuncs.updateCenterCirclePosition(panel);
+            const rect = button.container.getBoundingClientRect();
+            button.button.style.left = `${rect.width / 2 - parseFloat(button.canvas.style.width) / 2}px`;
+            button.button.style.top = `${rect.height / 2 - parseFloat(button.canvas.style.height) / 2}px`;
+            if (isChild) {
+                button.button.style.left = `${copiedElement.left}px`;
+                button.button.style.top = `${copiedElement.top}px`;
+            }
+            ElementSharedFuncs.updateCenterCirclePosition(button);
+            GLOBAL_ELEMENT_MAP.set(id, button);
+            if (!button)
+                new Notification("Error pasting element", 5000, "error");
+        },
+    ],
+    [
+        "draggable-scrolling_panel",
+        (copiedElement, parent, isChild = false) => {
+            const id = StringUtil.generateRandomString(15);
+            const panel = new DraggableScrollingPanel(id, parent);
+            panel.panel.style.width = `${copiedElement.width}px`;
+            panel.panel.style.height = `${copiedElement.height}px`;
+            panel.basePanel.style.width = panel.panel.style.width;
+            panel.basePanel.style.height = panel.panel.style.height;
+            if (isChild) {
+                panel.basePanel.style.left = `${copiedElement.left}px`;
+                panel.basePanel.style.top = `${copiedElement.top}px`;
+            }
+            panel.slider.updateHandle();
             GLOBAL_ELEMENT_MAP.set(id, panel);
-            return panel;
+            if (!panel)
+                new Notification("Error pasting element", 5000, "error");
+            processChildren(copiedElement, panel.panel);
         },
     ],
 ]);
 export class Paster {
     static paste() {
-        if (!selectedElement || !copiedElementData)
+        if (!copiedElementData)
             return;
-        if (!Builder.isValidPath(selectedElement)) {
+        const parent = selectedElement ?? config.rootElement;
+        if (!Builder.isValidPath(parent)) {
             new Notification("Selected element cannot have children", 5000, "error");
             return;
         }
-        const getClassElementFunc = pasteConversionMap.get(copiedElementData.type);
-        const element = getClassElementFunc(copiedElementData, selectedElement);
-        if (!element) {
-            new Notification("Error pasting element", 5000, "error");
-            return;
-        }
+        const paste = pasteConversionMap.get(copiedElementData.type);
+        paste(copiedElementData, parent);
+        new Notification("Element pasted", 5000, "notif");
     }
 }
 //# sourceMappingURL=paste.js.map

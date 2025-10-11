@@ -34,4 +34,6 @@ export declare class DraggableCollectionPanel {
     delete(): void;
     detach(): void;
     grid(showGrid: boolean): void;
+    hide(): void;
+    show(): void;
 }

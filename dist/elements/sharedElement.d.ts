@@ -35,7 +35,7 @@ export declare class ElementSharedFuncs {
     /**
      * Handles the selection of an element. If the element is already selected, it is deselected.
      * If another element is already selected, it is deselected and the given element is selected.
-     * The selected element is highlighted with a blue border and updated in the properties area.
+     * The selected element is highlighted with a blue outline and updated in the properties area.
      * @param e The mouse event that triggered the selection.
      * @param classElement The element to select.
      */
@@ -89,4 +89,6 @@ export declare class ElementSharedFuncs {
      */
     static generateGridElement(): HTMLElement;
     static grid(showGrid: boolean, classElement: GridableElements): void;
+    static hide(classElement: GlobalElementMapValue): void;
+    static show(classElement: GlobalElementMapValue): void;
 }

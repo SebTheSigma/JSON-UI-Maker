@@ -1,4 +1,4 @@
-import { GlobalElementMapValue, isInMainWindow, mainJsonUiPanelElement, selectedElement, setSelectedElement } from "../index.js";
+import { GlobalElementMapValue, isInMainWindow, selectedElement, setDraggedElement, setResizedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
@@ -63,6 +63,7 @@ export class ElementSharedFuncs {
         classElement.resizeStartTop = StringUtil.cssDimToNumber(panel.style.top);
 
         if (preventDefault) e.preventDefault();
+        setResizedElement(classElement);
     }
 
     /**
@@ -139,12 +140,13 @@ export class ElementSharedFuncs {
     public static stopResize(classElement: ResizeableElements): void {
         classElement.isResizing = false;
         if (isInMainWindow) updatePropertiesArea();
+        setResizedElement(undefined);
     }
 
     /**
      * Handles the selection of an element. If the element is already selected, it is deselected.
      * If another element is already selected, it is deselected and the given element is selected.
-     * The selected element is highlighted with a blue border and updated in the properties area.
+     * The selected element is highlighted with a blue outline and updated in the properties area.
      * @param e The mouse event that triggered the selection.
      * @param classElement The element to select.
      */
@@ -211,7 +213,7 @@ export class ElementSharedFuncs {
 
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement)!;
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== mainJsonUiPanelElement?.dataset.id) {
+        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) {
             parentClassElement.grid(config.settings.show_grid.value);
             
         }
@@ -225,6 +227,7 @@ export class ElementSharedFuncs {
         classElement.offsetY = e.clientY - panelRect.top;
 
         mainElement.style.cursor = "grabbing";
+        setDraggedElement(classElement);
     }
 
     /**
@@ -238,15 +241,13 @@ export class ElementSharedFuncs {
      * provided, the main HTMLElement of classElement is used.
      */
     public static drag(e: MouseEvent, classElement: GlobalElementMapValue, mainElement?: HTMLElement): void {
+        console.warn('drag');
         e.stopPropagation();
         if (!classElement.isDragging) return;
 
         if (isResizeableElement(classElement)) {
             if (classElement.isResizing) return;
         }
-
-        const c = (classElement as GridableElements).centerCircle;
-        console.log('dragging', c?.getBoundingClientRect(), c?.style.display);
 
         if (!mainElement) mainElement = classElement.getMainHTMLElement();
 
@@ -276,15 +277,15 @@ export class ElementSharedFuncs {
             const distanceToPoint = MathUtil.getDistanceVector2(centerPoint, closestPoint);
 
             if (distanceToPoint < radius) {
-                newLeft = closestPoint[0] - rect.width / 2 - 1;
-                newTop = closestPoint[1] - rect.height / 2 - 1;
+                newLeft = closestPoint[0] - rect.width / 2 + 1;
+                newTop = closestPoint[1] - rect.height / 2 + 1;
             } else {
                 // ---- Closest vertical line (X) ----
                 const nearestLineX = Math.round(centerPoint[0] / gridCellWidth) * gridCellWidth;
                 const distanceX = Math.abs(centerPoint[0] - nearestLineX);
 
                 if (distanceX < radius) {
-                    newLeft = nearestLineX - rect.width / 2 - 1;
+                    newLeft = nearestLineX - rect.width / 2 + 1;
                 }
 
                 // ---- Closest horizontal line (Y) ----
@@ -292,7 +293,7 @@ export class ElementSharedFuncs {
                 const distanceY = Math.abs(centerPoint[1] - nearestLineY);
 
                 if (distanceY < radius) {
-                    newTop = nearestLineY - rect.height / 2 - 1;
+                    newTop = nearestLineY - rect.height / 2 + 1;
                 }
             }
         }
@@ -349,7 +350,8 @@ export class ElementSharedFuncs {
 
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement)!;
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== mainJsonUiPanelElement?.dataset.id) parentClassElement.grid(false);
+        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) parentClassElement.grid(false);
+        setDraggedElement(undefined);
     }
 
     /**
@@ -368,7 +370,6 @@ export class ElementSharedFuncs {
     }
 
     public static grid(showGrid: boolean, classElement: GridableElements): void {
-        console.log("showGrid", showGrid);
 
         if (!showGrid) {
             classElement.gridElement!.style.removeProperty("--grid-cols");
@@ -377,5 +378,15 @@ export class ElementSharedFuncs {
             classElement.gridElement!.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
             classElement.gridElement!.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
+    }
+
+    public static hide(classElement: GlobalElementMapValue): void {
+        console.log("hide");
+        classElement.getMainHTMLElement().style.visibility = "hidden";
+    }
+
+    public static show(classElement: GlobalElementMapValue): void {
+        console.log("show");
+        classElement.getMainHTMLElement().style.visibility = "visible";
     }
 }

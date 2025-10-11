@@ -13,6 +13,8 @@ export const JSON_TYPES = new Map([
             "$text_offset|default": [0, -8],
             "$font_size|default": 1,
             "$font_type|default": "MinecraftRegular",
+            "$shadow|default": false,
+            "$text_alignment|default": "left",
             "$show_hover_text|default": true,
             type: "panel",
             size: "$button_size",
@@ -74,7 +76,8 @@ export const JSON_TYPES = new Map([
                                     font_type: "$font_type",
                                     font_scale_factor: "$font_size",
                                     layer: 5,
-                                    shadow: true,
+                                    text_alignment: "$text_alignment",
+                                    shadow: "$shadow",
                                     offset: "$text_offset",
                                     bindings: [
                                         {

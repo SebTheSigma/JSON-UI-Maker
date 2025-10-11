@@ -151,4 +151,17 @@ export class TextPrompt {
         });
 
     }
+
+    public delete(): void {
+        this.detach();
+
+        this.textarea.removeEventListener("selectionchange", () => {
+            this.lastSelectionStart = this.textarea.selectionStart ?? 0;
+            this.lastSelectionEnd = this.textarea.selectionEnd ?? 0;
+        });
+
+        this.textarea.removeEventListener("scroll", () => this.detach());
+
+        this.promptBox.remove();
+    }
 }

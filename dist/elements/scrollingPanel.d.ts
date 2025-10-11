@@ -34,4 +34,6 @@ export declare class DraggableScrollingPanel {
     getMainHTMLElement(): HTMLElement;
     delete(): void;
     detach(): void;
+    hide(): void;
+    show(): void;
 }

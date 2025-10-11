@@ -22,7 +22,7 @@ export interface TreeData {
 }
 
 export interface StringObjectMap {
-    [key: string]: object | string | [] | number;
+    [key: string]: object | string | [] | boolean | number;
 }
 
 export class Converter {

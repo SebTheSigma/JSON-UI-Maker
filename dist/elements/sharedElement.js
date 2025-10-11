@@ -1,4 +1,4 @@
-import { isInMainWindow, mainJsonUiPanelElement, selectedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, selectedElement, setDraggedElement, setResizedElement, setSelectedElement } from "../index.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
@@ -52,6 +52,7 @@ export class ElementSharedFuncs {
         classElement.resizeStartTop = StringUtil.cssDimToNumber(panel.style.top);
         if (preventDefault)
             e.preventDefault();
+        setResizedElement(classElement);
     }
     /**
      * Handles the resize event for the given element. The element is resized according to the user's mouse movement. The element's size is updated in real time.
@@ -122,11 +123,12 @@ export class ElementSharedFuncs {
         classElement.isResizing = false;
         if (isInMainWindow)
             updatePropertiesArea();
+        setResizedElement(undefined);
     }
     /**
      * Handles the selection of an element. If the element is already selected, it is deselected.
      * If another element is already selected, it is deselected and the given element is selected.
-     * The selected element is highlighted with a blue border and updated in the properties area.
+     * The selected element is highlighted with a blue outline and updated in the properties area.
      * @param e The mouse event that triggered the selection.
      * @param classElement The element to select.
      */
@@ -183,7 +185,7 @@ export class ElementSharedFuncs {
         classElement.isDragging = true;
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement);
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== mainJsonUiPanelElement?.dataset.id) {
+        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) {
             parentClassElement.grid(config.settings.show_grid.value);
         }
         const mainElement = classElement.getMainHTMLElement();
@@ -192,6 +194,7 @@ export class ElementSharedFuncs {
         classElement.offsetX = e.clientX - panelRect.left;
         classElement.offsetY = e.clientY - panelRect.top;
         mainElement.style.cursor = "grabbing";
+        setDraggedElement(classElement);
     }
     /**
      * Handles the dragging of an element. The element is moved to the desired
@@ -204,6 +207,7 @@ export class ElementSharedFuncs {
      * provided, the main HTMLElement of classElement is used.
      */
     static drag(e, classElement, mainElement) {
+        console.warn('drag');
         e.stopPropagation();
         if (!classElement.isDragging)
             return;
@@ -211,8 +215,6 @@ export class ElementSharedFuncs {
             if (classElement.isResizing)
                 return;
         }
-        const c = classElement.centerCircle;
-        console.log('dragging', c?.getBoundingClientRect(), c?.style.display);
         if (!mainElement)
             mainElement = classElement.getMainHTMLElement();
         const gridWidth = config.settings.grid_lock_columns.value;
@@ -233,21 +235,21 @@ export class ElementSharedFuncs {
             const closestPoint = [nearestGridX, nearestGridY];
             const distanceToPoint = MathUtil.getDistanceVector2(centerPoint, closestPoint);
             if (distanceToPoint < radius) {
-                newLeft = closestPoint[0] - rect.width / 2 - 1;
-                newTop = closestPoint[1] - rect.height / 2 - 1;
+                newLeft = closestPoint[0] - rect.width / 2 + 1;
+                newTop = closestPoint[1] - rect.height / 2 + 1;
             }
             else {
                 // ---- Closest vertical line (X) ----
                 const nearestLineX = Math.round(centerPoint[0] / gridCellWidth) * gridCellWidth;
                 const distanceX = Math.abs(centerPoint[0] - nearestLineX);
                 if (distanceX < radius) {
-                    newLeft = nearestLineX - rect.width / 2 - 1;
+                    newLeft = nearestLineX - rect.width / 2 + 1;
                 }
                 // ---- Closest horizontal line (Y) ----
                 const nearestLineY = Math.round(centerPoint[1] / gridCellHeight) * gridCellHeight;
                 const distanceY = Math.abs(centerPoint[1] - nearestLineY);
                 if (distanceY < radius) {
-                    newTop = nearestLineY - rect.height / 2 - 1;
+                    newTop = nearestLineY - rect.height / 2 + 1;
                 }
             }
         }
@@ -298,8 +300,9 @@ export class ElementSharedFuncs {
             updatePropertiesArea();
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement);
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== mainJsonUiPanelElement?.dataset.id)
+        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id)
             parentClassElement.grid(false);
+        setDraggedElement(undefined);
     }
     /**
      * Generates a new grid element. A grid element is a special element which
@@ -316,7 +319,6 @@ export class ElementSharedFuncs {
         return gridElement;
     }
     static grid(showGrid, classElement) {
-        console.log("showGrid", showGrid);
         if (!showGrid) {
             classElement.gridElement.style.removeProperty("--grid-cols");
             classElement.gridElement.style.removeProperty("--grid-rows");
@@ -325,6 +327,14 @@ export class ElementSharedFuncs {
             classElement.gridElement.style.setProperty("--grid-cols", String(config.settings.grid_lock_columns.value));
             classElement.gridElement.style.setProperty("--grid-rows", String(config.settings.grid_lock_rows.value));
         }
+    }
+    static hide(classElement) {
+        console.log("hide");
+        classElement.getMainHTMLElement().style.visibility = "hidden";
+    }
+    static show(classElement) {
+        console.log("show");
+        classElement.getMainHTMLElement().style.visibility = "visible";
     }
 }
 //# sourceMappingURL=sharedElement.js.map

@@ -160,6 +160,8 @@ export const classToJsonUI = new Map([
                 $font_size: TextElementJsonUi?.font_scale_factor ?? 1,
                 $text_offset: [TextElementJsonUi?.offset?.[0] ?? 0, TextElementJsonUi?.offset?.[1] ?? 0],
                 $font_type: TextElementJsonUi?.font_type ?? "MinecraftRegular",
+                $shadow: TextElementJsonUi?.shadow ?? false,
+                $text_alignment: TextElementJsonUi?.text_alignment ?? "center",
                 $show_hover_text: false,
                 bindings: bindings,
             };
@@ -193,7 +195,7 @@ export const classToJsonUI = new Map([
             const jsonUIElement = {
                 offset: [
                     (offset[0] + config.magicNumbers.fontOffsetX) * ui_scaler,
-                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler,
+                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler + getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
                 ],
                 layer: Number(element.style.zIndex),
                 type: "label",

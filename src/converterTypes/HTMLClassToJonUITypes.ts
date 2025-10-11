@@ -222,6 +222,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 $font_size: TextElementJsonUi?.font_scale_factor ?? 1,
                 $text_offset: [TextElementJsonUi?.offset?.[0] ?? 0, TextElementJsonUi?.offset?.[1] ?? 0],
                 $font_type: TextElementJsonUi?.font_type ?? "MinecraftRegular",
+                $shadow: TextElementJsonUi?.shadow ?? false,
+                $text_alignment: TextElementJsonUi?.text_alignment ?? "center",
 
                 $show_hover_text: false,
 
@@ -266,7 +268,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [
                     (offset[0] + (config.magicNumbers.fontOffsetX as number)) * ui_scaler,
-                    (offset[1] + (config.magicNumbers.fontOffsetY as number)) * ui_scaler,
+                    (offset[1] + (config.magicNumbers.fontOffsetY as number)) * ui_scaler + getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
                 ],
                 layer: Number(element.style.zIndex),
                 type: "label",

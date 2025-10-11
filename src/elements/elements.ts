@@ -8,4 +8,3 @@ export const AllJsonUIElements = [
     'draggable-label',
     'draggable-scrolling_panel'
 ]
-

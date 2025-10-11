@@ -2,6 +2,7 @@ import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 export class DraggablePanel {
     // Core elements
     container;
@@ -63,15 +64,14 @@ export class DraggablePanel {
             this.initEvents();
         this.grid(false);
         ElementSharedFuncs.updateCenterCirclePosition(this);
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
         this.panel.addEventListener("dblclick", (e) => this.select(e));
-        document.addEventListener("mousemove", (e) => this.drag(e));
-        document.addEventListener("mouseup", () => this.stopDrag());
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
     }
     select(e) {
         ElementSharedFuncs.select(e, this);
@@ -80,6 +80,7 @@ export class DraggablePanel {
         ElementSharedFuncs.unSelect(this);
     }
     startDrag(e) {
+        console.warn('HELLO');
         if (e.target === this.resizeHandle)
             return;
         ElementSharedFuncs.startDrag(e, this);
@@ -113,16 +114,16 @@ export class DraggablePanel {
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.getMainHTMLElement());
-        this.detach();
     }
+    detach() { }
     grid(showGrid) {
         ElementSharedFuncs.grid(showGrid, this);
     }
-    detach() {
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
-        document.addEventListener("mousemove", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
+    hide() {
+        ElementSharedFuncs.hide(this);
+    }
+    show() {
+        ElementSharedFuncs.show(this);
     }
 }
 //# sourceMappingURL=panel.js.map

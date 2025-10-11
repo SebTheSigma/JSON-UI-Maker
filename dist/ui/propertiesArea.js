@@ -8,7 +8,7 @@ export const propertiesMap = new Map([
         "draggable-panel",
         [
             {
-                type: "string",
+                type: "text",
                 displayName: "Width",
                 editable: true,
                 get: (element) => element.style.width,
@@ -18,7 +18,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Height",
                 editable: true,
                 get: (element) => element.style.height,
@@ -28,21 +28,21 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
                 set: (element, value) => (element.style.left = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.style.top,
                 set: (element, value) => (element.style.top = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
@@ -54,11 +54,14 @@ export const propertiesMap = new Map([
                 editable: true,
                 set: (element, value) => {
                     const parent = element.parentElement;
+                    if (parent.dataset.id == config.rootElement.dataset.id)
+                        return;
                     element.style.width = parent.style.width;
                     element.style.height = parent.style.height;
                     element.style.left = '0px';
                     element.style.top = '0px';
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
+                    updatePropertiesArea();
                 },
             }
         ],
@@ -67,7 +70,7 @@ export const propertiesMap = new Map([
         "draggable-canvas",
         [
             {
-                type: "string",
+                type: "text",
                 displayName: "Width",
                 editable: true,
                 get: (element) => element.style.width,
@@ -85,7 +88,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Height",
                 editable: true,
                 get: (element) => element.style.height,
@@ -103,21 +106,21 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
                 set: (element, value) => (element.style.left = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.style.top,
                 set: (element, value) => (element.style.top = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
@@ -139,6 +142,8 @@ export const propertiesMap = new Map([
                 editable: true,
                 set: (element, value) => {
                     const parent = element.parentElement;
+                    if (parent.dataset.id == config.rootElement.dataset.id)
+                        return;
                     const classElement = GeneralUtil.elementToClassElement(element);
                     const height = StringUtil.cssDimToNumber(parent.style.height);
                     const width = StringUtil.cssDimToNumber(parent.style.width);
@@ -160,6 +165,7 @@ export const propertiesMap = new Map([
                     element.style.left = '0px';
                     element.style.top = '0px';
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
+                    updatePropertiesArea();
                 },
             }
         ],
@@ -263,6 +269,8 @@ export const propertiesMap = new Map([
                 editable: true,
                 set: (element, value) => {
                     const parent = element.parentElement;
+                    if (parent.dataset.id == config.rootElement.dataset.id)
+                        return;
                     const classElement = GeneralUtil.elementToClassElement(element);
                     const height = StringUtil.cssDimToNumber(parent.style.height);
                     const width = StringUtil.cssDimToNumber(parent.style.width);
@@ -284,6 +292,7 @@ export const propertiesMap = new Map([
                     element.style.left = '0px';
                     element.style.top = '0px';
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
+                    updatePropertiesArea();
                 },
             }
         ],
@@ -292,7 +301,7 @@ export const propertiesMap = new Map([
         "draggable-collection_panel",
         [
             {
-                type: "string",
+                type: "text",
                 displayName: "Width",
                 editable: true,
                 get: (element) => element.style.width,
@@ -302,7 +311,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Height",
                 editable: true,
                 get: (element) => element.style.height,
@@ -312,21 +321,21 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
                 set: (element, value) => (element.style.left = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.style.top,
                 set: (element, value) => (element.style.top = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
@@ -339,13 +348,29 @@ export const propertiesMap = new Map([
                 get: (element) => element.dataset.collectionName,
                 set: (element, value) => (element.dataset.collectionName = value),
             },
+            {
+                type: "button",
+                displayName: "Fill Parent",
+                editable: true,
+                set: (element, value) => {
+                    const parent = element.parentElement;
+                    if (parent.dataset.id == config.rootElement.dataset.id)
+                        return;
+                    element.style.width = parent.style.width;
+                    element.style.height = parent.style.height;
+                    element.style.left = '0px';
+                    element.style.top = '0px';
+                    ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
+                    updatePropertiesArea();
+                },
+            }
         ],
     ],
     [
         "draggable-label",
         [
             {
-                type: "string",
+                type: "text",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
@@ -357,7 +382,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.style.top,
@@ -369,7 +394,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
@@ -390,6 +415,7 @@ export const propertiesMap = new Map([
                     elementClass.mirror.style.fontSize = `${value}em`;
                     elementClass.shadowLabel.style.fontSize = `${value}em`;
                     elementClass.updateSize();
+                    elementClass.label.dispatchEvent(new Event("input"));
                 },
             },
             {
@@ -416,6 +442,7 @@ export const propertiesMap = new Map([
                     elementClass.mirror.style.fontFamily = value;
                     elementClass.label.style.fontFamily = value;
                     elementClass.updateSize(false);
+                    elementClass.label.dispatchEvent(new Event("input"));
                 },
             },
             {
@@ -429,6 +456,7 @@ export const propertiesMap = new Map([
                 set: (element) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.shadow(!elementClass.hasShadow);
+                    elementClass.updateSize(false);
                     elementClass.label.dispatchEvent(new Event("input"));
                 },
             },
@@ -438,7 +466,7 @@ export const propertiesMap = new Map([
         "draggable-scrolling_panel",
         [
             {
-                type: "string",
+                type: "text",
                 displayName: "Width",
                 editable: true,
                 get: (element) => element.style.width,
@@ -450,7 +478,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Height",
                 editable: true,
                 get: (element) => element.style.height,
@@ -462,26 +490,45 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.parentElement.style.left,
                 set: (element, value) => (element.parentElement.style.left = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Top",
                 editable: true,
                 get: (element) => element.parentElement.style.top,
                 set: (element, value) => (element.parentElement.style.top = value),
             },
             {
-                type: "string",
+                type: "text",
                 displayName: "Layer",
                 editable: true,
                 get: (element) => element.style.zIndex,
                 set: (element, value) => (element.style.zIndex = value),
             },
+            {
+                type: "button",
+                displayName: "Fill Parent",
+                editable: true,
+                set: (element, value) => {
+                    const classElement = GeneralUtil.elementToClassElement(element);
+                    const parent = classElement.basePanel.parentElement;
+                    if (parent.dataset.id == config.rootElement.dataset.id)
+                        return;
+                    classElement.panel.style.width = parent.style.width;
+                    classElement.panel.style.height = parent.style.height;
+                    classElement.basePanel.style.width = parent.style.width;
+                    classElement.basePanel.style.height = parent.style.height;
+                    classElement.basePanel.style.left = '0px';
+                    classElement.basePanel.style.top = '0px';
+                    classElement.slider.updateHandle();
+                    updatePropertiesArea();
+                },
+            }
         ],
     ],
 ]);

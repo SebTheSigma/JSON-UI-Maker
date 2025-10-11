@@ -35,9 +35,9 @@ export declare class DraggableCanvas {
     drag(e: MouseEvent): void;
     stopDrag(): void;
     startResize(e: MouseEvent): void;
+    confirmResize(e: MouseEvent): void;
     resize(e: MouseEvent): void;
-    outlineResize(e: MouseEvent): void;
-    stopResize(): void;
+    stopResize(e?: MouseEvent, shouldResize?: boolean): void;
     /**
      *
      * @param {number} width
@@ -47,9 +47,11 @@ export declare class DraggableCanvas {
     changeImage(imageName: string): void;
     setParse(shouldParse: boolean): void;
     detatchAllEvents(): void;
+    detach(): void;
     getMainHTMLElement(): HTMLElement;
     editable(isEditable: boolean): void;
     delete(): void;
-    detach(): void;
     grid(showGrid: boolean): void;
+    hide(): void;
+    show(): void;
 }

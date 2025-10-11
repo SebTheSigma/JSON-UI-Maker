@@ -14,4 +14,6 @@ export declare class MinecraftSlider {
     updateHandle(): void;
     setMoveType(moveType: "smooth" | "instant"): void;
     delete(): void;
+    hide(): void;
+    show(): void;
 }

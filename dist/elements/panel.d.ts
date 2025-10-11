@@ -32,6 +32,8 @@ export declare class DraggablePanel {
     stopResize(): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;
-    grid(showGrid: boolean): void;
     detach(): void;
+    grid(showGrid: boolean): void;
+    hide(): void;
+    show(): void;
 }

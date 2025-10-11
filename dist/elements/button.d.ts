@@ -78,4 +78,6 @@ export declare class DraggableButton {
     delete(): void;
     detach(): void;
     grid(showGrid: boolean): void;
+    hide(): void;
+    show(): void;
 }

@@ -7,6 +7,7 @@ import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 
 export class DraggableCanvas {
     // Core data
@@ -102,7 +103,7 @@ export class DraggableCanvas {
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
         this.outlineDiv.classList.add("body-attched");
-        this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
+        this.outlineDiv.style.outline = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
         this.outlineDiv.style.zIndex = "1000";
 
@@ -122,6 +123,9 @@ export class DraggableCanvas {
         this.grid(false);
 
         ElementSharedFuncs.updateCenterCirclePosition(this);
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
 
     public initEvents(): void {
@@ -130,13 +134,8 @@ export class DraggableCanvas {
         // to get the canvas to accept input through the grid so this is a workaround
         this.gridElement.addEventListener("mousedown", (e) => this.startDrag(e));
         this.gridElement.addEventListener("dblclick", (e) => this.select(e));
-        document.addEventListener("mousemove", (e) => this.drag(e));
-        document.addEventListener("mouseup", () => this.stopDrag());
 
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.outlineResize(e));
-        document.addEventListener("mouseup", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
     }
 
     public select(e: MouseEvent): void {
@@ -152,7 +151,7 @@ export class DraggableCanvas {
     public startDrag(e: MouseEvent): void {
         if (e.target === this.resizeHandle || !this.isEditable) return;
         this.outlineDiv.style.display = "none";
-        if (this.isResizing) this.stopResize();
+        if (this.isResizing) this.stopResize(e, false);
 
         ElementSharedFuncs.startDrag(e, this);
         this.centerCircle!.style.display = "block";
@@ -179,17 +178,19 @@ export class DraggableCanvas {
         this.outlineDiv.style.display = "block";
     }
 
-    public resize(e: MouseEvent): void {
+    public confirmResize(e: MouseEvent): void {
         if (!this.isResizing || !this.isEditable) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
-        const newWidth: number = this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0;
-        const newHeight: number = this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0;
+
+        const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
+        const newWidth: number = (this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0) + outlineWidth;
+        const newHeight: number = (this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0) + outlineWidth;
 
         this.drawImage(newWidth, newHeight);
         ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
-    public outlineResize(e: MouseEvent): void {
+    public resize(e: MouseEvent): void {
         if (!this.isResizing || !this.isEditable) return;
         e.stopPropagation(); // Prevent event from bubbling to parent
         const containerRect: DOMRect = this.container.getBoundingClientRect();
@@ -216,7 +217,7 @@ export class DraggableCanvas {
             }
         }
 
-        const borderWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth);
+        const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
         if (config.settings.boundary_constraints!.value) {
 
             if (!this.nineSlice) {
@@ -234,15 +235,17 @@ export class DraggableCanvas {
                 }
             }
 
-            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - borderWidth}px`;
-            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - borderWidth}px`;
+            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - outlineWidth}px`;
+            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - outlineWidth}px`;
         } else {
-            this.outlineDiv.style.width = `${newWidth - borderWidth}px`;
-            this.outlineDiv.style.height = `${newHeight - borderWidth}px`;
+            this.outlineDiv.style.width = `${newWidth - outlineWidth}px`;
+            this.outlineDiv.style.height = `${newHeight - outlineWidth}px`;
         }
     }
 
-    public stopResize(): void {
+    public stopResize(e?: MouseEvent, shouldResize: boolean = true): void {
+        if (shouldResize) this.confirmResize(e!);
+
         this.outlineDiv.style.display = "none";
         ElementSharedFuncs.stopResize(this);
     }
@@ -330,14 +333,11 @@ export class DraggableCanvas {
     public detatchAllEvents(): void {
         this.canvas.removeEventListener("mousedown", (e) => this.startDrag(e));
         this.canvas.removeEventListener("dblclick", (e) => this.select(e));
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
 
         this.resizeHandle.removeEventListener("mousedown", (e) => this.startResize(e));
-        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
-        document.removeEventListener("mouseup", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
     }
+
+    public detach(): void {}
 
     public getMainHTMLElement(): HTMLElement {
         return this.canvasHolder;
@@ -346,7 +346,7 @@ export class DraggableCanvas {
     public editable(isEditable: boolean): void {
         if (!isEditable) {
             this.stopDrag();
-            this.stopResize();
+            this.stopResize(undefined, false);
             this.detatchAllEvents();
 
             if (this.selected) this.unSelect();
@@ -356,7 +356,6 @@ export class DraggableCanvas {
 
         this.resizeHandle.style.display = isEditable ? "block" : "none";
         this.canvasHolder.style.outline = isEditable ? `${config.settings.element_outline.value}px solid black` : "none";
-        this.canvasHolder.style.border = isEditable ? `${config.settings.element_outline.value}px solid black` : "none";
 
         this.isEditable = isEditable;
     }
@@ -367,19 +366,17 @@ export class DraggableCanvas {
 
         this.container.removeChild(this.getMainHTMLElement());
         document.body.removeChild(this.outlineDiv);
-
-        this.detach();
-    }
-
-    public detach(): void {
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
-        document.removeEventListener("mousemove", (e) => this.outlineResize(e));
-        document.removeEventListener("mouseup", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
     }
 
     public grid(showGrid: boolean): void {
         ElementSharedFuncs.grid(showGrid, this);
+    }
+
+    public hide(): void {
+        ElementSharedFuncs.hide(this);
+    }
+
+    public show(): void {
+        ElementSharedFuncs.show(this);
     }
 }

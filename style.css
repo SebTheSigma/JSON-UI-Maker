@@ -27,7 +27,6 @@ input[type="file"] {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-
 .importers > *:hover {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
     transform: scale(1.05); /* 120% */
@@ -566,7 +565,7 @@ input[type="file"] {
 #mainWarningMessage {
     position: fixed;
     top: 20px;
-    left: calc(100% );
+    left: calc(100%);
     display: flex;
     flex-direction: column; /* Stack vertically */
     gap: 10px; /* Space between notifications */
@@ -602,7 +601,7 @@ input[type="file"] {
     color: white;
     padding: 15px 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     outline: rgb(174, 0, 255) 2px solid;
     transform: translateX(300px); /* Start off-screen */
     transition: transform 0.5s ease, opacity 0.5s ease;
@@ -615,6 +614,94 @@ input[type="file"] {
     opacity: 1;
 }
 
+.explorer {
+    position: relative;
+    width: calc(100% - 10px);
+    height: 100%;
+    margin: 5px;
+    border-radius: 10px;
+    background-color: rgb(71, 71, 71);
+    white-space: pre;
+    overflow-x: auto;
+    max-width: 210px; /* don’t grow wider than parent */
+    max-height: 381.34px;
+    scrollbar-color: rgb(0, 0, 0) rgb(59, 59, 59);
+}
+
+.explorerDiv {
+    position: relative;
+}
+
+.explorerArrow {
+    display: inline;
+    padding: 4px;
+    border-radius: 50%;
+    position: relative;
+    top: 5px;
+    width: 13px;
+    transition: all 0.3s ease;
+}
+
+.explorerArrow:hover {
+    top: 2px;
+}
+
+.explorerText {
+    display: inline;
+    color: white;
+}
+
+.explorerText:hover {
+    text-decoration: underline;
+    user-select: none; /* Prevents text selection */
+}
+.selected {
+    background: linear-gradient(45deg, rgb(104, 0, 104), rgb(58, 0, 145));
+    padding: 2px;
+    border-radius: 5px;
+}
+
+.explorerLocked {
+    width: 13px;
+    position: relative;
+    top: 3px;
+    padding-left: 10px;
+}
+
+.explorerVisibilityToggle {
+    width: 25px;
+    position: relative;
+    top: 5px;
+    padding-left: 10px;
+    transition: all 0.3s ease;
+}
+
+.explorerVisibilityToggle:hover {
+    width: 25px;
+    position: relative;
+    top: 5px;
+    padding-left: 10px;
+    rotate: -7deg;
+    scale: 1.1;
+}
+
+.explorerDragTextBackground {
+    position: absolute;
+    color: white;
+    user-select: none; /* Prevents text selection */
+    background-color: rgba(68, 68, 182, 0.2);
+    outline: rgb(105, 105, 201) 2px solid;
+    border-radius: 50vh;
+    padding: 2px 6px 2px 6px;
+}
+
+
+.explorerDragText {
+    position: relative;
+    color: white;
+    user-select: none; /* Prevents text selection */
+    padding: 5px;
+}
 
 @font-face {
     font-family: "MinecraftRegular";

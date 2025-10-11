@@ -20,8 +20,11 @@ import { createFormModal } from "./ui/modals/createForm.js";
 import { Notification } from "./ui/notifs/noficationMaker.js";
 import { CopiedElementData } from "./copy_paste/copy.js";
 import { FormUploader } from "./upload.js";
-import "./ui/modals/settings.js";
 import { initDefaultImages } from "./files/initDefaultImages.js";
+import { ExplorerController } from "./ui/explorer/explorerController.js";
+import { ResizeableElements } from "./elements/sharedElement.js";
+import "./ui/modals/settings.js";
+import "./elements/groupedEventlisteners.js";
 
 console.log("Script Loaded");
 
@@ -34,8 +37,6 @@ console.log("Bindings-Area Loaded");
 ScriptGenerator.init();
 console.log("Script Generator Loaded");
 
-export let mainJsonUiPanelElement: HTMLElement | undefined = undefined;
-
 document.addEventListener("DOMContentLoaded", async (e) => {
     const createFormOptions = await createFormModal();
     const title = createFormOptions.title!;
@@ -44,28 +45,32 @@ document.addEventListener("DOMContentLoaded", async (e) => {
     config.nameSpace = `${StringUtil.generateRandomString(6)}namespace`;
 
     const mainPanelInfo = constructMainPanel();
-    mainJsonUiPanelElement = mainPanelInfo.mainPanel.getMainHTMLElement();
-});
 
+    config.rootElement = mainPanelInfo.mainPanel.getMainHTMLElement()!;
+});
 
 /**
  * Constructs the main panel, which is a non-interactive draggable panel.
  * The panel is added to the global element map.
  * @returns An object containing the id of the main panel and the main panel element itself.
  */
-function constructMainPanel(): { id: string, mainPanel: DraggablePanel } {
+function constructMainPanel(): { id: string; mainPanel: DraggablePanel } {
     // A non interactable main panel
     const id = StringUtil.generateRandomString(15);
     const mainPanel = new DraggablePanel(id, panelContainer, false);
     mainPanel.deleteable = false;
-    mainPanel.panel.style.width = 'calc(100% + 3px)';
-    mainPanel.panel.style.height = 'calc(100% + 3px)';
-    mainPanel.panel.style.top = '-3px';
-    mainPanel.panel.style.left = '-3px';
+    
+    const parent = mainPanel.panel.parentElement!;
+    const parentRect = parent.getBoundingClientRect();
+    
+    mainPanel.panel.style.width = `${parentRect.width + 3}px`;
+    mainPanel.panel.style.height = `${parentRect.height + 3}px`;
 
-    mainPanel.gridElement!.style.setProperty("--grid-cols", '2');
-    mainPanel.gridElement!.style.setProperty("--grid-rows", '2');
+    mainPanel.panel.style.left = `-1.5px`;
+    mainPanel.panel.style.top = `-1.5px`;
 
+    mainPanel.gridElement!.style.setProperty("--grid-cols", "2");
+    mainPanel.gridElement!.style.setProperty("--grid-rows", "2");
 
     GLOBAL_ELEMENT_MAP.set(id, mainPanel);
 
@@ -76,16 +81,27 @@ export let selectedElement: HTMLElement | undefined = undefined;
 export function setSelectedElement(element: HTMLElement | undefined): void {
     selectedElement = element;
     BindingsArea.updateBindingsEditor();
+    ExplorerController.selectedElementUpdate();
 }
 
 export let copiedElementData: CopiedElementData | undefined = undefined;
 export function setCopiedElementData(data: CopiedElementData | undefined): void {
     copiedElementData = data;
+    new Notification("Copied Element", 2000, "notif");
+}
+
+export let draggedElement: GlobalElementMapValue | undefined = undefined;
+export function setDraggedElement(classElement: GlobalElementMapValue | undefined): void {
+    draggedElement = classElement;
+}
+
+export let resizedElement: ResizeableElements | undefined = undefined;
+export function setResizedElement(classElement: ResizeableElements | undefined): void {
+    resizedElement = classElement;
 }
 
 export const panelContainer: HTMLElement = document.getElementById("main_window")!;
 export let isInMainWindow: boolean = false;
-
 
 panelContainer.addEventListener("mouseenter", () => {
     isInMainWindow = true;
@@ -106,7 +122,7 @@ export const GLOBAL_ELEMENT_MAP: Map<string, GlobalElementMapValue> = new Map();
 
 export class Builder {
     public static uploadForm(): void {
-        console.log('Uploading form');
+        console.log("Uploading form");
         const input = document.getElementById("form_importer") as HTMLInputElement;
         const file = input.files![0]; // ✅ first (and only) file
 
@@ -117,9 +133,10 @@ export class Builder {
         reader.onload = (event) => {
             const text = event.target?.result as string;
             FormUploader.uploadForm(text);
+            Builder.updateExplorer();
 
             input.value = "";
-        }
+        };
 
         reader.readAsText(file);
     }
@@ -134,7 +151,7 @@ export class Builder {
 
         if (type == "copy") {
             navigator.clipboard.writeText(func(config.nameSpace));
-            new Notification('Server-Form Copied to Clipboard!');
+            new Notification("Server-Form Copied to Clipboard!");
             return;
         }
 
@@ -157,7 +174,7 @@ export class Builder {
 
         if (type == "copy") {
             navigator.clipboard.writeText(jsonUI);
-            new Notification('Json-UI Copied to Clipboard!');
+            new Notification("Json-UI Copied to Clipboard!");
             return;
         }
 
@@ -170,7 +187,7 @@ export class Builder {
         URL.revokeObjectURL(url);
     }
 
-    public static isValidPath(parent: HTMLElement): boolean {
+    public static isValidPath(parent: HTMLElement, childType?: "scrolling_panel" | "collection_panel" | "label" | "button" | "canvas" | "panel"): boolean {
         const convertionFunction = classToJsonUI.get(parent?.classList[0]!)!;
         if (!convertionFunction) return false;
 
@@ -178,64 +195,79 @@ export class Builder {
         const instructions = convertionFunction(parent, config.nameSpace).instructions!;
         if (!instructions) return false;
 
-        // If the tree was susposed to be stopped at this point
+        if (childType == "scrolling_panel") {
+            // If the tree was susposed to be stopped at this point
+            let currentParent = parent;
+            let isScrollingContent = false;
+
+            while (currentParent.dataset.id != config.rootElement!.dataset.id) {
+                if (currentParent.classList.contains("draggable-scrolling_panel")) isScrollingContent = true;
+                currentParent = currentParent.parentElement!;
+            }
+
+            if (isScrollingContent) {
+                new Notification("Cannot stack scrolling panels", 2000, "warning");
+                return false;
+            }
+        }
+
         return instructions.ContinuePath;
     }
 
     public static addLabel(): void {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "label")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
-        const label = new DraggableLabel(id, selectedElement ?? mainJsonUiPanelElement, { text: "Label", includeTextPrompt: true });
+        const label = new DraggableLabel(id, selectedElement ?? config.rootElement!, { text: "Label", includeTextPrompt: true });
         GLOBAL_ELEMENT_MAP.set(id, label);
     }
 
     public static addPanel(): void {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "panel")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
-        const panel = new DraggablePanel(id, selectedElement ?? mainJsonUiPanelElement);
+        const panel = new DraggablePanel(id, selectedElement ?? config.rootElement!);
         GLOBAL_ELEMENT_MAP.set(id, panel);
     }
 
     public static addCollectionPanel(): void {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "collection_panel")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
-        const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? mainJsonUiPanelElement);
+        const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? config.rootElement!);
         GLOBAL_ELEMENT_MAP.set(id, collectionPanel);
     }
 
     public static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "canvas")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, selectedElement ?? mainJsonUiPanelElement, imageData, imageName, nineSlice);
+        const canvas = new DraggableCanvas(id, selectedElement ?? config.rootElement!, imageData, imageName, nineSlice);
         GLOBAL_ELEMENT_MAP.set(id, canvas);
     }
 
     public static async addButton(): Promise<void> {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "button")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
 
@@ -256,7 +288,7 @@ export class Builder {
             return;
         }
 
-        const button = new DraggableButton(id, selectedElement ?? mainJsonUiPanelElement, {
+        const button = new DraggableButton(id, selectedElement ?? config.rootElement!, {
             defaultTexture: formFields.defaultTexture,
             hoverTexture: formFields.hoverTexture,
             pressedTexture: formFields.pressedTexture,
@@ -268,13 +300,13 @@ export class Builder {
 
     public static addScrollingPanel(): void {
         if (selectedElement) {
-            if (!this.isValidPath(selectedElement)) return;
+            if (!this.isValidPath(selectedElement, "scrolling_panel")) return;
         }
 
-        if (!mainJsonUiPanelElement) return;
+        if (!config.rootElement!) return;
 
         const id = StringUtil.generateRandomString(15);
-        const panel = new DraggableScrollingPanel(id, selectedElement ?? mainJsonUiPanelElement);
+        const panel = new DraggableScrollingPanel(id, selectedElement ?? config.rootElement!);
         GLOBAL_ELEMENT_MAP.set(id, panel);
     }
 
@@ -284,6 +316,7 @@ export class Builder {
         // Removes events
         for (const element of elements) {
             if (element.getMainHTMLElement().dataset.id == selectedElement?.dataset.id) continue;
+
             element.detach();
         }
 
@@ -307,23 +340,27 @@ export class Builder {
         panelContainer.appendChild(bgImage);
 
         const mainPanelInfo = constructMainPanel();
-        mainJsonUiPanelElement = mainPanelInfo.mainPanel.getMainHTMLElement();
+        config.rootElement = mainPanelInfo.mainPanel.getMainHTMLElement();
 
         updatePropertiesArea();
+        Builder.updateExplorer();
     }
 
     public static deleteSelected(): void {
         if (!selectedElement) return;
 
-        const element = GeneralUtil.elementToClassElement(selectedElement)!;
-        const id = selectedElement.dataset.id!;
+        Builder.delete(selectedElement.dataset.id!);
+    }
+
+    public static delete(id: string): void {
+        const element = GeneralUtil.idToClassElement(id);
+        if (!element || !element.deleteable) return;
 
         element.delete();
 
-        if (!element.deleteable) return;
-
         GLOBAL_ELEMENT_MAP.delete(id);
         updatePropertiesArea();
+        Builder.updateExplorer();
     }
 
     public static setSettingToggle(setting: keyof typeof config.settings, value: any): void {
@@ -338,6 +375,10 @@ export class Builder {
 
         // Checks if the image is a nineslice
         this.addCanvas(imageData.png, imageName, imageData.json);
+    }
+
+    public static updateExplorer(): void {
+        ExplorerController.updateExplorer();
     }
 }
 
@@ -357,7 +398,6 @@ declare global {
 }
 
 window.Builder = Builder;
-
 
 /*
 

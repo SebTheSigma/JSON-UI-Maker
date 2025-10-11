@@ -2,6 +2,7 @@ import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 export class DraggableCollectionPanel {
     // Core elements
     container;
@@ -45,7 +46,6 @@ export class DraggableCollectionPanel {
         this.panel.style.left = `${rect.width / 2 - parseFloat(this.panel.style.width) / 2}px`;
         this.panel.style.top = `${rect.height / 2 - parseFloat(this.panel.style.height) / 2}px`;
         this.panel.style.backgroundColor = "rgba(255, 255, 255, 0)";
-        this.panel.style.border = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
@@ -61,15 +61,14 @@ export class DraggableCollectionPanel {
         this.initEvents();
         this.grid(false);
         ElementSharedFuncs.updateCenterCirclePosition(this);
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
     initEvents() {
         this.panel.addEventListener("mousedown", (e) => this.startDrag(e));
         this.panel.addEventListener("dblclick", (e) => this.select(e));
-        document.addEventListener("mousemove", (e) => this.drag(e));
-        document.addEventListener("mouseup", () => this.stopDrag());
         this.resizeHandle.addEventListener("mousedown", (e) => this.startResize(e));
-        document.addEventListener("mousemove", (e) => this.resize(e));
-        document.addEventListener("mouseup", () => this.stopResize());
     }
     select(e) {
         ElementSharedFuncs.select(e, this);
@@ -111,16 +110,16 @@ export class DraggableCollectionPanel {
         if (this.selected)
             this.unSelect();
         this.container.removeChild(this.getMainHTMLElement());
-        this.detach();
     }
-    detach() {
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
-        document.removeEventListener("mousemove", (e) => this.resize(e));
-        document.removeEventListener("mouseup", () => this.stopResize());
-    }
+    detach() { }
     grid(showGrid) {
         ElementSharedFuncs.grid(showGrid, this);
+    }
+    hide() {
+        ElementSharedFuncs.hide(this);
+    }
+    show() {
+        ElementSharedFuncs.show(this);
     }
 }
 //# sourceMappingURL=collectionPanel.js.map

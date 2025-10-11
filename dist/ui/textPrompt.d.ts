@@ -17,4 +17,5 @@ export declare class TextPrompt {
     detach(): void;
     autoCorrectHighlightedText(): void;
     setHighlightedIndex(index: number): void;
+    delete(): void;
 }

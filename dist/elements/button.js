@@ -8,6 +8,7 @@ import { StringUtil } from "../util/stringUtil.js";
 import { DraggableLabel } from "./label.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 export class DraggableButton {
     // Core data
     imageDataDefault;
@@ -72,7 +73,6 @@ export class DraggableButton {
         this.button.style.zIndex = String(i * 2);
         this.button.style.position = "absolute";
         this.button.style.outline = `${config.settings.element_outline.value}px solid black`;
-        this.button.style.border = `${config.settings.element_outline.value}px solid black`;
         this.button.dataset.defaultImageName = defaultTex;
         this.button.dataset.hoverImageName = hoverTex;
         this.button.dataset.pressedImageName = pressedTex;
@@ -102,7 +102,7 @@ export class DraggableButton {
         this.outlineDiv = document.createElement("div");
         this.outlineDiv.className = "outline-div";
         this.outlineDiv.classList.add("body-attched");
-        this.outlineDiv.style.border = "3px dotted rgb(0, 0, 0)";
+        this.outlineDiv.style.outline = "3px dotted rgb(0, 0, 0)";
         this.outlineDiv.style.position = "absolute";
         this.outlineDiv.style.zIndex = "1000";
         this.gridElement = ElementSharedFuncs.generateGridElement();
@@ -117,7 +117,12 @@ export class DraggableButton {
         this.initEvents();
         this.setDisplayText(buttonText ?? "Label");
         this.grid(false);
+        if (this.displayTexture)
+            this.setDisplayImage(this.displayTexture);
         ElementSharedFuncs.updateCenterCirclePosition(this);
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
     initEvents() {
         this.gridElement.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -166,8 +171,9 @@ export class DraggableButton {
         if (!this.isResizing)
             return;
         e.stopPropagation(); // Prevent event from bubbling to parent
-        const newWidth = this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0;
-        const newHeight = this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0;
+        const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
+        const newWidth = (this.outlineDiv.style.width ? StringUtil.cssDimToNumber(this.outlineDiv.style.width) : 0) + outlineWidth;
+        const newHeight = (this.outlineDiv.style.height ? StringUtil.cssDimToNumber(this.outlineDiv.style.height) : 0) + outlineWidth;
         this.drawImage(newWidth, newHeight, this.getCurrentlyRenderedState());
         ElementSharedFuncs.updateCenterCirclePosition(this);
     }
@@ -196,7 +202,7 @@ export class DraggableButton {
                 newHeight = newWidth;
             }
         }
-        const borderWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.borderWidth);
+        const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
         if (config.settings.boundary_constraints.value) {
             if (!currentRenderState.json) {
                 // Adjust width and height proportionally
@@ -211,12 +217,12 @@ export class DraggableButton {
                     }
                 }
             }
-            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - borderWidth}px`;
-            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - borderWidth}px`;
+            this.outlineDiv.style.width = `${Math.max(0, Math.min(newWidth, maxWidth)) - outlineWidth}px`;
+            this.outlineDiv.style.height = `${Math.max(0, Math.min(newHeight, maxHeight)) - outlineWidth}px`;
         }
         else {
-            this.outlineDiv.style.width = `${newWidth - borderWidth}px`;
-            this.outlineDiv.style.height = `${newHeight - borderWidth}px`;
+            this.outlineDiv.style.width = `${newWidth - outlineWidth}px`;
+            this.outlineDiv.style.height = `${newHeight - outlineWidth}px`;
         }
     }
     stopResize() {
@@ -227,7 +233,7 @@ export class DraggableButton {
         this.canvas.style.cursor = "pointer";
         this.isHovering = true;
         this.aspectRatio = this.imageDataHover.png?.width / this.imageDataHover.png?.height;
-        this.drawImage(this.canvas.width, this.canvas.height * this.aspectRatio, this.imageDataHover);
+        this.drawImage(this.canvas.width, this.canvas.height, this.imageDataHover);
     }
     stopHover() {
         this.canvas.style.cursor = "default";
@@ -431,6 +437,12 @@ export class DraggableButton {
     }
     grid(showGrid) {
         ElementSharedFuncs.grid(showGrid, this);
+    }
+    hide() {
+        ElementSharedFuncs.hide(this);
+    }
+    show() {
+        ElementSharedFuncs.show(this);
     }
 }
 //# sourceMappingURL=button.js.map

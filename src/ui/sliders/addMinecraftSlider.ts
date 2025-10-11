@@ -130,4 +130,14 @@ export class MinecraftSlider {
         document.removeEventListener("mouseup", () => this.stopManualBarScroll());
         */
     }
+
+    public hide(): void {
+        this.backgroundBar.style.visibility = "hidden";
+        this.handleCanvas?.hide();
+    }
+
+    public show(): void {
+        this.backgroundBar.style.visibility = "visible";
+        this.handleCanvas?.show();
+    }
 }

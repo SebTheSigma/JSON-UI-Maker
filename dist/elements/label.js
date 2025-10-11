@@ -6,6 +6,7 @@ import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
+import { ExplorerController } from "../ui/explorer/explorerController.js";
 export class DraggableLabel {
     // Core elements
     container;
@@ -50,7 +51,6 @@ export class DraggableLabel {
         this.label.style.minWidth = "10px";
         this.label.style.minHeight = "20px";
         this.label.style.maxWidth = `${panelContainer.getBoundingClientRect().width}px`;
-        this.label.style.border = `${config.settings.element_outline.value}px solid black`;
         this.label.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.label.style.font = "16px sans-serif";
         this.label.style.padding = "4px";
@@ -79,7 +79,7 @@ export class DraggableLabel {
         this.mirror.style.font = this.label.style.font;
         this.mirror.style.fontFamily = this.label.style.fontFamily;
         this.mirror.style.padding = this.label.style.padding;
-        this.mirror.style.border = this.label.style.border;
+        this.mirror.style.outline = this.label.style.outline;
         this.mirror.style.boxSizing = "border-box";
         this.mirror.style.textAlign = textAlign;
         this.mirror.style.fontSize = `${fontSize}em`;
@@ -108,6 +108,9 @@ export class DraggableLabel {
             this.bindingsTextPrompt.detach();
         }
         this.initEvents();
+        setTimeout(() => {
+            ExplorerController.updateExplorer();
+        }, 0);
     }
     updateSize(updateProperties = true) {
         const lines = this.label.value.split("\n");
@@ -124,7 +127,7 @@ export class DraggableLabel {
             this.label.style.color = "rgb(0, 8, 255)";
         }
         else
-            this.label.style.color = 'white';
+            this.label.style.color = "white";
         const mirrorRect = this.mirror.getBoundingClientRect();
         this.label.style.width = `${mirrorRect.width}px`;
         this.label.style.height = `${mirrorRect.height}px`;
@@ -140,8 +143,6 @@ export class DraggableLabel {
     initEvents() {
         this.label.addEventListener("mousedown", (e) => this.startDrag(e));
         this.label.addEventListener("dblclick", (e) => this.select(e));
-        document.addEventListener("mousemove", (e) => this.drag(e));
-        document.addEventListener("mouseup", () => this.stopDrag());
         // Initial size
         this.updateSize();
         // Auto-resize on input
@@ -290,20 +291,27 @@ export class DraggableLabel {
         this.container.removeChild(this.label);
         this.container.removeChild(this.mirror);
         this.container.removeChild(this.shadowLabel);
+        if (this.bindingsTextPrompt)
+            this.bindingsTextPrompt.delete();
         this.detach();
     }
     shadow(shouldShadow) {
         this.hasShadow = shouldShadow;
-        console.log(this.shadowLabel, shouldShadow);
         this.shadowLabel.style.display = shouldShadow ? "block" : "none";
     }
     detach() {
-        document.removeEventListener("mousemove", (e) => this.drag(e));
-        document.removeEventListener("mouseup", () => this.stopDrag());
         window.removeEventListener("keydown", (e) => {
             if (this.focussed)
                 this.handleKeyboardInput(e);
         });
+    }
+    hide() {
+        this.shadowLabel.style.visibility = "hidden";
+        ElementSharedFuncs.hide(this);
+    }
+    show() {
+        this.shadowLabel.style.visibility = "visible";
+        ElementSharedFuncs.show(this);
     }
 }
 //# sourceMappingURL=label.js.map

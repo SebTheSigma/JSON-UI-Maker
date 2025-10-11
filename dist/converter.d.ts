@@ -16,7 +16,7 @@ export interface TreeData {
     instructions?: TreeInstructions;
 }
 export interface StringObjectMap {
-    [key: string]: object | string | [] | number;
+    [key: string]: object | string | [] | boolean | number;
 }
 export declare class Converter {
     /**

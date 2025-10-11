@@ -49,5 +49,7 @@ export declare class DraggableLabel {
     delete(): void;
     shadow(shouldShadow: boolean): void;
     detach(): void;
+    hide(): void;
+    show(): void;
 }
 export {};
