@@ -11,6 +11,7 @@ const hardcoded_source_property_names = [
     '#form_button_texture_file_system',
     '#form_button_texture',
     '#form_button_text',
+    '#form_text'
 ]
 
 
