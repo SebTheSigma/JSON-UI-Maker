@@ -25,6 +25,7 @@ import { ExplorerController } from "./ui/explorer/explorerController.js";
 import { ResizeableElements } from "./elements/sharedElement.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
+import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 
 console.log("Script Loaded");
 
@@ -379,6 +380,10 @@ export class Builder {
 
     public static updateExplorer(): void {
         ExplorerController.updateExplorer();
+    }
+
+    public static texturePresetsModal(): void {
+        loadTexturePresetsModal();
     }
 }
 

@@ -42,6 +42,7 @@ export declare class Builder {
     static setSettingToggle(setting: keyof typeof config.settings, value: any): void;
     static addImage(imageName: string): void;
     static updateExplorer(): void;
+    static texturePresetsModal(): void;
 }
 export interface ImageDataState {
     png?: ImageData;

@@ -167,11 +167,15 @@ const configMagicNumbers = {
         return offset;
     },
 };
+const texturePresets = {
+    'turquoise_ore-ui_style': false
+};
 export const config = {
     settings: configSettings,
     magicNumbers: configMagicNumbers,
     nameSpace: "default_namespace",
     title: "default_title",
     defaultCollectionName: "form_buttons",
+    texturePresets: texturePresets
 };
 //# sourceMappingURL=CONFIG.js.map

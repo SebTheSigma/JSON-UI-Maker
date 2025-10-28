@@ -5,7 +5,7 @@ export declare class FileUploader {
      */
     static handleUiTexturesUpload(): void;
     static processFileUpload(files: File[]): Promise<void>;
-    private static readJsonFile;
+    static readJsonFile(file: File): Promise<any>;
     private static readImageAsImageData;
     static isFileUploaded(fileName: string): boolean;
     static getAssetAsFile(path: string, filename: string): Promise<File>;

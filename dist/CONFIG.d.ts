@@ -85,6 +85,9 @@ interface Config {
     title: string;
     defaultCollectionName: string;
     rootElement?: HTMLElement;
+    texturePresets?: {
+        [key: string]: boolean;
+    };
 }
 export declare const config: Config;
 export {};

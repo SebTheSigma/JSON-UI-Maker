@@ -48,7 +48,7 @@ export class FileUploader {
         await Promise.all(tasks);
     }
 
-    private static readJsonFile(file: File): Promise<any> {
+    public static readJsonFile(file: File): Promise<any> {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = () => {

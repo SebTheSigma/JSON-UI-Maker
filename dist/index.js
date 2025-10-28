@@ -22,6 +22,7 @@ import { initDefaultImages } from "./files/initDefaultImages.js";
 import { ExplorerController } from "./ui/explorer/explorerController.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
+import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 console.log("Script Loaded");
 initDefaultImages();
 console.log("Image-Files Loaded");
@@ -308,6 +309,9 @@ export class Builder {
     }
     static updateExplorer() {
         ExplorerController.updateExplorer();
+    }
+    static texturePresetsModal() {
+        loadTexturePresetsModal();
     }
 }
 export var images = new Map();

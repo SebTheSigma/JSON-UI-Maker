@@ -172,6 +172,10 @@ const configMagicNumbers = {
     },
 };
 
+const texturePresets = {
+    'turquoise_ore-ui_style': false
+};
+
 interface Config {
     settings: typeof configSettings;
     magicNumbers: typeof configMagicNumbers;
@@ -179,6 +183,7 @@ interface Config {
     title: string;
     defaultCollectionName: string;
     rootElement?: HTMLElement;
+    texturePresets?: { [key: string]: boolean };
 }
 
 export const config: Config = {
@@ -187,4 +192,5 @@ export const config: Config = {
     nameSpace: "default_namespace",
     title: "default_title",
     defaultCollectionName: "form_buttons",
+    texturePresets: texturePresets
 };
