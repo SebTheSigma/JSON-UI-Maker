@@ -1,4 +1,4 @@
-import { GLOBAL_ELEMENT_MAP, isInMainWindow, panelContainer, selectedElement, setDraggedElement, setSelectedElement } from "../index.js";
+import { GLOBAL_ELEMENT_MAP, panelContainer} from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";

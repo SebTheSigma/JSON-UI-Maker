@@ -1,9 +1,7 @@
-import { images, isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { images, panelContainer } from "../index.js";
 import { Nineslice, NinesliceData } from "../nineslice.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
-import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";

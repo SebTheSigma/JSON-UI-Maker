@@ -9,7 +9,6 @@ import { config } from "../CONFIG.js";
 import { DraggableCanvas } from "../elements/canvas.js";
 import { Notification } from "../ui/notifs/noficationMaker.js";
 import { DraggableButton } from "../elements/button.js";
-import { is } from "cheerio/dist/commonjs/api/traversing.js";
 import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
 
 function processChildren(copiedElement: CopiedElementData, elementClassMainHTMLElement: HTMLElement) {

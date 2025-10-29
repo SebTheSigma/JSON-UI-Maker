@@ -1,7 +1,6 @@
-import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { TextPrompt } from "../ui/textPrompt.js";
 import { collectSourcePropertyNames } from "../scripter/bindings/source_property_name.js";

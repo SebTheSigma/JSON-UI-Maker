@@ -1,7 +1,5 @@
-import { isInMainWindow, panelContainer, selectedElement, setSelectedElement } from "../index.js";
+import { panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
-import { updatePropertiesArea } from "../ui/propertiesArea.js";
-import { AllJsonUIElements } from "./elements.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { ExplorerController } from "../ui/explorer/explorerController.js";

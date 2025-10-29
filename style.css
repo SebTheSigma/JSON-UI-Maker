@@ -67,6 +67,23 @@ input[type="file"] {
     transform: scale(1.05); /* 120% */
 }
 
+.discord_link {
+    position: absolute; /* or fixed, or relative depending on context */
+    left: calc(100% - 225px);
+    top: 10px;
+    transition: all 0.3s ease;
+}
+
+.discord_link:hover {
+    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+    transform: scale(1.1) rotate(5deg);
+}
+
+.discord_icon {
+    width: 40px;
+    height: 40px;
+}
+
 .settings_img {
     width: 20px;
     height: 20px;
@@ -716,7 +733,6 @@ input[type="file"] {
     border-radius: 50vh;
     padding: 2px 6px 2px 6px;
 }
-
 
 .explorerDragText {
     position: relative;
