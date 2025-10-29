@@ -26,6 +26,7 @@ import { ResizeableElements } from "./elements/sharedElement.js";
 import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
+import { helpModal } from "./ui/modals/helpMenu.js";
 
 console.log("Script Loaded");
 
@@ -384,6 +385,10 @@ export class Builder {
 
     public static texturePresetsModal(): void {
         loadTexturePresetsModal();
+    }
+
+    public static openHelpMenu(): void {
+        helpModal();
     }
 }
 

@@ -741,6 +741,20 @@ input[type="file"] {
     padding: 5px;
 }
 
+.help_button {
+    position: absolute;
+    top: 10px;
+    left: calc(100% - 270px);
+    width: 40px;
+    height: 40px;
+    transition: all 0.3s ease;
+}
+
+.help_button:hover {
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+}
+
 @font-face {
     font-family: "MinecraftRegular";
     src: url("./fonts/MinecraftRegular.ttf") format("truetype");

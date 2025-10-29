@@ -7,7 +7,13 @@ export class Nineslice {
         else {
             [left, top, right, bottom] = new Array(4).fill(nineslice_size);
         }
-        const [baseWidth, baseHeight] = base_size;
+        let baseWidth, baseHeight;
+        if (Array.isArray(base_size)) {
+            [baseWidth, baseHeight] = base_size;
+        }
+        else {
+            [baseWidth, baseHeight] = new Array(2).fill(base_size);
+        }
         const output = new Uint8ClampedArray(newWidth * newHeight * 4);
         function getPixel(x, y) {
             x = Math.max(0, Math.min(baseWidth - 1, x));

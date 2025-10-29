@@ -10,6 +10,10 @@ const options = [
         name: "red_ore-ui_style",
         displayName: "Red Ore-UI Style",
     },
+    {
+        name: "pink_ore-ui_style",
+        displayName: "Pink Ore-UI Style",
+    },
 ];
 export async function loadTexturePresetsModal() {
     modal.style.display = "block";

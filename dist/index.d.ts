@@ -43,6 +43,7 @@ export declare class Builder {
     static addImage(imageName: string): void;
     static updateExplorer(): void;
     static texturePresetsModal(): void;
+    static openHelpMenu(): void;
 }
 export interface ImageDataState {
     png?: ImageData;

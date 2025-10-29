@@ -22,8 +22,9 @@
                 onchange="Builder.uploadForm()" accept=".json"/>
             Upload Form
         </label>
-
     </div>
+
+    <img src="icons/help.webp" class="help_button" onclick="Builder.openHelpMenu()"></img>
 
     <a href="https://discord.gg/zqfNbYCcA9" class="discord_link"><img src="icons/discord.webp" class="discord_icon"></a>
 
@@ -80,6 +81,36 @@
             <h2 class="modalHeader">Load Texture Presets</h2>
             <div class="modalLoadTexturePresetsForm">
 
+            </div>
+        </div>
+    </div>
+    <!--------------->
+
+    <!-- The Help Menu Modal -->
+    <div id="modalHelpMenu" class="modal">
+        <div class="modal-content">
+            <span id="modalHelpMenuClose" class="modalClose">&times;</span>
+            <h2 class="modalHeader">Help</h2>
+            <div class="modalHelpMenuForm">
+                <label style="font-weight: 500; color: rgb(255, 255, 255);">Key Binds:</label><br><br>
+
+                <label class="modalOptionLabel">
+                    CTRL + c: <b>Copy</b><br>
+                    CTRL + v: <b>Paste</b><br>
+                    CTRL + x: <b>Cut</b><br>
+                    Tab: <b>Indent</b><br>
+                    Del: <b>Delete</b><br>
+                    Tab | Enter: <b>Autocomplete</b><br>
+                    Arrow Keys: <b>Move</b>
+                </label><br><br><br>
+
+                <label style="font-weight: 500; color: rgb(255, 255, 255); font-size: 20px;">General Issues:</label><br><br>
+
+                <label style="font-weight: 500; color: rgb(255, 255, 255);">Why arent my buttons working in-game?</label><br><br>
+                <label class="modalOptionLabel">You probably need to stack the button on top of a collection panel, if that doesnt fix it, check that all texture paths are correct</label><br><br>
+
+                <label style="font-weight: 500; color: rgb(255, 255, 255);">Why isnt the form uploader working?</label><br><br>
+                <label class="modalOptionLabel">The form uploader can only upload forms made by the website</label>
             </div>
         </div>
     </div>
