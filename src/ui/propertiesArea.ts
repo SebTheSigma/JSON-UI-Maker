@@ -473,7 +473,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "number",
+                type: "decimal",
                 displayName: "Font Scale",
                 editable: true,
 
@@ -670,6 +670,10 @@ export function updatePropertiesArea(): void {
             input.spellcheck = false;
         }
         else if (property.type === "number") input.value = value as string;
+        else if (property.type === "decimal") {
+            input.value = value as string;
+            input.step = "any";
+        }
 
         const label = document.createElement("label");
         label.textContent = `${property.displayName}: `;

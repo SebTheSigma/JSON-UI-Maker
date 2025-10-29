@@ -5,12 +5,12 @@ const modal: HTMLElement = document.getElementById("modalCreateForm")!;
 const options = [
     {
         type: "text",
-        name: "title",
-        displayName: "Form Title",
+        name: "title_flag",
+        displayName: "Title Flag",
         required: true,
-        default: config.title,
-        body: "Will be set as your title text in scripts<br>Cant start with a number or special character",
-        condition: (value: string) => /^[A-Za-z].*$/.test(value) && value !== '' && value,
+        default: config.title_flag,
+        body: "Will be set as your title flag in scripts<br>Cant start with a number",
+        condition: (value: string) => /^[^0-9].*$/.test(value) && value !== '' && value
     },
 ];
 

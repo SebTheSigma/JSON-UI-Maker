@@ -40,9 +40,9 @@ console.log("Script Generator Loaded");
 
 document.addEventListener("DOMContentLoaded", async (e) => {
     const createFormOptions = await createFormModal();
-    const title = createFormOptions.title!;
+    const title_flag = createFormOptions.title_flag!;
 
-    config.title = title;
+    config.title_flag = title_flag;
     config.nameSpace = `${StringUtil.generateRandomString(6)}namespace`;
 
     const mainPanelInfo = constructMainPanel();
@@ -402,17 +402,3 @@ declare global {
 }
 
 window.Builder = Builder;
-
-/*
-
-TODO:
-- Finsish grid locking
-- Update pack uploader
-- Grid and scrolling panels
-- Scrolling panel offsets
-- Upload button
-
-BUGS:
-- Nineslice doesnt dynamically size using the uiscale
-
-*/

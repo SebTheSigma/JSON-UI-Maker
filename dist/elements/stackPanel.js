@@ -3,7 +3,7 @@ import { config } from "../CONFIG.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { ExplorerController } from "../ui/explorer/explorerController.js";
-export class DraggablePanel {
+export class DraggableStackPanel {
     // Core elements
     container;
     panel;
@@ -30,10 +30,10 @@ export class DraggablePanel {
     /**
      * @param {HTMLElement} container
      */
-    constructor(ID, container, interactable = true) {
+    constructor(ID, container, stackPanelOptions) {
         const i = GeneralUtil.getElementDepth(container, panelContainer);
         // Saves parameters
-        this._constructorArgs = [ID, container, interactable];
+        this._constructorArgs = [ID, container, stackPanelOptions];
         this.container = container;
         const rect = container.getBoundingClientRect();
         this.panel = document.createElement("div");
@@ -49,19 +49,16 @@ export class DraggablePanel {
         this.panel.style.outline = `${config.settings.element_outline.value}px solid black`;
         this.panel.style.position = "absolute";
         this.panel.style.zIndex = String(2 * i);
-        if (interactable) {
-            this.resizeHandle = document.createElement("div");
-            this.resizeHandle.className = "resize-handle";
-            this.resizeHandle.style.zIndex = String(2 * i + 1);
-            this.panel.appendChild(this.resizeHandle);
-        }
+        this.resizeHandle = document.createElement("div");
+        this.resizeHandle.className = "resize-handle";
+        this.resizeHandle.style.zIndex = String(2 * i + 1);
+        this.panel.appendChild(this.resizeHandle);
         this.gridElement = ElementSharedFuncs.generateGridElement();
         this.centerCircle = ElementSharedFuncs.generateCenterPoint();
         this.panel.appendChild(this.gridElement);
         this.panel.appendChild(this.centerCircle);
         this.container.appendChild(this.panel);
-        if (interactable)
-            this.initEvents();
+        this.initEvents();
         this.grid(false);
         ElementSharedFuncs.updateCenterCirclePosition(this);
         setTimeout(() => {
@@ -126,4 +123,4 @@ export class DraggablePanel {
         ElementSharedFuncs.show(this);
     }
 }
-//# sourceMappingURL=panel.js.map
+//# sourceMappingURL=stackPanel.js.map

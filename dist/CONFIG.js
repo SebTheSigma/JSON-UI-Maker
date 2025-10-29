@@ -174,7 +174,7 @@ export const config = {
     settings: configSettings,
     magicNumbers: configMagicNumbers,
     nameSpace: "default_namespace",
-    title: "default_title",
+    title_flag: "default_title",
     defaultCollectionName: "form_buttons",
     texturePresets: texturePresets
 };

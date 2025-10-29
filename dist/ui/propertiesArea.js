@@ -405,7 +405,7 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "number",
+                type: "decimal",
                 displayName: "Font Scale",
                 editable: true,
                 get: (element) => element.style.fontSize.replace("em", ""),
@@ -575,6 +575,10 @@ export function updatePropertiesArea() {
         }
         else if (property.type === "number")
             input.value = value;
+        else if (property.type === "decimal") {
+            input.value = value;
+            input.step = "any";
+        }
         const label = document.createElement("label");
         label.textContent = `${property.displayName}: `;
         const isEditableLabel = document.createElement("label");

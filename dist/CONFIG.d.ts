@@ -82,7 +82,7 @@ interface Config {
     settings: typeof configSettings;
     magicNumbers: typeof configMagicNumbers;
     nameSpace: string;
-    title: string;
+    title_flag: string;
     defaultCollectionName: string;
     rootElement?: HTMLElement;
     texturePresets?: {

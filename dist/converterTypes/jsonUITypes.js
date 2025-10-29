@@ -176,7 +176,7 @@ export const JSON_TYPES_GENERATOR = new Map([
                         },
                         {
 							"binding_type": "view",
-							"source_property_name": "((#title_text - '${config.title}') = #title_text)",
+							"source_property_name": "((#title_text - '${config.title_flag}') = #title_text)",
 							"target_property_name": "#visible"
 						}
                     ]
@@ -191,7 +191,7 @@ export const JSON_TYPES_GENERATOR = new Map([
                         },
                         {
                             "binding_type": "view",
-                            "source_property_name": "(#title_text = '${config.title}')",
+                            "source_property_name": "( not ((#title_text - '${config.title_flag}') = #title_text))",
                             "target_property_name": "#visible"
                         }
                     ]

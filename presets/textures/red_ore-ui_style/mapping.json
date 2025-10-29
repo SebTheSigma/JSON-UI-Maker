@@ -1,0 +1,28 @@
+{
+    "data": [
+        {
+            "image": "default_button",
+            "nineslice": true
+        },
+        {
+            "image": "default_secondary_button",
+            "nineslice": true
+        },
+        {
+            "image": "hover_button",
+            "nineslice": true
+        },
+        {
+            "image": "hover_secondary_button",
+            "nineslice": true
+        },
+        {
+            "image": "pressed_button",
+            "nineslice": true
+        },
+        {
+            "image": "default_background",
+            "nineslice": true
+        }
+    ]
+}

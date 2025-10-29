@@ -6,12 +6,22 @@ const options = [
         name: "turquoise_ore-ui_style",
         displayName: "Turquoise Ore-UI Style",
     },
+    {
+        name: "red_ore-ui_style",
+        displayName: "Red Ore-UI Style",
+    },
 ];
 export async function loadTexturePresetsModal() {
     modal.style.display = "block";
     const form = document.getElementsByClassName("modalLoadTexturePresetsForm")[0];
     // Clears the form
     form.innerHTML = "";
+    const bodyText = document.createElement("p");
+    bodyText.innerHTML = "To get the textures in MC<br>download the files from github";
+    bodyText.className = 'modalOptionInput';
+    bodyText.style.textAlign = 'center';
+    form.appendChild(bodyText);
+    form.appendChild(document.createElement("br"));
     const elements = [];
     // Adds the options
     for (let option of options) {
@@ -45,7 +55,10 @@ export async function loadTexturePresetsModal() {
         submit.onclick = () => {
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i];
-                const value = element.value;
+                const checked = element.checked;
+                console.log('value', checked);
+                if (!checked)
+                    continue;
                 if (config.texturePresets[element.name] == true)
                     continue;
                 loadPresetTextureSets(element.name);

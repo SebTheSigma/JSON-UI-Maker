@@ -15,7 +15,7 @@ import { ActionFormData } from '@minecraft/server-ui';
 
 function showCustomForm(player) {
     const form = new ActionFormData();
-    form.title("${config.title}");
+    form.title("${config.title_flag}Example Title");
 
 ${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
 
@@ -50,7 +50,7 @@ import { ActionFormData } from '@minecraft/server-ui';
 
 function showCustomForm(player: Player) {
     const form = new ActionFormData();
-    form.title("${config.title}");
+    form.title("${config.title_flag}Example Title");
 
 ${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
 

@@ -180,7 +180,7 @@ interface Config {
     settings: typeof configSettings;
     magicNumbers: typeof configMagicNumbers;
     nameSpace: string;
-    title: string;
+    title_flag: string;
     defaultCollectionName: string;
     rootElement?: HTMLElement;
     texturePresets?: { [key: string]: boolean };
@@ -190,7 +190,7 @@ export const config: Config = {
     settings: configSettings,
     magicNumbers: configMagicNumbers,
     nameSpace: "default_namespace",
-    title: "default_title",
+    title_flag: "default_title",
     defaultCollectionName: "form_buttons",
     texturePresets: texturePresets
 };
