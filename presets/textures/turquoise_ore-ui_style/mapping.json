@@ -1,19 +1,19 @@
 {
     "data": [
         {
-            "image": "default_button",
+            "image": "turquoise_default_button",
             "nineslice": true
         },
         {
-            "image": "hover_button",
+            "image": "turquoise_hover_button",
             "nineslice": true
         },
         {
-            "image": "default_background",
+            "image": "turquoise_default_background",
             "nineslice": true
         },
         {
-            "image": "default_title_background",
+            "image": "turquoise_default_title_background",
             "nineslice": true
         }
     ]

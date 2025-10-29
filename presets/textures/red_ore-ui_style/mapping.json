@@ -1,27 +1,27 @@
 {
     "data": [
         {
-            "image": "default_button",
+            "image": "red_default_button",
             "nineslice": true
         },
         {
-            "image": "default_secondary_button",
+            "image": "red_default_secondary_button",
             "nineslice": true
         },
         {
-            "image": "hover_button",
+            "image": "red_hover_button",
             "nineslice": true
         },
         {
-            "image": "hover_secondary_button",
+            "image": "red_hover_secondary_button",
             "nineslice": true
         },
         {
-            "image": "pressed_button",
+            "image": "red_pressed_button",
             "nineslice": true
         },
         {
-            "image": "default_background",
+            "image": "red_default_background",
             "nineslice": true
         }
     ]
