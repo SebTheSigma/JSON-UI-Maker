@@ -53,6 +53,5 @@ declare global {
     interface Window {
         Builder: typeof Builder;
         Converter: typeof Converter;
-        handlePackUpload: () => void;
     }
 }

@@ -23,9 +23,9 @@ import { FormUploader } from "./upload.js";
 import { initDefaultImages } from "./files/initDefaultImages.js";
 import { ExplorerController } from "./ui/explorer/explorerController.js";
 import { ResizeableElements } from "./elements/sharedElement.js";
+import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
-import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 
 console.log("Script Loaded");
 
@@ -398,7 +398,6 @@ declare global {
     interface Window {
         Builder: typeof Builder;
         Converter: typeof Converter;
-        handlePackUpload: () => void;
     }
 }
 

@@ -1,20 +1,6 @@
 import { selectedElement } from "../index.js";
 import { config } from '../CONFIG.js'
 
-let focused = false;
-document.addEventListener('focusin', (e) => {
-  const el: HTMLElement = e.target as HTMLElement;
-  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-    focused = true;
-  }
-});
-
-document.addEventListener('focusout', (e) => {
-  const el: HTMLElement = e.target as HTMLElement;
-  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-    focused = false;
-  }
-});
 
 
 /**
@@ -25,10 +11,6 @@ document.addEventListener('focusout', (e) => {
  */
 export function triggerArrowMovement(e: KeyboardEvent): void {
     if (!selectedElement) return;
-
-    // Allows user to use the arrow-
-    // keys while in a text-field element
-    if (focused) return;
 
     // Movement
     if (e.key === "ArrowLeft") selectedElement!.style.left = `${parseFloat(selectedElement!.style.left) - config.settings.arrow_key_move_amount!.value}px`;

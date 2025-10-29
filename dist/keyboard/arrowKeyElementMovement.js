@@ -1,18 +1,5 @@
 import { selectedElement } from "../index.js";
 import { config } from '../CONFIG.js';
-let focused = false;
-document.addEventListener('focusin', (e) => {
-    const el = e.target;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-        focused = true;
-    }
-});
-document.addEventListener('focusout', (e) => {
-    const el = e.target;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-        focused = false;
-    }
-});
 /**
  * Triggers movement of the selected element based on the arrow keys.
  * Arrow key presses will move the element by the amount specified in
@@ -21,10 +8,6 @@ document.addEventListener('focusout', (e) => {
  */
 export function triggerArrowMovement(e) {
     if (!selectedElement)
-        return;
-    // Allows user to use the arrow-
-    // keys while in a text-field element
-    if (focused)
         return;
     // Movement
     if (e.key === "ArrowLeft")
