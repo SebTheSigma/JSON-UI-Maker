@@ -28,14 +28,9 @@
 
     <a href="https://discord.gg/zqfNbYCcA9" class="discord_link"><img src="icons/discord.webp" class="discord_icon"></a>
 
-    <div class="presetTextures" onclick="Builder.texturePresetsModal()">Preset Textures</div>
-
-    <img src="icons/zoom_in.webp" class="zoom_in" id="zoom_in">
-    <div class="zoom_label" id="zoom_label">100%</div>
-    <img src="icons/zoom_out.webp" class="zoom_out" id="zoom_out">
-
-
-    <!-- The Settings Modal -->
+    <div class="presetTextures" onclick="Builder.texturePresetsModal()">Preset Textures</div>    
+    
+    
     <button class="modalSettingsBtn" id="modalSettingsBtn">
         <label class="settings_label">
             Settings
@@ -44,7 +39,9 @@
         <img class="settings_img" src="settings_cog.png"></img>
     </button>
 
+    <input style="margin-left: 20px;" id="ui_scale_slider" type="range" min="10" max="100">
 
+    <!-- The Settings Modal -->
     <div id="modalSettings" class="modal">
         <div class="modal-content">
             <span id="modalSettingsClose" class="modalClose">&times;</span>

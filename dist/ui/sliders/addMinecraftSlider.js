@@ -12,8 +12,8 @@ export class MinecraftSlider {
     isDragging;
     handleCanvas;
     constructor(scrollingPanel) {
-        this.scrollBarWidth = 10;
-        this.backgroundBarWidth = 6;
+        this.scrollBarWidth = 14;
+        this.backgroundBarWidth = 10;
         this.scrollingPanel = scrollingPanel;
         this.backgroundBar = document.createElement("div");
         this.backgroundBar.className = "minecraft-slider";

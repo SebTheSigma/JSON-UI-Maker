@@ -27,7 +27,7 @@ import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 import { helpModal } from "./ui/modals/helpMenu.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
-import "./ui/zoom.js";
+import "./ui/scale.js";
 
 console.log("Script Loaded");
 

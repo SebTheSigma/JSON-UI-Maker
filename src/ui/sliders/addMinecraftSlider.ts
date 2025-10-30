@@ -20,8 +20,8 @@ export class MinecraftSlider {
 
     constructor(scrollingPanel: DraggableScrollingPanel) {
 
-        this.scrollBarWidth = 10;
-        this.backgroundBarWidth = 6;
+        this.scrollBarWidth = 14;
+        this.backgroundBarWidth = 10;
 
         this.scrollingPanel = scrollingPanel;
         this.backgroundBar = document.createElement("div");

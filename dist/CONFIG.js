@@ -124,7 +124,7 @@ const configMagicNumbers = {
         else
             return doubleFontSize - 3;
     },
-    UI_SCALAR: 0.5,
+    UI_SCALAR: 0.36,
     buttonImageOffsetX: 2,
     buttonImageOffsetY: 2,
     labelToOffset: (label) => {
@@ -177,6 +177,5 @@ export const config = {
     title_flag: "default_title",
     defaultCollectionName: "form_buttons",
     texturePresets: texturePresets,
-    zoom: 1
 };
 //# sourceMappingURL=CONFIG.js.map

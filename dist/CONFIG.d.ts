@@ -88,7 +88,6 @@ interface Config {
     texturePresets?: {
         [key: string]: boolean;
     };
-    zoom: number;
 }
 export declare const config: Config;
 export {};

@@ -124,7 +124,7 @@ const configMagicNumbers = {
         else if (fontType == "MinecraftTen") return -1;
         else return doubleFontSize - 3
     },
-    UI_SCALAR: 0.5,
+    UI_SCALAR: 0.36,
     buttonImageOffsetX: 2,
     buttonImageOffsetY: 2,
 
@@ -184,7 +184,6 @@ interface Config {
     defaultCollectionName: string;
     rootElement?: HTMLElement;
     texturePresets?: { [key: string]: boolean };
-    zoom: number;
 }
 
 export const config: Config = {
@@ -194,5 +193,4 @@ export const config: Config = {
     title_flag: "default_title",
     defaultCollectionName: "form_buttons",
     texturePresets: texturePresets,
-    zoom: 1
 };
