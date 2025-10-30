@@ -14,14 +14,18 @@ import { StringUtil } from "./util/stringUtil.js";
 export class FormUploader {
     static parseJsonWithComments(raw) {
         const noComments = raw
-            .replace(/\/\/.*$/gm, "") // remove //
-            .replace(/\/\*[\s\S]*?\*\//g, ""); // remove /* */
+            // Remove block comments first so we don't break URLs
+            .replace(/\/\*[\s\S]*?\*\//gm, "")
+            // Then remove single-line comments
+            .replace(/\/\/.*$/gm, "")
+            // Clean up whitespace
+            .trim();
         return JSON.parse(noComments);
     }
     static isValid(form) {
         try {
             const parsed = FormUploader.parseJsonWithComments(form);
-            console.log(parsed);
+            console.warn(parsed);
             if (!parsed.namespace) {
                 new Notification("Invalid namespace, please upload a valid form", 5000, "error");
                 return false;
@@ -275,7 +279,7 @@ export const tagNameToCreateClassElementFunc = new Map([
                 defaultTexture: imageNames[0],
                 hoverTexture: imageNames[1],
                 pressedTexture: imageNames[2],
-                displayTexture: 'placeholder',
+                displayTexture: "placeholder",
                 collectionIndex: json.$collection_index,
             });
             GLOBAL_ELEMENT_MAP.set(id, button);

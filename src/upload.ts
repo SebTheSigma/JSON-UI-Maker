@@ -22,15 +22,20 @@ interface UploadTreeInstructions {
 export class FormUploader {
     public static parseJsonWithComments(raw: string) {
         const noComments = raw
-            .replace(/\/\/.*$/gm, "") // remove //
-            .replace(/\/\*[\s\S]*?\*\//g, ""); // remove /* */
+            // Remove block comments first so we don't break URLs
+            .replace(/\/\*[\s\S]*?\*\//gm, "")
+            // Then remove single-line comments
+            .replace(/\/\/.*$/gm, "")
+            // Clean up whitespace
+            .trim();
+
         return JSON.parse(noComments);
     }
 
     public static isValid(form: string) {
         try {
             const parsed = FormUploader.parseJsonWithComments(form);
-            console.log(parsed);
+            console.warn(parsed);
 
             if (!parsed.namespace) {
                 new Notification("Invalid namespace, please upload a valid form", 5000, "error");
@@ -418,7 +423,7 @@ export const tagNameToCreateClassElementFunc: Map<
                 defaultTexture: imageNames[0],
                 hoverTexture: imageNames[1],
                 pressedTexture: imageNames[2],
-                displayTexture: 'placeholder',
+                displayTexture: "placeholder",
                 collectionIndex: json.$collection_index as string,
             });
 
@@ -428,7 +433,6 @@ export const tagNameToCreateClassElementFunc: Map<
             const offset = json.$button_offset as [number, number];
 
             button.drawImage(size[0] / UI_SCALAR, size[1] / UI_SCALAR);
-
 
             // LABEL -----------------------------------------------------
             const label = button.displayText!;
@@ -462,7 +466,6 @@ export const tagNameToCreateClassElementFunc: Map<
             label.label.dispatchEvent(new Event("input"));
             // -----------------------------------------------------------
 
-
             // CANVAS ----------------------------------------------------
             const canvas = button.displayCanvas!;
 
@@ -474,7 +477,6 @@ export const tagNameToCreateClassElementFunc: Map<
 
             canvas.drawImage(canvasSize[0] / UI_SCALAR, canvasSize[1] / UI_SCALAR);
             // -----------------------------------------------------------
-
 
             button.button.style.left = `${offset[0] / UI_SCALAR}px`;
             button.button.style.top = `${offset[1] / UI_SCALAR}px`;

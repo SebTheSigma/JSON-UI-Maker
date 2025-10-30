@@ -176,6 +176,7 @@ export const config = {
     nameSpace: "default_namespace",
     title_flag: "default_title",
     defaultCollectionName: "form_buttons",
-    texturePresets: texturePresets
+    texturePresets: texturePresets,
+    zoom: 1
 };
 //# sourceMappingURL=CONFIG.js.map

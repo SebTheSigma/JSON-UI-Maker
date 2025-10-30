@@ -184,6 +184,7 @@ interface Config {
     defaultCollectionName: string;
     rootElement?: HTMLElement;
     texturePresets?: { [key: string]: boolean };
+    zoom: number;
 }
 
 export const config: Config = {
@@ -192,5 +193,6 @@ export const config: Config = {
     nameSpace: "default_namespace",
     title_flag: "default_title",
     defaultCollectionName: "form_buttons",
-    texturePresets: texturePresets
+    texturePresets: texturePresets,
+    zoom: 1
 };

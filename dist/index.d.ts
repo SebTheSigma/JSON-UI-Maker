@@ -11,6 +11,7 @@ import { CopiedElementData } from "./copy_paste/copy.js";
 import { ResizeableElements } from "./elements/sharedElement.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
+import "./ui/zoom.js";
 export declare let selectedElement: HTMLElement | undefined;
 export declare function setSelectedElement(element: HTMLElement | undefined): void;
 export declare let copiedElementData: CopiedElementData | undefined;

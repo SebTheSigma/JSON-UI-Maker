@@ -24,9 +24,10 @@ import { initDefaultImages } from "./files/initDefaultImages.js";
 import { ExplorerController } from "./ui/explorer/explorerController.js";
 import { ResizeableElements } from "./elements/sharedElement.js";
 import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
+import { helpModal } from "./ui/modals/helpMenu.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
-import { helpModal } from "./ui/modals/helpMenu.js";
+import "./ui/zoom.js";
 
 console.log("Script Loaded");
 
