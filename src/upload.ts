@@ -377,7 +377,7 @@ export const tagNameToCreateClassElementFunc: Map<
             scrollingPanel.basePanel.style.width = scrollingPanel.panel.style.width;
             scrollingPanel.basePanel.style.height = scrollingPanel.panel.style.height;
 
-            scrollingPanel.basePanel.style.left = `${offset[0]! / UI_SCALAR}px`;
+            scrollingPanel.basePanel.style.left = `${(offset[0] - config.magicNumbers.scrolling_panel_offsets.scrolling_pane_right_offset)! / UI_SCALAR}px`;
             scrollingPanel.basePanel.style.top = `${offset[1]! / UI_SCALAR}px`;
 
             scrollingPanel.slider.updateHandle();

@@ -103,6 +103,9 @@ const configSettings = {
 };
 
 const configMagicNumbers = {
+    scrolling_panel_offsets: {
+        scrolling_pane_right_offset: 2
+    },
     textEditor: {
         indentation: 4,
     },

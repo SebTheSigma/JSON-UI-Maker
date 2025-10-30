@@ -230,8 +230,9 @@ export const classToJsonUI = new Map([
                 offset[1] = -processedHeight / 2;
             }
             const ui_scaler = config.magicNumbers.UI_SCALAR;
+            const right_offset = config.magicNumbers.scrolling_panel_offsets.scrolling_pane_right_offset;
             const jsonUIElement = {
-                offset: [offset[0] * ui_scaler, offset[1] * ui_scaler],
+                offset: [(offset[0] * ui_scaler) + right_offset, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 type: "panel",
@@ -240,7 +241,7 @@ export const classToJsonUI = new Map([
                 $scroll_size: [10 * ui_scaler, processedHeight * ui_scaler],
                 $scrolling_pane_size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 $scrolling_pane_offset: [0, 0],
-                $scroll_bar_right_padding_size: [0, 0],
+                $scroll_bar_right_padding_size: [right_offset, 0],
             };
             const newTreeLink = `${nameSpace}.${StringUtil.generateRandomString(8)}-skip`;
             const instructions = {

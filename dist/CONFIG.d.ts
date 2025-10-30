@@ -60,6 +60,9 @@ declare const configSettings: {
     };
 };
 declare const configMagicNumbers: {
+    scrolling_panel_offsets: {
+        scrolling_pane_right_offset: number;
+    };
     textEditor: {
         indentation: number;
     };
