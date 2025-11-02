@@ -543,8 +543,9 @@ function attachTextureSearch(input) {
             dropdown.style.position = "absolute";
             dropdown.style.left = `${rect.left + window.scrollX}px`;
             dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-            dropdown.style.minWidth = `${rect.width}px`;
-            dropdown.style.maxWidth = `${rect.width}px`;
+            const minW = Math.max(rect.width, 380);
+            dropdown.style.minWidth = `${minW}px`;
+            dropdown.style.maxWidth = `640px`;
         };
         const render = (q) => {
             dropdown.innerHTML = "";
@@ -554,6 +555,7 @@ function attachTextureSearch(input) {
                     const item = document.createElement("div");
                     item.className = "textureSearchItem";
                     item.textContent = name;
+                    item.title = name;
                     item.onclick = () => {
                         input.value = name;
                         input.dispatchEvent(new Event("input"));
