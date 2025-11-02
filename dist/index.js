@@ -22,6 +22,7 @@ import { initDefaultImages } from "./files/initDefaultImages.js";
 import { ExplorerController } from "./ui/explorer/explorerController.js";
 import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 import { helpModal } from "./ui/modals/helpMenu.js";
+import { chooseImageModal } from "./ui/modals/chooseImage.js";
 import "./ui/modals/settings.js";
 import "./elements/groupedEventlisteners.js";
 import "./ui/scale.js";
@@ -94,6 +95,10 @@ panelContainer.addEventListener("mouseleave", () => {
  * The id is used to access the element.
  */
 export const GLOBAL_ELEMENT_MAP = new Map();
+export let GLOBAL_FILE_SYSTEM = {};
+export function setFileSystem(fs) {
+    GLOBAL_FILE_SYSTEM = fs;
+}
 export class Builder {
     static uploadForm() {
         console.log("Uploading form");
@@ -206,7 +211,7 @@ export class Builder {
         const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? config.rootElement);
         GLOBAL_ELEMENT_MAP.set(id, collectionPanel);
     }
-    static addCanvas(imageData, imageName, nineSlice) {
+    static addCanvas(imageData, imagePath, nineSlice) {
         if (selectedElement) {
             if (!this.isValidPath(selectedElement, "canvas"))
                 return;
@@ -214,7 +219,7 @@ export class Builder {
         if (!config.rootElement)
             return;
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, selectedElement ?? config.rootElement, imageData, imageName, nineSlice);
+        const canvas = new DraggableCanvas(id, selectedElement ?? config.rootElement, imageData, imagePath, nineSlice);
         GLOBAL_ELEMENT_MAP.set(id, canvas);
     }
     static async addButton() {
@@ -301,14 +306,6 @@ export class Builder {
     static setSettingToggle(setting, value) {
         config.settings[setting].value = value;
     }
-    static addImage(imageName) {
-        const imageData = images.get(imageName);
-        // Checks if the image is there
-        if (!imageData?.png)
-            return;
-        // Checks if the image is a nineslice
-        this.addCanvas(imageData.png, imageName, imageData.json);
-    }
     static updateExplorer() {
         ExplorerController.updateExplorer();
     }
@@ -317,6 +314,12 @@ export class Builder {
     }
     static openHelpMenu() {
         helpModal();
+    }
+    static async openAddImageMenu() {
+        const filePath = await chooseImageModal();
+        console.warn(filePath, images);
+        const imageInfo = images.get(filePath);
+        this.addCanvas(imageInfo.png, filePath, imageInfo.json);
     }
 }
 export var images = new Map();

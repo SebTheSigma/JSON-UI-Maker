@@ -1,4 +1,5 @@
 export declare class FileUploader {
+    static addToFileSystem(file: File): void;
     /**
      * Handles the event when a file is selected in the "Open Pack" dialog.
      * Loads the selected pack into the image map.

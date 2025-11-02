@@ -6,9 +6,11 @@ import { DraggableLabel } from "../elements/label.js";
 import { DraggablePanel } from "../elements/panel.js";
 import { DraggableScrollingPanel } from "../elements/scrollingPanel.js";
 import { ElementSharedFuncs } from "../elements/sharedElement.js";
-import { GLOBAL_ELEMENT_MAP, selectedElement } from "../index.js";
+import { Builder, GLOBAL_ELEMENT_MAP, selectedElement } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
+import { MathUtil } from "../util/mathUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { chooseImageModal } from "./modals/chooseImage.js";
 
 export const propertiesMap = new Map([
     [
@@ -147,11 +149,11 @@ export const propertiesMap = new Map([
                 set: (element: HTMLElement, value: string) => (element.style.zIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Texture",
                 editable: true,
 
-                get: (element: HTMLElement) => element.dataset.imageName,
+                get: (element: HTMLElement) => element.dataset.imagePath,
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableCanvas;
 
@@ -253,11 +255,11 @@ export const propertiesMap = new Map([
                 set: (element: HTMLElement, value: string) => (element.style.zIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Default Texture",
                 editable: true,
 
-                get: (element: HTMLElement) => element.dataset.defaultImageName,
+                get: (element: HTMLElement) => element.dataset.defaultImagePath,
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
@@ -265,11 +267,11 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Hover Texture",
                 editable: true,
 
-                get: (element: HTMLElement) => element.dataset.hoverImageName,
+                get: (element: HTMLElement) => element.dataset.hoverImagePath,
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
@@ -277,11 +279,11 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Pressed Texture",
                 editable: true,
 
-                get: (element: HTMLElement) => element.dataset.pressedImageName,
+                get: (element: HTMLElement) => element.dataset.pressedImagePath,
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
@@ -297,11 +299,11 @@ export const propertiesMap = new Map([
                 set: (element: HTMLElement, value: string) => (element.dataset.collectionIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Display Texture",
                 editable: true,
 
-                get: (element: HTMLElement) => element.dataset.displayImageName,
+                get: (element: HTMLElement) => element.dataset.displayImagePath,
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
@@ -473,19 +475,24 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "decimal",
+                type: "text",
                 displayName: "Font Scale",
                 editable: true,
 
-                get: (element: HTMLElement) => element.style.fontSize.replace("em", ""),
+                get: (element: HTMLElement) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element) as DraggableLabel;
+                    return elementClass.lastAttemptedScaleFactor;
+                },
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableLabel;
+
+                    console.log(value)
+                    elementClass.lastAttemptedScaleFactor = value;
 
                     element.style.fontSize = `${value}em`;
                     elementClass.mirror.style.fontSize = `${value}em`;
                     elementClass.shadowLabel.style.fontSize = `${value}em`;
-                    elementClass.updateSize();
-                    elementClass.label.dispatchEvent(new Event("input"));
+                    elementClass.updateSize(false);
                 },
             },
             {
@@ -623,6 +630,7 @@ export const propertiesMap = new Map([
 let currentInputs: HTMLInputElement[] = [];
 
 export function updatePropertiesArea(): void {
+    console.log("updatePropertiesArea");
     const propertiesArea = document.getElementById("properties")!;
 
     // Removes old event listeners
@@ -670,9 +678,13 @@ export function updatePropertiesArea(): void {
             input.spellcheck = false;
         }
         else if (property.type === "number") input.value = value as string;
-        else if (property.type === "decimal") {
+
+        if (property.type === "texture") {
+            input.type = "text";
+            input.readOnly = true;
             input.value = value as string;
-            input.step = "any";
+
+            setTimeout(() => GeneralUtil.autoResizeInput(input), 0);
         }
 
         const label = document.createElement("label");
@@ -685,9 +697,21 @@ export function updatePropertiesArea(): void {
         if (property.editable) {
             input.contentEditable = "true";
 
-            input.oninput = function () {
-                property.set(selectedElement!, input.value);
-            };
+            if (property.type === "texture") {
+                input.onclick = async function () {
+                    const filePath: string = await chooseImageModal();
+                    input.value = filePath;
+
+                    property.set(selectedElement!, filePath);
+
+                    GeneralUtil.autoResizeInput(input)
+                };
+            }
+            else {
+                input.oninput = function () {
+                    property.set(selectedElement!, input.value);
+                };
+            }
         } else input.contentEditable = "false";
 
         currentInputs.push(input);
@@ -698,6 +722,3 @@ export function updatePropertiesArea(): void {
         propertiesArea.appendChild(document.createElement("br"));
     }
 }
-
-
-

@@ -27,7 +27,7 @@ export declare class DraggableCanvas {
     /**
      * @param {HTMLElement} container
      */
-    constructor(ID: string, container: HTMLElement, imageData: ImageData, imageName: string, nineSlice?: NinesliceData);
+    constructor(ID: string, container: HTMLElement, imageData: ImageData, imagePath: string, nineSlice?: NinesliceData);
     initEvents(): void;
     select(e: MouseEvent): void;
     unSelect(_e?: MouseEvent): void;
@@ -44,7 +44,7 @@ export declare class DraggableCanvas {
      * @param {number} height
      */
     drawImage(width: number, height: number, _updateImage?: boolean): void;
-    changeImage(imageName: string): void;
+    changeImage(imagePath: string): void;
     setParse(shouldParse: boolean): void;
     detatchAllEvents(): void;
     detach(): void;

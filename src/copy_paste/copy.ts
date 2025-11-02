@@ -120,7 +120,7 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 height: StringUtil.cssDimToNumber(mainElement.style.height),
                 left: StringUtil.cssDimToNumber(mainElement.style.left),
                 top: StringUtil.cssDimToNumber(mainElement.style.top),
-                imageName: mainElement.dataset.imageName,
+                imagePath: mainElement.dataset.imagePath,
             };
 
             const childrenCopiedData = processChildren(mainElement);
@@ -145,10 +145,10 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
                 left: StringUtil.cssDimToNumber(mainElement.style.left),
                 top: StringUtil.cssDimToNumber(mainElement.style.top),
 
-                defaultTexture: mainElement.dataset.defaultImageName,
-                hoverTexture: mainElement.dataset.hoverImageName,
-                pressedTexture: mainElement.dataset.pressedImageName,
-                displayTexture: mainElement.dataset.displayImageName,
+                defaultTexture: mainElement.dataset.defaultImagePath,
+                hoverTexture: mainElement.dataset.hoverImagePath,
+                pressedTexture: mainElement.dataset.pressedImagePath,
+                displayTexture: mainElement.dataset.displayImagePath,
                 collectionIndex: mainElement.dataset.collectionIndex,
             };
 

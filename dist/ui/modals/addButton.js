@@ -1,26 +1,32 @@
+import { GeneralUtil } from "../../util/generalUtil.js";
+import { chooseImageModal } from "./chooseImage.js";
 const modal = document.getElementById("modalAddButton");
 const closeBtn = document.getElementById("modalAddButtonClose");
 const options = [
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "defaultTexture",
         displayName: "Default Texture",
     },
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "hoverTexture",
         displayName: "Hover Texture",
     },
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "pressedTexture",
         displayName: "Pressed Texture",
     },
     {
         type: "number",
+        default: "0",
         name: "collectionIndex",
         displayName: "Collection Index",
-    }
+    },
 ];
 export async function addButtonModal() {
     modal.style.display = "block";
@@ -31,13 +37,27 @@ export async function addButtonModal() {
     // Adds the options
     for (let option of options) {
         const input = document.createElement("input");
-        input.type = option.type;
+        input.autocomplete = "off";
+        input.value = option.default;
+        if (option.type === "texture") {
+            input.type = "text";
+            input.readOnly = true;
+            // Apply after added to DOM
+            setTimeout(() => GeneralUtil.autoResizeInput(input));
+            input.onclick = async function () {
+                const filePath = await chooseImageModal();
+                input.value = filePath;
+                GeneralUtil.autoResizeInput(input);
+            };
+        }
+        else {
+            input.type = option.type;
+        }
         input.name = option.name;
-        input.style.maxWidth = "60px";
-        input.className = 'modalOptionInput';
+        input.className = "modalOptionInput";
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
-        label.className = 'modalOptionLabel';
+        label.className = "modalOptionLabel";
         // Add the nodes
         form.appendChild(label);
         form.appendChild(input);
@@ -48,7 +68,7 @@ export async function addButtonModal() {
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Create";
-    submit.className = 'modalSubmitButton';
+    submit.className = "modalSubmitButton";
     // Add submit button
     form.appendChild(submit);
     const fields = {};
@@ -56,6 +76,7 @@ export async function addButtonModal() {
         submit.onclick = () => {
             modal.style.display = "none";
             for (let element of elements) {
+                console.log(element, element.value);
                 fields[element.name] = element.value;
             }
             resolve(fields);

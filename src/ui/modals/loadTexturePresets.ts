@@ -2,6 +2,8 @@ import { config } from "../../CONFIG.js";
 import { loadPresetTextureSets } from "../../files/initDefaultImages.js";
 
 const modal: HTMLElement = document.getElementById("modalLoadTexturePresets")!;
+const closeBtn: HTMLElement = document.getElementById("modalLoadTexturePresetsClose")!;
+const form: HTMLElement = document.getElementsByClassName("modalLoadTexturePresetsForm")[0] as HTMLFormElement;
 
 const options = [
     {
@@ -21,8 +23,6 @@ const options = [
 
 export async function loadTexturePresetsModal() {
     modal.style.display = "block";
-
-    const form: HTMLElement = document.getElementsByClassName("modalLoadTexturePresetsForm")[0] as HTMLFormElement;
 
     // Clears the form
     form.innerHTML = "";
@@ -95,3 +95,18 @@ export async function loadTexturePresetsModal() {
         };
     });
 }
+
+/**
+ * Hides the add button modal
+ */
+closeBtn.onclick = () => {
+    modal.style.display = "none";
+    form.innerHTML = "";
+};
+
+window.addEventListener("click", (event) => {
+    if (event.target == modal) {
+        modal.style.display = "none";
+        form.innerHTML = "";
+    }
+});

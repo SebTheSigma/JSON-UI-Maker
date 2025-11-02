@@ -6,7 +6,7 @@ export class MinecraftSlider {
     scrollingPanel;
     scrollBarWidth;
     backgroundBarWidth;
-    imageName = "ScrollHandle";
+    imagePath = "assets/sliders/ScrollHandle";
     offsetX = 0;
     offsetY = 0;
     isDragging;
@@ -29,11 +29,11 @@ export class MinecraftSlider {
         this.initHandle();
     }
     async initHandle() {
-        const imageData = images.get(this.imageName);
+        const imageData = images.get(this.imagePath);
         if (!imageData)
             return;
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png, this.imageName, imageData.json);
+        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png, this.imagePath, imageData.json);
         canvas.setParse(false);
         canvas.editable(false);
         GLOBAL_ELEMENT_MAP.set(id, canvas);

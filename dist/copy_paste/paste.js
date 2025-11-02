@@ -88,12 +88,12 @@ export const pasteConversionMap = new Map([
         "draggable-canvas",
         (copiedElement, parent, isChild = false) => {
             const id = StringUtil.generateRandomString(15);
-            const imageInfo = images.get(copiedElement.imageName);
+            const imageInfo = images.get(copiedElement.imagePath);
             if (!imageInfo) {
-                new Notification("Image name not found", 5000, "error");
+                new Notification("Image path not found", 5000, "error");
                 return undefined;
             }
-            const canvas = new DraggableCanvas(id, parent, imageInfo?.png, copiedElement.imageName, imageInfo?.json);
+            const canvas = new DraggableCanvas(id, parent, imageInfo?.png, copiedElement.imagePath, imageInfo?.json);
             canvas.drawImage(copiedElement.width, copiedElement.height);
             if (isChild) {
                 canvas.canvasHolder.style.left = `${copiedElement.left}px`;
@@ -112,21 +112,21 @@ export const pasteConversionMap = new Map([
             const id = StringUtil.generateRandomString(15);
             const displayimageInfo = images.get(copiedElement.displayTexture);
             if (!displayimageInfo) {
-                new Notification("Display-Image name not found", 5000, "warning");
+                new Notification("Display-Image path not found", 5000, "warning");
             }
             const defaultimageInfo = images.get(copiedElement.defaultTexture);
             if (!defaultimageInfo) {
-                new Notification("Default-Image name not found", 5000, "error");
+                new Notification("Default-Image path not found", 5000, "error");
                 return;
             }
             const hoverimageInfo = images.get(copiedElement.hoverTexture);
             if (!hoverimageInfo) {
-                new Notification("Hover-Image name not found", 5000, "error");
+                new Notification("Hover-Image path not found", 5000, "error");
                 return;
             }
             const pressedimageInfo = images.get(copiedElement.pressedTexture);
             if (!pressedimageInfo) {
-                new Notification("Pressed-Image name not found", 5000, "error");
+                new Notification("Pressed-Image path not found", 5000, "error");
                 return;
             }
             const button = new DraggableButton(id, parent, {

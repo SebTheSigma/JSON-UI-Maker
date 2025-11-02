@@ -74,9 +74,9 @@ export class DraggableButton {
         // Saves parameters
         (this as any)._constructorArgs = [ID, container, buttonOptions];
 
-        const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "";
-        const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "";
-        const pressedTex = pressedTexture ?? hoverTexture ?? defaultTexture ?? "";
+        const defaultTex = defaultTexture ?? hoverTexture ?? pressedTexture ?? "asset/placeholder.png";
+        const hoverTex = hoverTexture ?? defaultTexture ?? pressedTexture ?? "asset/placeholder.png";
+        const pressedTex = pressedTexture ?? hoverTexture ?? defaultTexture ?? "asset/placeholder.png";
 
         this.imageDataDefault = images.get(defaultTex)!;
         this.imageDataHover = images.get(hoverTex)!;
@@ -98,10 +98,10 @@ export class DraggableButton {
         this.button.style.zIndex = String(i * 2);
         this.button.style.position = "absolute";
         this.button.style.outline = `${config.settings.element_outline.value}px solid black`;
-        this.button.dataset.defaultImageName = defaultTex;
-        this.button.dataset.hoverImageName = hoverTex;
-        this.button.dataset.pressedImageName = pressedTex;
-        this.button.dataset.displayImageName = displayTexture ?? "";
+        this.button.dataset.defaultImagePath = defaultTex;
+        this.button.dataset.hoverImagePath = hoverTex;
+        this.button.dataset.pressedImagePath = pressedTex;
+        this.button.dataset.displayImagePath = displayTexture ?? "";
         this.button.dataset.id = ID;
         this.button.dataset.collectionIndex = collectionIndex ?? "0";
 
@@ -434,8 +434,8 @@ export class DraggableButton {
         }
     }
 
-    public setDefaultImage(imageName: string): void {
-        const data = images.get(imageName);
+    public setDefaultImage(imagePath: string): void {
+        const data = images.get(imagePath);
 
         // Checks if the image is there
         if (!data || !data.png) return;
@@ -443,12 +443,14 @@ export class DraggableButton {
         // Sets pixel data
         this.imageDataDefault = data;
 
-        this.button.dataset.defaultImageName = imageName;
+        this.button.dataset.defaultImagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, data);
+
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
-    public setHoverImage(imageName: string): void {
-        const data = images.get(imageName);
+    public setHoverImage(imagePath: string): void {
+        const data = images.get(imagePath);
 
         // Checks if the image is there
         if (!data || !data.png) return;
@@ -456,12 +458,14 @@ export class DraggableButton {
         // Sets pixel data
         this.imageDataHover = data;
 
-        this.button.dataset.hoverImageName = imageName;
+        this.button.dataset.hoverImagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, data);
+
+                ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
-    public setPressedImage(imageName: string): void {
-        const data = images.get(imageName);
+    public setPressedImage(imagePath: string): void {
+        const data = images.get(imagePath);
 
         // Checks if the image is there
         if (!data || !data.png) return;
@@ -469,25 +473,27 @@ export class DraggableButton {
         // Sets pixel data
         this.imageDataPressed = data;
 
-        this.button.dataset.pressedImageName = imageName;
+        this.button.dataset.pressedImagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, data);
+
+                ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
-    public setDisplayImage(imageName: string): void {
+    public setDisplayImage(imagePath: string): void {
         // Removes the canvas
-        if (this.displayCanvas) this.displayCanvas.changeImage(imageName);
+        if (this.displayCanvas) this.displayCanvas.changeImage(imagePath);
         else {
-            const data = images.get(imageName);
+            const data = images.get(imagePath);
             if (!data || !data.png) return;
 
             const id = StringUtil.generateRandomString(15);
-            this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imageName, data.json);
+            this.displayCanvas = new DraggableCanvas(id, this.button, data.png, imagePath, data.json);
             this.displayCanvas.deleteable = false;
             GLOBAL_ELEMENT_MAP.set(id, this.displayCanvas);
         }
 
         this.displayCanvas.setParse(false);
-        this.button.dataset.displayImageName = imageName;
+        this.button.dataset.displayImagePath = imagePath;
     }
 
     public setDisplayText(text: string): void {

@@ -19,4 +19,5 @@ export declare class GeneralUtil {
      * @returns {Boolean}
      */
     static isIterable(input: any): boolean;
+    static autoResizeInput(input: HTMLInputElement): void;
 }

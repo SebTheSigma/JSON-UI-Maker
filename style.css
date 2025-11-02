@@ -187,6 +187,8 @@ input[type="file"] {
     margin-left: 5px;
     margin-right: 5px;
     padding: 5px;
+    padding-left: 30px;
+    padding-right: 30px;
     border-radius: 5px;
     background-color: rgb(59, 56, 71);
     color: white;
@@ -286,6 +288,7 @@ input[type="file"] {
 }
 
 .propertyInput {
+    width: 300px;
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 4px;
@@ -320,51 +323,6 @@ input[type="file"] {
     margin: 10px;
 }
 
-.addImageDropdown {
-    position: relative;
-    border-radius: 4px;
-    width: 200px;
-    max-height: 0px;
-    overflow: hidden;
-    background-color: rgba(73, 73, 73, 0);
-    transform-origin: center right; /* Resize from the center to the right */
-    transition: width 0.5s ease, max-height 0.5s ease, background-color 0.5s ease;
-    scrollbar-color: rgb(0, 0, 0) rgb(73, 73, 73);
-}
-
-.addImage:hover > .addImageDropdown {
-    position: relative;
-
-    max-height: 250px;
-    overflow: auto;
-    background-color: rgba(73, 73, 73, 0.532);
-}
-
-.addImage:hover .dropdownContent {
-    visibility: visible;
-    gap: 5px;
-    text-align: left;
-    position: relative;
-    margin: 4px;
-    left: 5px;
-    top: 0px;
-    transition: left 0.5s ease;
-}
-
-.addImage:hover .dropdownContent:hover {
-    visibility: visible;
-    gap: 5px;
-    text-align: left;
-    position: relative;
-    margin: 4px;
-    left: 10px;
-    top: 0px;
-}
-
-.dropdownContent {
-    visibility: hidden;
-}
-
 /* The Modal (background) */
 .modal {
     display: none;
@@ -374,7 +332,7 @@ input[type="file"] {
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto;
+    overflow: hidden;
     background-color: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(3px);
 }
@@ -741,6 +699,14 @@ input[type="file"] {
     padding: 5px;
 }
 
+.explorerHasNineslice {
+    width: 20px;
+    position: relative;
+    top: 5px;
+    padding-left: 10px;
+    transition: all 0.3s ease;
+}
+
 .help_button {
     position: absolute;
     top: 10px;
@@ -755,7 +721,17 @@ input[type="file"] {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
 }
 
-
+.modalChooseImageForm {
+    max-height: 400px;
+    width: 500px;
+    overflow-y: scroll;
+    scrollbar-color: rgb(0, 0, 0) rgb(73, 73, 73);
+    padding: 10px;
+    outline: #000000 3px solid;
+    border-radius: 5px;
+    background-color: #3f3f3f;
+    margin-top: 15px;
+}
 
 @font-face {
     font-family: "MinecraftRegular";

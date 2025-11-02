@@ -123,7 +123,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 type: "image",
-                texture: `textures/ui/${element.dataset.imageName!}`,
+                texture: `textures/${element.dataset.imagePath!}`,
                 anchor_from: "top_left",
                 anchor_to: "top_left",
 
@@ -144,13 +144,11 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
 
-            const fileToTex = (fileName: string): string => {
-                return `textures/ui/${fileName}`;
-            };
+            const defaultTex = `textures/${element.dataset.defaultImagePath}`!;
+            const hoverTex = `textures/${element.dataset.hoverImagePath}`!;
+            const pressedTex = `textures/${element.dataset.pressedImagePath}`!;
 
-            const defaultTex = fileToTex(element.dataset.defaultImageName!);
-            const hoverTex = fileToTex(element.dataset.hoverImageName!);
-            const pressedTex = fileToTex(element.dataset.pressedImageName!);
+            console.warn(element.dataset.defaultImagePath, element.dataset.hoverImagePath, element.dataset.pressedImagePath, defaultTex, hoverTex, pressedTex);
 
             const collectionIndex: number = Number(element.dataset.collectionIndex!);
 
@@ -229,6 +227,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
 
                 bindings: bindings,
             };
+
+            console.warn(jsonUIElement);
 
             const instructions: TreeInstructions = {
                 ContinuePath: false,

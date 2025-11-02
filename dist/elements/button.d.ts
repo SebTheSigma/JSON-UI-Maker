@@ -69,10 +69,10 @@ export declare class DraggableButton {
      * @param {boolean} [_updateImage=false] - Whether to update the image to fill the button container, only needed if the image has changed.
      */
     drawImage(width: number, height: number, imageDataState?: ImageDataState, _updateImage?: boolean): void;
-    setDefaultImage(imageName: string): void;
-    setHoverImage(imageName: string): void;
-    setPressedImage(imageName: string): void;
-    setDisplayImage(imageName: string): void;
+    setDefaultImage(imagePath: string): void;
+    setHoverImage(imagePath: string): void;
+    setPressedImage(imagePath: string): void;
+    setDisplayImage(imagePath: string): void;
     setDisplayText(text: string): void;
     getMainHTMLElement(): HTMLElement;
     delete(): void;

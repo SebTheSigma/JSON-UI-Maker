@@ -121,5 +121,9 @@ export class GeneralUtil {
         }
         return typeof input[Symbol.iterator] === 'function';
     }
+    static autoResizeInput(input) {
+        input.style.width = '1px'; // reset
+        input.style.width = (input.scrollWidth + 5) + 'px'; // expand to fit text
+    }
 }
 //# sourceMappingURL=generalUtil.js.map

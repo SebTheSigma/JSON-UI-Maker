@@ -10,7 +10,7 @@ export class MinecraftSlider {
     public scrollBarWidth: number;
     public backgroundBarWidth: number;
 
-    public imageName: string = "ScrollHandle";
+    public imagePath: string = "assets/sliders/ScrollHandle";
 
     public offsetX: number = 0;
     public offsetY: number = 0;
@@ -44,11 +44,11 @@ export class MinecraftSlider {
     }
 
     public async initHandle(): Promise<void> {
-        const imageData = images.get(this.imageName)!;
+        const imageData = images.get(this.imagePath)!;
         if (!imageData) return;
 
         const id = StringUtil.generateRandomString(15);
-        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png!, this.imageName, imageData.json!);
+        const canvas = new DraggableCanvas(id, this.backgroundBar, imageData.png!, this.imagePath, imageData.json!);
         canvas.setParse(false);
         canvas.editable(false);
 

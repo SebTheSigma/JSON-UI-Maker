@@ -29,6 +29,7 @@ export class DraggableLabel {
     // Data
     lastValue;
     bindings = "";
+    lastAttemptedScaleFactor = "1";
     /**
      * @param {HTMLElement} container
      */

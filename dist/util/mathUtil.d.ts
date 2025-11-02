@@ -8,4 +8,5 @@ export declare class MathUtil {
     static clampToByte(value: number): number;
     static getDistanceVector2(vec1: [number, number], vec2: [number, number]): number;
     static getClosestPointVector2(point: [number, number], points: [number, number][]): [number, number];
+    static isNumeric(value: string): boolean;
 }

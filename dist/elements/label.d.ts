@@ -23,6 +23,7 @@ export declare class DraggableLabel {
     shadowOffsetY: number;
     lastValue: string;
     bindings: string;
+    lastAttemptedScaleFactor: string;
     /**
      * @param {HTMLElement} container
      */

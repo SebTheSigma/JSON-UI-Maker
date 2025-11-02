@@ -36,7 +36,7 @@
             Settings
         </label>
 
-        <img class="settings_img" src="settings_cog.png"></img>
+        <img class="settings_img" src="icons/settings_cog.webp"></img>
     </button>
 
     <input style="margin-left: 20px;" id="ui_scale_slider" type="range" min="10" max="100">
@@ -79,6 +79,7 @@
     <!-- The Load Texture Presets Modal -->
     <div id="modalLoadTexturePresets" class="modal">
         <div class="modal-content">
+            <span id="modalLoadTexturePresetsClose" class="modalClose">&times;</span>
             <h2 class="modalHeader">Load Texture Presets</h2>
             <div class="modalLoadTexturePresetsForm">
 
@@ -117,17 +118,27 @@
     </div>
     <!--------------->
 
+    <!-- The Choose Image Modal -->
+    <div id="modalChooseImage" class="modal">
+        <div class="modal-content">
+            <span id="modalChooseImageClose" class="modalClose">&times;</span>
+            <h2 class="modalHeader">Choose Image</h2>
+            <img src="icons/nineslice.webp" style="width: 20px; position: relative; top: 5px; left: 5px;">
+            <label style="font-weight: 500; color: rgb(255, 255, 255);">: Nineslice Image</label>
+            <div class="modalChooseImageForm">
+
+            </div>
+        </div>
+    </div>
+    <!--------------->
+
     <div class="main">
         <div class="buttons">
             <div class="addElements">
                 Elements:
                 <button type="button" onclick="Builder.addPanel()">Add panel</button>
 
-                <button type="button" class="addImage">Add image
-                    <div class="addImageDropdown" id="addImageDropdown">
-                    </div>
-                </button>
-
+                <button type="button" onclick="Builder.openAddImageMenu()">Add image</button>
                 <button type="button" onclick="Builder.addButton()">Add button</button>
                 <button type="button" onclick="Builder.addCollectionPanel()">Add Collection Panel</button>
                 <button type="button" onclick="Builder.addLabel()">Add Label</button>

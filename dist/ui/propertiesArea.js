@@ -3,6 +3,7 @@ import { ElementSharedFuncs } from "../elements/sharedElement.js";
 import { selectedElement } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { chooseImageModal } from "./modals/chooseImage.js";
 export const propertiesMap = new Map([
     [
         "draggable-panel",
@@ -127,10 +128,10 @@ export const propertiesMap = new Map([
                 set: (element, value) => (element.style.zIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Texture",
                 editable: true,
-                get: (element) => element.dataset.imageName,
+                get: (element) => element.dataset.imagePath,
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.changeImage(value);
@@ -217,30 +218,30 @@ export const propertiesMap = new Map([
                 set: (element, value) => (element.style.zIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Default Texture",
                 editable: true,
-                get: (element) => element.dataset.defaultImageName,
+                get: (element) => element.dataset.defaultImagePath,
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.setDefaultImage(value);
                 },
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Hover Texture",
                 editable: true,
-                get: (element) => element.dataset.hoverImageName,
+                get: (element) => element.dataset.hoverImagePath,
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.setHoverImage(value);
                 },
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Pressed Texture",
                 editable: true,
-                get: (element) => element.dataset.pressedImageName,
+                get: (element) => element.dataset.pressedImagePath,
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.setPressedImage(value);
@@ -254,10 +255,10 @@ export const propertiesMap = new Map([
                 set: (element, value) => (element.dataset.collectionIndex = value),
             },
             {
-                type: "text",
+                type: "texture",
                 displayName: "Display Texture",
                 editable: true,
-                get: (element) => element.dataset.displayImageName,
+                get: (element) => element.dataset.displayImagePath,
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
                     elementClass.setDisplayImage(value);
@@ -405,17 +406,21 @@ export const propertiesMap = new Map([
                 },
             },
             {
-                type: "decimal",
+                type: "text",
                 displayName: "Font Scale",
                 editable: true,
-                get: (element) => element.style.fontSize.replace("em", ""),
+                get: (element) => {
+                    const elementClass = GeneralUtil.elementToClassElement(element);
+                    return elementClass.lastAttemptedScaleFactor;
+                },
                 set: (element, value) => {
                     const elementClass = GeneralUtil.elementToClassElement(element);
+                    console.log(value);
+                    elementClass.lastAttemptedScaleFactor = value;
                     element.style.fontSize = `${value}em`;
                     elementClass.mirror.style.fontSize = `${value}em`;
                     elementClass.shadowLabel.style.fontSize = `${value}em`;
-                    elementClass.updateSize();
-                    elementClass.label.dispatchEvent(new Event("input"));
+                    elementClass.updateSize(false);
                 },
             },
             {
@@ -534,6 +539,7 @@ export const propertiesMap = new Map([
 ]);
 let currentInputs = [];
 export function updatePropertiesArea() {
+    console.log("updatePropertiesArea");
     const propertiesArea = document.getElementById("properties");
     // Removes old event listeners
     for (let input of currentInputs) {
@@ -575,9 +581,11 @@ export function updatePropertiesArea() {
         }
         else if (property.type === "number")
             input.value = value;
-        else if (property.type === "decimal") {
+        if (property.type === "texture") {
+            input.type = "text";
+            input.readOnly = true;
             input.value = value;
-            input.step = "any";
+            setTimeout(() => GeneralUtil.autoResizeInput(input), 0);
         }
         const label = document.createElement("label");
         label.textContent = `${property.displayName}: `;
@@ -586,9 +594,19 @@ export function updatePropertiesArea() {
         isEditableLabel.textContent = `${property.editable ? "Editable" : "Not Editable"}`;
         if (property.editable) {
             input.contentEditable = "true";
-            input.oninput = function () {
-                property.set(selectedElement, input.value);
-            };
+            if (property.type === "texture") {
+                input.onclick = async function () {
+                    const filePath = await chooseImageModal();
+                    input.value = filePath;
+                    property.set(selectedElement, filePath);
+                    GeneralUtil.autoResizeInput(input);
+                };
+            }
+            else {
+                input.oninput = function () {
+                    property.set(selectedElement, input.value);
+                };
+            }
         }
         else
             input.contentEditable = "false";

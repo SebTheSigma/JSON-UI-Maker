@@ -25,7 +25,6 @@ export class FormUploader {
     static isValid(form) {
         try {
             const parsed = FormUploader.parseJsonWithComments(form);
-            console.warn(parsed);
             if (!parsed.namespace) {
                 new Notification("Invalid namespace, please upload a valid form", 5000, "error");
                 return false;
@@ -55,7 +54,6 @@ export class FormUploader {
         return jsonControls;
     }
     static uploadForm(form) {
-        console.log(1);
         if (FormUploader.isValid(form)) {
             const parsed = FormUploader.parseJsonWithComments(form);
             const namespace = parsed.namespace;
@@ -78,18 +76,14 @@ export class FormUploader {
                 }
             };
             if (childType == "skip") {
-                console.log("Manual Skip");
                 skip();
                 continue;
             }
-            console.log(childType);
             if (!childType) {
                 new Notification("Some elements lack a type", 2000, "warning");
                 continue;
             }
-            console.log(childType);
             const createClassElement = tagNameToCreateClassElementFunc.get(childType);
-            console.warn(args);
             const newParent = createClassElement(childJson, parentClassElement, args[0], rootJson);
             if (!newParent?.element || !newParent.instructions) {
                 new Notification("Error creating element", 5000, "error");
@@ -179,19 +173,20 @@ export const tagNameToCreateClassElementFunc = new Map([
         "image",
         (json, parentClassElement, usedConfig, nextNodes) => {
             const UI_SCALAR = usedConfig.magicNumbers.UI_SCALAR;
-            const texturePath = json.texture;
-            let imageName = texturePath.split("/").pop().split(".")[0] || texturePath;
-            if (!FileUploader.isFileUploaded(imageName)) {
-                new Notification(`Image ${imageName} not found`, 2000, "warning");
-                imageName = "placeholder";
+            let texturePath = json.texture;
+            console.warn(texturePath);
+            texturePath = texturePath.replace(/^textures\//, "");
+            if (!FileUploader.isFileUploaded(texturePath)) {
+                new Notification(`Image ${texturePath} not found`, 2000, "warning");
+                texturePath = "assets/placeholder";
             }
-            const imageData = images.get(imageName);
+            const imageData = images.get(texturePath);
             if (!imageData) {
-                new Notification(`Image ${imageName} not found`, 2000, "warning");
+                new Notification(`Image ${texturePath} not found`, 2000, "warning");
                 return undefined;
             }
             const id = StringUtil.generateRandomString(15);
-            const canvas = new DraggableCanvas(id, parentClassElement.getMainHTMLElement(), imageData.png, imageName, imageData.json);
+            const canvas = new DraggableCanvas(id, parentClassElement.getMainHTMLElement(), imageData.png, texturePath, imageData.json);
             GLOBAL_ELEMENT_MAP.set(id, canvas);
             const size = json.size;
             const offset = json.offset;
@@ -239,7 +234,6 @@ export const tagNameToCreateClassElementFunc = new Map([
             // Iterate twice to get to the from the current node to the node ahead
             const controls1 = FormUploader.getJsonControlsAndType(nextNodes);
             const scrollingLinkerPanel = FormUploader.getJsonControlsAndType(controls1[0]?.control)[0]?.control;
-            // console.warn(12, nextNodeFirstControl, nextNodeFirstControlKey, nextNodeFirstControlJson, nextNodes);
             const size = json.size;
             const offset = scrollingLinkerPanel.$scrolling_pane_offset;
             scrollingPanel.panel.style.width = `${size[0] / UI_SCALAR}px`;
@@ -259,17 +253,17 @@ export const tagNameToCreateClassElementFunc = new Map([
         "button",
         (json, parentClassElement, usedConfig, nextNodes) => {
             const UI_SCALAR = usedConfig.magicNumbers.UI_SCALAR;
-            const defaultTexturePath = json.$default_button_background_texture;
-            const hoverTexturePath = json.$hover_button_background_texture;
-            const pressedTexturePath = json.$pressed_button_background_texture;
-            let defaultImageName = defaultTexturePath.split("/").pop().split(".")[0] || defaultTexturePath;
-            let hoverImageName = hoverTexturePath.split("/").pop().split(".")[0] || hoverTexturePath;
-            let pressedImageName = pressedTexturePath.split("/").pop().split(".")[0] || pressedTexturePath;
+            let defaultTexturePath = json.$default_button_background_texture;
+            let hoverTexturePath = json.$hover_button_background_texture;
+            let pressedTexturePath = json.$pressed_button_background_texture;
+            defaultTexturePath = defaultTexturePath.replace(/^textures\//, "");
+            hoverTexturePath = hoverTexturePath.replace(/^textures\//, "");
+            pressedTexturePath = pressedTexturePath.replace(/^textures\//, "");
             const imageNames = [];
-            for (let image of [defaultImageName, hoverImageName, pressedImageName]) {
+            for (let image of [defaultTexturePath, hoverTexturePath, pressedTexturePath]) {
                 if (!FileUploader.isFileUploaded(image)) {
                     new Notification(`Image ${image} not found`, 2000, "warning");
-                    image = "placeholder";
+                    image = "assets/placeholder";
                 }
                 imageNames.push(image);
             }
@@ -279,8 +273,8 @@ export const tagNameToCreateClassElementFunc = new Map([
                 defaultTexture: imageNames[0],
                 hoverTexture: imageNames[1],
                 pressedTexture: imageNames[2],
-                displayTexture: "placeholder",
-                collectionIndex: json.$collection_index,
+                displayTexture: "assets/placeholder",
+                collectionIndex: json.collection_index,
             });
             GLOBAL_ELEMENT_MAP.set(id, button);
             const size = json.$button_size;

@@ -146,4 +146,8 @@ export class GeneralUtil {
         return typeof input[Symbol.iterator] === 'function'
     }
 
+    public static autoResizeInput(input: HTMLInputElement) {
+        input.style.width = '1px'; // reset
+        input.style.width = (input.scrollWidth + 5) + 'px'; // expand to fit text
+    }
 }

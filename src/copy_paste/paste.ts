@@ -104,13 +104,13 @@ export const pasteConversionMap: Map<string, (copiedElement: CopiedElementData, 
         (copiedElement: CopiedElementData, parent: HTMLElement, isChild: boolean = false): void => {
             const id: string = StringUtil.generateRandomString(15);
 
-            const imageInfo = images.get(copiedElement.imageName);
+            const imageInfo = images.get(copiedElement.imagePath);
             if (!imageInfo) {
-                new Notification("Image name not found", 5000, "error");
+                new Notification("Image path not found", 5000, "error");
                 return undefined;
             }
 
-            const canvas: DraggableCanvas = new DraggableCanvas(id, parent, imageInfo?.png!, copiedElement.imageName, imageInfo?.json);
+            const canvas: DraggableCanvas = new DraggableCanvas(id, parent, imageInfo?.png!, copiedElement.imagePath, imageInfo?.json);
 
             canvas.drawImage(copiedElement.width, copiedElement.height);
 
@@ -134,24 +134,24 @@ export const pasteConversionMap: Map<string, (copiedElement: CopiedElementData, 
 
             const displayimageInfo = images.get(copiedElement.displayTexture);
             if (!displayimageInfo) {
-                new Notification("Display-Image name not found", 5000, "warning");
+                new Notification("Display-Image path not found", 5000, "warning");
             }
 
             const defaultimageInfo = images.get(copiedElement.defaultTexture);
             if (!defaultimageInfo) {
-                new Notification("Default-Image name not found", 5000, "error");
+                new Notification("Default-Image path not found", 5000, "error");
                 return;
             }
 
             const hoverimageInfo = images.get(copiedElement.hoverTexture);
             if (!hoverimageInfo) {
-                new Notification("Hover-Image name not found", 5000, "error");
+                new Notification("Hover-Image path not found", 5000, "error");
                 return;
             }
 
             const pressedimageInfo = images.get(copiedElement.pressedTexture);
             if (!pressedimageInfo) {
-                new Notification("Pressed-Image name not found", 5000, "error");
+                new Notification("Pressed-Image path not found", 5000, "error");
                 return;
             }
 

@@ -24,6 +24,8 @@ export declare const panelContainer: HTMLElement;
 export declare let isInMainWindow: boolean;
 export type GlobalElementMapValue = DraggableButton | DraggableCanvas | DraggablePanel | DraggableCollectionPanel | DraggableLabel | DraggableScrollingPanel;
 export declare const GLOBAL_ELEMENT_MAP: Map<string, GlobalElementMapValue>;
+export declare let GLOBAL_FILE_SYSTEM: any;
+export declare function setFileSystem(fs: any): void;
 export declare class Builder {
     static uploadForm(): void;
     static formatBindingsArea(): void;
@@ -34,17 +36,17 @@ export declare class Builder {
     static addLabel(): void;
     static addPanel(): void;
     static addCollectionPanel(): void;
-    static addCanvas(imageData: ImageData, imageName: string, nineSlice?: NinesliceData): void;
+    static addCanvas(imageData: ImageData, imagePath: string, nineSlice?: NinesliceData): void;
     static addButton(): Promise<void>;
     static addScrollingPanel(): void;
     static reset(): void;
     static deleteSelected(): void;
     static delete(id: string): void;
     static setSettingToggle(setting: keyof typeof config.settings, value: any): void;
-    static addImage(imageName: string): void;
     static updateExplorer(): void;
     static texturePresetsModal(): void;
     static openHelpMenu(): void;
+    static openAddImageMenu(): Promise<void>;
 }
 export interface ImageDataState {
     png?: ImageData;

@@ -83,7 +83,7 @@ export const classToJsonUI = new Map([
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 type: "image",
-                texture: `textures/ui/${element.dataset.imageName}`,
+                texture: `textures/${element.dataset.imagePath}`,
                 anchor_from: "top_left",
                 anchor_to: "top_left",
                 bindings: bindings,
@@ -100,12 +100,10 @@ export const classToJsonUI = new Map([
             const parent = element.parentElement;
             const processedWidth = StringUtil.cssDimToNumber(element.style.width);
             const processedHeight = StringUtil.cssDimToNumber(element.style.height);
-            const fileToTex = (fileName) => {
-                return `textures/ui/${fileName}`;
-            };
-            const defaultTex = fileToTex(element.dataset.defaultImageName);
-            const hoverTex = fileToTex(element.dataset.hoverImageName);
-            const pressedTex = fileToTex(element.dataset.pressedImageName);
+            const defaultTex = `textures/${element.dataset.defaultImagePath}`;
+            const hoverTex = `textures/${element.dataset.hoverImagePath}`;
+            const pressedTex = `textures/${element.dataset.pressedImagePath}`;
+            console.warn(element.dataset.defaultImagePath, element.dataset.hoverImagePath, element.dataset.pressedImagePath, defaultTex, hoverTex, pressedTex);
             const collectionIndex = Number(element.dataset.collectionIndex);
             const offset = [StringUtil.cssDimToNumber(element.style.left), StringUtil.cssDimToNumber(element.style.top)];
             if (parent?.className == "main_window") {
@@ -165,6 +163,7 @@ export const classToJsonUI = new Map([
                 $show_hover_text: false,
                 bindings: bindings,
             };
+            console.warn(jsonUIElement);
             const instructions = {
                 ContinuePath: false,
                 CommonElementLink: `@${nameSpace}.custom_button`,

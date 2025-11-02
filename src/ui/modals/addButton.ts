@@ -1,31 +1,36 @@
 import { ButtonOptions } from "../../elements/button.js";
+import { GeneralUtil } from "../../util/generalUtil.js";
+import { chooseImageModal } from "./chooseImage.js";
 
 const modal: HTMLElement = document.getElementById("modalAddButton")!;
 const closeBtn: HTMLElement = document.getElementById("modalAddButtonClose") as HTMLElement;
 
 const options = [
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "defaultTexture",
         displayName: "Default Texture",
     },
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "hoverTexture",
         displayName: "Hover Texture",
     },
     {
-        type: "text",
+        type: "texture",
+        default: "assets/placeholder",
         name: "pressedTexture",
         displayName: "Pressed Texture",
     },
     {
         type: "number",
+        default: "0",
         name: "collectionIndex",
         displayName: "Collection Index",
-    }
+    },
 ];
-
 
 export async function addButtonModal(): Promise<ButtonOptions> {
     modal.style.display = "block";
@@ -39,14 +44,35 @@ export async function addButtonModal(): Promise<ButtonOptions> {
     // Adds the options
     for (let option of options) {
         const input = document.createElement("input");
-        input.type = option.type;
+        input.autocomplete = "off";
+        input.value = option.default!;
+
+        if (option.type === "texture") {
+            input.type = "text";
+            input.readOnly = true;
+
+            // Apply after added to DOM
+            setTimeout(() => GeneralUtil.autoResizeInput(input));
+
+            input.onclick = async function () {
+                const filePath: string = await chooseImageModal();
+                input.value = filePath;
+
+                GeneralUtil.autoResizeInput(input);
+            };
+        }
+
+        else {
+            input.type = option.type;
+        }
+
+        
         input.name = option.name;
-        input.style.maxWidth = "60px";
-        input.className = 'modalOptionInput';
+        input.className = "modalOptionInput";
 
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
-        label.className = 'modalOptionLabel';
+        label.className = "modalOptionLabel";
 
         // Add the nodes
         form.appendChild(label);
@@ -60,7 +86,7 @@ export async function addButtonModal(): Promise<ButtonOptions> {
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Create";
-    submit.className = 'modalSubmitButton';
+    submit.className = "modalSubmitButton";
 
     // Add submit button
     form.appendChild(submit);
@@ -72,6 +98,7 @@ export async function addButtonModal(): Promise<ButtonOptions> {
             modal.style.display = "none";
 
             for (let element of elements) {
+                console.log(element, element.value);
                 fields[element.name] = element.value;
             }
 

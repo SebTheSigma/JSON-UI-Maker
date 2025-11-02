@@ -1,6 +1,8 @@
 import { config } from "../../CONFIG.js";
 import { loadPresetTextureSets } from "../../files/initDefaultImages.js";
 const modal = document.getElementById("modalLoadTexturePresets");
+const closeBtn = document.getElementById("modalLoadTexturePresetsClose");
+const form = document.getElementsByClassName("modalLoadTexturePresetsForm")[0];
 const options = [
     {
         name: "turquoise_ore-ui_style",
@@ -17,7 +19,6 @@ const options = [
 ];
 export async function loadTexturePresetsModal() {
     modal.style.display = "block";
-    const form = document.getElementsByClassName("modalLoadTexturePresetsForm")[0];
     // Clears the form
     form.innerHTML = "";
     const bodyText = document.createElement("p");
@@ -72,4 +73,17 @@ export async function loadTexturePresetsModal() {
         };
     });
 }
+/**
+ * Hides the add button modal
+ */
+closeBtn.onclick = () => {
+    modal.style.display = "none";
+    form.innerHTML = "";
+};
+window.addEventListener("click", (event) => {
+    if (event.target == modal) {
+        modal.style.display = "none";
+        form.innerHTML = "";
+    }
+});
 //# sourceMappingURL=loadTexturePresets.js.map

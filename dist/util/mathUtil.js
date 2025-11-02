@@ -23,5 +23,8 @@ export class MathUtil {
         }
         return closestPoint;
     }
+    static isNumeric(value) {
+        return value.trim() !== "" && isFinite(Number(value));
+    }
 }
 //# sourceMappingURL=mathUtil.js.map

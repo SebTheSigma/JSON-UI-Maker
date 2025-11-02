@@ -41,10 +41,10 @@ export class DraggableCanvas {
     /**
      * @param {HTMLElement} container
      */
-    constructor(ID, container, imageData, imageName, nineSlice) {
+    constructor(ID, container, imageData, imagePath, nineSlice) {
         const i = GeneralUtil.getElementDepth(container, panelContainer);
         // Saves parameters
-        this._constructorArgs = [ID, container, imageData, imageName, nineSlice];
+        this._constructorArgs = [ID, container, imageData, imagePath, nineSlice];
         this.imageData = imageData;
         this.aspectRatio = imageData.width / imageData.height;
         this.nineSlice = nineSlice;
@@ -57,7 +57,7 @@ export class DraggableCanvas {
         this.canvasHolder.className = "draggable-canvas";
         this.canvasHolder.style.zIndex = String(i * 2);
         this.canvasHolder.style.visibility = "visible";
-        this.canvasHolder.dataset.imageName = imageName;
+        this.canvasHolder.dataset.imagePath = imagePath;
         this.canvasHolder.dataset.id = ID;
         this.canvasHolder.style.position = "absolute";
         // Creates the canvas and puts it in the canvas holder
@@ -254,8 +254,8 @@ export class DraggableCanvas {
             }
         }
     }
-    changeImage(imageName) {
-        const data = images.get(imageName);
+    changeImage(imagePath) {
+        const data = images.get(imagePath);
         // Checks if the image is there
         if (!data || !data.png)
             return;
@@ -266,8 +266,9 @@ export class DraggableCanvas {
         // Sets nineslice
         this.nineSlice = undefined;
         this.nineSlice = data.json;
-        this.canvasHolder.dataset.imageName = imageName;
+        this.canvasHolder.dataset.imagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, true);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
     setParse(shouldParse) {
         this.canvasHolder.dataset.shouldParse = `${shouldParse}`.toLowerCase();

@@ -4,7 +4,7 @@ export declare class MinecraftSlider {
     scrollingPanel: DraggableScrollingPanel;
     scrollBarWidth: number;
     backgroundBarWidth: number;
-    imageName: string;
+    imagePath: string;
     offsetX: number;
     offsetY: number;
     isDragging: boolean;

@@ -56,7 +56,7 @@ export class ScriptGenerator {
         const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
 
         return {
-            texture: `textures/ui/${element.dataset.displayImageName ?? "blank"}`,
+            texture: `textures/${element.dataset.displayImagePath ?? "ui/blank"}`,
             text: text
         }
     }
