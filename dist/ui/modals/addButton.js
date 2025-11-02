@@ -76,9 +76,11 @@ function attachTextureSearch(input) {
             dropdown.style.position = "absolute";
             dropdown.style.left = `${rect.left + window.scrollX}px`;
             dropdown.style.top = `${rect.bottom + window.scrollY}px`;
-            const minW = Math.max(rect.width, 380);
+            const minW = Math.max(rect.width, 560);
             dropdown.style.minWidth = `${minW}px`;
-            dropdown.style.maxWidth = `640px`;
+            dropdown.style.maxWidth = `800px`;
+            dropdown.style.width = `${Math.min(Math.max(minW, 560), 800)}px`;
+            dropdown.style.boxSizing = "border-box";
         };
         const render = (q) => {
             dropdown.innerHTML = "";
