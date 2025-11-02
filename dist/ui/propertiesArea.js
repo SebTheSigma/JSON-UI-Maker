@@ -3,53 +3,6 @@ import { ElementSharedFuncs } from "../elements/sharedElement.js";
 import { selectedElement, images } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
-
-// Snap helpers to align images and collection panels with normal panels using Left/Width
-function getPanelEdgesForSiblingContainer(element) {
-    const container = element?.parentElement;
-    if (!container)
-        return [];
-    const panels = Array.from(container.querySelectorAll('.draggable-panel'));
-    const edges = [];
-    for (const panel of panels) {
-        const left = StringUtil.cssDimToNumber(panel.style.left);
-        const width = StringUtil.cssDimToNumber(panel.style.width);
-        if (!isNaN(left) && !isNaN(width)) {
-            edges.push(left);
-            edges.push(left + width);
-        }
-    }
-    return edges.sort((a, b) => a - b);
-}
-function snapToNearest(value, edges, radius) {
-    if (!edges.length)
-        return value;
-    let best = value;
-    let minDiff = radius + 1;
-    for (const e of edges) {
-        const d = Math.abs(e - value);
-        if (d <= radius && d < minDiff) {
-            minDiff = d;
-            best = e;
-        }
-    }
-    return best;
-}
-function snapLeftToPanels(element, proposedLeft) {
-    const radius = Number((config && config.settings && config.settings.grid_lock_radius) ?? 8);
-    const edges = getPanelEdgesForSiblingContainer(element);
-    return snapToNearest(proposedLeft, edges, radius);
-}
-function snapWidthToPanels(element, proposedWidth) {
-    const radius = Number((config && config.settings && config.settings.grid_lock_radius) ?? 8);
-    const edges = getPanelEdgesForSiblingContainer(element);
-    const currentLeft = StringUtil.cssDimToNumber(element?.style?.left);
-    if (isNaN(currentLeft))
-        return proposedWidth;
-    const proposedRight = currentLeft + proposedWidth;
-    const snappedRight = snapToNearest(proposedRight, edges, radius);
-    return snappedRight - currentLeft;
-}
 export const propertiesMap = new Map([
     [
         "draggable-panel",
@@ -123,8 +76,7 @@ export const propertiesMap = new Map([
                 get: (element) => element.style.width,
                 set: (element, value) => {
                     const classElement = GeneralUtil.elementToClassElement(element);
-                    let numVal = StringUtil.cssDimToNumber(value);
-                    numVal = snapWidthToPanels(element, numVal);
+                    const numVal = StringUtil.cssDimToNumber(value);
                     const height = StringUtil.cssDimToNumber(classElement.canvas.style.height);
                     if (classElement.nineSlice) {
                         classElement.drawImage(numVal, height);
@@ -158,11 +110,7 @@ export const propertiesMap = new Map([
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
-                set: (element, value) => {
-                    const leftNum = StringUtil.cssDimToNumber(value);
-                    const snapped = snapLeftToPanels(element, leftNum);
-                    element.style.left = `${snapped}px`;
-                },
+                set: (element, value) => (element.style.left = value),
             },
             {
                 type: "text",
@@ -358,8 +306,7 @@ export const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.style.width,
                 set: (element, value) => {
-                    const widthNum = snapWidthToPanels(element, StringUtil.cssDimToNumber(value));
-                    element.style.width = `${widthNum}px`;
+                    element.style.width = value;
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
                 },
             },
@@ -378,11 +325,7 @@ export const propertiesMap = new Map([
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
-                set: (element, value) => {
-                    const leftNum = StringUtil.cssDimToNumber(value);
-                    const snapped = snapLeftToPanels(element, leftNum);
-                    element.style.left = `${snapped}px`;
-                },
+                set: (element, value) => (element.style.left = value),
             },
             {
                 type: "text",
@@ -712,22 +655,7 @@ export function updatePropertiesArea() {
         if (property.editable) {
             input.contentEditable = "true";
             input.oninput = function () {
-                let newVal = input.value;
-                const type = selectedElement?.classList[0];
-                const name = property.displayName;
-                if ((type === "draggable-canvas" || type === "draggable-collection_panel") && (name === "Left" || name === "Width")) {
-                    const num = StringUtil.cssDimToNumber(newVal);
-                    if (!isNaN(num)) {
-                        if (name === "Left") {
-                            const snappedLeft = snapLeftToPanels(selectedElement, num);
-                            newVal = `${snappedLeft}px`;
-                        } else {
-                            const snappedWidth = snapWidthToPanels(selectedElement, num);
-                            newVal = `${snappedWidth}px`;
-                        }
-                    }
-                }
-                property.set(selectedElement, newVal);
+                property.set(selectedElement, input.value);
             };
         }
         else
