@@ -323,7 +323,7 @@ input[type="file"] {
 .addImageDropdown {
     position: relative;
     border-radius: 4px;
-    width: 420px;
+    width: 560px;
     max-height: 0px;
     overflow: hidden;
     background-color: rgba(73, 73, 73, 0);
@@ -373,7 +373,7 @@ input[type="file"] {
     position: absolute;
     background-color: rgba(73, 73, 73, 0.92);
     border-radius: 4px;
-    max-width: 640px;
+    max-width: 800px;
     max-height: 200px;
     overflow: auto;
     z-index: 1000;
