@@ -14,6 +14,8 @@ export function updateImageDropdown() {
     search.className = "propertyInput";
     search.placeholder = "Search textures...";
     search.spellcheck = false;
+    search.style.width = "calc(100% - 10px)";
+    search.style.boxSizing = "border-box";
     dropdown.appendChild(search);
     const render = () => {
         // Clear existing items
@@ -26,6 +28,7 @@ export function updateImageDropdown() {
                 const fileNameText = document.createElement("div");
                 fileNameText.className = "dropdownContent";
                 fileNameText.textContent = fileName;
+                fileNameText.title = fileName;
                 fileNameText.onclick = function () {
                     Builder.addImage(fileName);
                 };
