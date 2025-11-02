@@ -323,7 +323,7 @@ input[type="file"] {
 .addImageDropdown {
     position: relative;
     border-radius: 4px;
-    width: 200px;
+    width: 420px;
     max-height: 0px;
     overflow: hidden;
     background-color: rgba(73, 73, 73, 0);
@@ -349,6 +349,9 @@ input[type="file"] {
     left: 5px;
     top: 0px;
     transition: left 0.5s ease;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .addImage:hover .dropdownContent:hover {
@@ -370,6 +373,7 @@ input[type="file"] {
     position: absolute;
     background-color: rgba(73, 73, 73, 0.92);
     border-radius: 4px;
+    max-width: 640px;
     max-height: 200px;
     overflow: auto;
     z-index: 1000;
@@ -382,6 +386,9 @@ input[type="file"] {
     color: white;
     cursor: pointer;
     border-radius: 3px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .textureSearchItem:hover {
