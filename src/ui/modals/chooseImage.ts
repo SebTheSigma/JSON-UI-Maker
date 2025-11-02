@@ -110,6 +110,12 @@ function collectImagePaths(fsObj: any, currentPath: string = ""): string[] {
 
 export async function chooseImageModal(): Promise<string> {
     return new Promise((resolve, reject) => {
+        // Clean up any existing search wrapper first
+        const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+        if (existingSearchWrapper) {
+            existingSearchWrapper.remove();
+        }
+        
         // Clear previous content
         form.innerHTML = "";
 
