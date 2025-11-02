@@ -71,6 +71,12 @@ class ChooseImageFileTree {
 }
 export async function chooseImageModal() {
     return new Promise((resolve, reject) => {
+        // Clean up any existing search wrapper first
+        const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+        if (existingSearchWrapper) {
+            existingSearchWrapper.remove();
+        }
+        
         form.innerHTML = "";
         // -------------------- NEW: Search UI --------------------
         const searchWrapper = document.createElement("div");
