@@ -1,3 +1,4 @@
+import { images } from "../../index.js";
 const modal = document.getElementById("modalAddButton");
 const closeBtn = document.getElementById("modalAddButtonClose");
 const options = [
@@ -35,6 +36,9 @@ export async function addButtonModal() {
         input.name = option.name;
         input.style.maxWidth = "60px";
         input.className = 'modalOptionInput';
+        if (/texture/i.test(option.displayName)) {
+            input.onfocus = function () { attachTextureSearch(input); };
+        }
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
         label.className = 'modalOptionLabel';
@@ -61,6 +65,71 @@ export async function addButtonModal() {
             resolve(fields);
         };
     });
+}
+function attachTextureSearch(input) {
+    try {
+        const dropdown = document.createElement("div");
+        dropdown.className = "textureSearchDropdown";
+        dropdown.tabIndex = -1;
+        const position = () => {
+            const rect = input.getBoundingClientRect();
+            dropdown.style.position = "absolute";
+            dropdown.style.left = `${rect.left + window.scrollX}px`;
+            dropdown.style.top = `${rect.bottom + window.scrollY}px`;
+            const minW = Math.max(rect.width, 560);
+            dropdown.style.minWidth = `${minW}px`;
+            dropdown.style.maxWidth = `800px`;
+            dropdown.style.width = `${Math.min(Math.max(minW, 560), 800)}px`;
+            dropdown.style.boxSizing = "border-box";
+        };
+        const render = (q) => {
+            dropdown.innerHTML = "";
+            const query = (q || "").toLowerCase();
+            for (const [name] of images.entries()) {
+                if (!query || name.toLowerCase().includes(query)) {
+                    const item = document.createElement("div");
+                    item.className = "textureSearchItem";
+                    item.textContent = name;
+                    item.title = name;
+                    item.onclick = () => {
+                        input.value = name;
+                        input.dispatchEvent(new Event("input"));
+                        cleanup();
+                    };
+                    dropdown.appendChild(item);
+                }
+            }
+            if (!dropdown.childElementCount) {
+                const none = document.createElement("div");
+                none.className = "textureSearchItem";
+                none.textContent = "No matches";
+                none.style.color = "#bbb";
+                dropdown.appendChild(none);
+            }
+        };
+        const onInput = () => render(input.value);
+        const cleanup = () => {
+            if (document.body.contains(dropdown)) {
+                document.body.removeChild(dropdown);
+            }
+            input.removeEventListener("input", onInput);
+            window.removeEventListener("scroll", position);
+            window.removeEventListener("resize", position);
+        };
+        render(input.value);
+        position();
+        document.body.appendChild(dropdown);
+        input.addEventListener("input", onInput);
+        window.addEventListener("scroll", position);
+        window.addEventListener("resize", position);
+        const blurHandler = () => {
+            setTimeout(() => cleanup(), 200);
+        };
+        input.addEventListener("blur", blurHandler, { once: true });
+    }
+    catch (err) {
+        console.error("Failed to attach texture search", err);
+    }
 }
 /**
  * Hides the add button modal

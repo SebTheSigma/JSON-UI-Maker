@@ -323,7 +323,7 @@ input[type="file"] {
 .addImageDropdown {
     position: relative;
     border-radius: 4px;
-    width: 200px;
+    width: 560px;
     max-height: 0px;
     overflow: hidden;
     background-color: rgba(73, 73, 73, 0);
@@ -349,6 +349,9 @@ input[type="file"] {
     left: 5px;
     top: 0px;
     transition: left 0.5s ease;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .addImage:hover .dropdownContent:hover {
@@ -363,6 +366,33 @@ input[type="file"] {
 
 .dropdownContent {
     visibility: hidden;
+}
+
+/* Texture search dropdown */
+.textureSearchDropdown {
+    position: absolute;
+    background-color: rgba(73, 73, 73, 0.92);
+    border-radius: 4px;
+    max-width: 800px;
+    max-height: 200px;
+    overflow: auto;
+    z-index: 1000;
+    padding: 4px;
+    outline: rgb(162, 0, 255) 1px solid;
+}
+
+.textureSearchItem {
+    padding: 4px;
+    color: white;
+    cursor: pointer;
+    border-radius: 3px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.textureSearchItem:hover {
+    background-color: rgba(162, 0, 255, 0.3);
 }
 
 /* The Modal (background) */
