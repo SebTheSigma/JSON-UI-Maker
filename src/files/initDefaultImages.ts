@@ -24,8 +24,11 @@ export async function loadPresetTextureSets(textureSet: string) {
 
     const mapJson = await FileUploader.readJsonFile(mapFile);
 
+    console.log('mapJson', mapJson);
 
     for (let imageInfo of mapJson.data) {
+
+        console.log('imageInfo', imageInfo); 
         const image = imageInfo.image;
         const isNineslice = imageInfo.nineslice;
 

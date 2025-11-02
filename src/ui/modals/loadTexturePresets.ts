@@ -18,6 +18,14 @@ const options = [
         name: "pink_ore-ui_style",
         displayName: "Pink Ore-UI Style",
     },
+    {
+        name: "eternal_ore-ui_style",
+        displayName: "Eternal Ore-UI Style",
+    },
+    {
+        name: "other_ore-ui_style",
+        displayName: "Other Ore-UI Style",
+    },
 ];
 
 

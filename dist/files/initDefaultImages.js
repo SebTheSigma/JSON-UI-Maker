@@ -14,7 +14,9 @@ export async function loadPresetTextureSets(textureSet) {
     const mapFile = await FileUploader.getAssetAsFile(`presets/textures/${textureSet}/mapping.json`, `mapping.json`);
     mapFile._webkitRelativePath = `presets/textures/${textureSet}/mapping.json`;
     const mapJson = await FileUploader.readJsonFile(mapFile);
+    console.log('mapJson', mapJson);
     for (let imageInfo of mapJson.data) {
+        console.log('imageInfo', imageInfo);
         const image = imageInfo.image;
         const isNineslice = imageInfo.nineslice;
         const imageFile = await FileUploader.getAssetAsFile(`presets/textures/${textureSet}/${image}.png`, `${image}.png`);

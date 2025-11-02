@@ -1,6 +1,6 @@
 {
     "data": [
-        { "image": "background form", "nineslice": true },
+        { "image": "background_form", "nineslice": true },
         { "image": "dropdown_background2", "nineslice": true },
         { "image": "green_default", "nineslice": true },
         { "image": "green_hover", "nineslice": true },
