@@ -123,7 +123,8 @@ export const propertiesMap = new Map([
                 get: (element) => element.style.width,
                 set: (element, value) => {
                     const classElement = GeneralUtil.elementToClassElement(element);
-                    const numVal = StringUtil.cssDimToNumber(value);
+                    let numVal = StringUtil.cssDimToNumber(value);
+                    numVal = snapWidthToPanels(element, numVal);
                     const height = StringUtil.cssDimToNumber(classElement.canvas.style.height);
                     if (classElement.nineSlice) {
                         classElement.drawImage(numVal, height);
@@ -157,7 +158,11 @@ export const propertiesMap = new Map([
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
-                set: (element, value) => (element.style.left = value),
+                set: (element, value) => {
+                    const leftNum = StringUtil.cssDimToNumber(value);
+                    const snapped = snapLeftToPanels(element, leftNum);
+                    element.style.left = `${snapped}px`;
+                },
             },
             {
                 type: "text",
@@ -353,7 +358,8 @@ export const propertiesMap = new Map([
                 editable: true,
                 get: (element) => element.style.width,
                 set: (element, value) => {
-                    element.style.width = value;
+                    const widthNum = snapWidthToPanels(element, StringUtil.cssDimToNumber(value));
+                    element.style.width = `${widthNum}px`;
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
                 },
             },
@@ -372,7 +378,11 @@ export const propertiesMap = new Map([
                 displayName: "Left",
                 editable: true,
                 get: (element) => element.style.left,
-                set: (element, value) => (element.style.left = value),
+                set: (element, value) => {
+                    const leftNum = StringUtil.cssDimToNumber(value);
+                    const snapped = snapLeftToPanels(element, leftNum);
+                    element.style.left = `${snapped}px`;
+                },
             },
             {
                 type: "text",
