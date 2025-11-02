@@ -115,7 +115,7 @@ export async function chooseImageModal(): Promise<string> {
         if (existingSearchWrapper) {
             existingSearchWrapper.remove();
         }
-
+        
         // Clear previous content
         form.innerHTML = "";
 
@@ -199,10 +199,7 @@ export async function chooseImageModal(): Promise<string> {
                 current = current.parentElement;
             }
 
-            const filePath = parents
-                .reverse()
-                .join("/")
-                .replace(/\.[^/.]+$/, "");
+            const filePath = parents.reverse().join("/").replace(/\.[^/.]+$/, "");
             console.log(`File Path: ${filePath}`);
 
             cleanup();
