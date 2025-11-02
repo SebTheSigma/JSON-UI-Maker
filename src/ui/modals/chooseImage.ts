@@ -217,6 +217,11 @@ export async function chooseImageModal(): Promise<string> {
             closeBtn.removeEventListener("click", handleClose);
             window.removeEventListener("click", handleWindowClick);
             modal.style.display = "none";
+            // Remove the search wrapper if it exists
+            const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+            if (existingSearchWrapper) {
+                existingSearchWrapper.remove();
+            }
             form.innerHTML = "";
         };
 
