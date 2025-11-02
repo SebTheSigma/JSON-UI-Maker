@@ -59,12 +59,12 @@ export const propertiesMap = new Map([
                         return;
                     element.style.width = parent.style.width;
                     element.style.height = parent.style.height;
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -163,12 +163,12 @@ export const propertiesMap = new Map([
                             classElement.drawImage(adjustedHeight, height);
                         }
                     }
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -290,12 +290,12 @@ export const propertiesMap = new Map([
                             classElement.drawImage(adjustedHeight, height);
                         }
                     }
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -359,12 +359,12 @@ export const propertiesMap = new Map([
                         return;
                     element.style.width = parent.style.width;
                     element.style.height = parent.style.height;
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element));
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -528,12 +528,12 @@ export const propertiesMap = new Map([
                     classElement.panel.style.height = parent.style.height;
                     classElement.basePanel.style.width = parent.style.width;
                     classElement.basePanel.style.height = parent.style.height;
-                    classElement.basePanel.style.left = '0px';
-                    classElement.basePanel.style.top = '0px';
+                    classElement.basePanel.style.left = "0px";
+                    classElement.basePanel.style.top = "0px";
                     classElement.slider.updateHandle();
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
 ]);

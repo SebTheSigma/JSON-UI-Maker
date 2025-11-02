@@ -11,7 +11,7 @@ export declare class ScriptGenerator {
      * The logged data is in the following format: { texture: string, text: string }
      * This function is intended to be called by the "Generate Scripter" button.
      */
-    static generateScript(language: 'ts' | 'js'): void;
+    static generateScript(language: "ts" | "js"): void;
     /**
      * Retrieves the button information from a given HTML element.
      *

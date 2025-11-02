@@ -2,25 +2,16 @@ import { config } from "./CONFIG.js";
 export class Nineslice {
     static ninesliceResize({ nineslice_size, base_size }, pixelArray, newWidth, newHeight) {
         const scale = config.magicNumbers.UI_SCALAR;
-        console.warn(scale, 'UI_SCALAR');
+        console.warn(scale, "UI_SCALAR");
         // Normalize inputs
-        const [left, top, right, bottom] = Array.isArray(nineslice_size)
-            ? nineslice_size
-            : [nineslice_size, nineslice_size, nineslice_size, nineslice_size];
-        const [baseWidth, baseHeight] = Array.isArray(base_size)
-            ? base_size
-            : [base_size, base_size];
+        const [left, top, right, bottom] = Array.isArray(nineslice_size) ? nineslice_size : [nineslice_size, nineslice_size, nineslice_size, nineslice_size];
+        const [baseWidth, baseHeight] = Array.isArray(base_size) ? base_size : [base_size, base_size];
         const output = new Uint8ClampedArray(newWidth * newHeight * 4);
         function getPixel(x, y) {
             x = Math.max(0, Math.min(baseWidth - 1, Math.floor(x)));
             y = Math.max(0, Math.min(baseHeight - 1, Math.floor(y)));
             const idx = (y * baseWidth + x) * 4;
-            return [
-                pixelArray[idx] ?? 0,
-                pixelArray[idx + 1] ?? 0,
-                pixelArray[idx + 2] ?? 0,
-                pixelArray[idx + 3] ?? 255,
-            ];
+            return [pixelArray[idx] ?? 0, pixelArray[idx + 1] ?? 0, pixelArray[idx + 2] ?? 0, pixelArray[idx + 3] ?? 255];
         }
         function setPixel(x, y, rgba) {
             x = Math.floor(x);

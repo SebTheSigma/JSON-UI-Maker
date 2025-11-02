@@ -64,7 +64,7 @@ export class TextPrompt {
         highlightedElement.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
-            inline: "nearest"
+            inline: "nearest",
         });
     }
     updatePosition() {
@@ -113,7 +113,7 @@ export class TextPrompt {
         newHighlighted.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
-            inline: "nearest"
+            inline: "nearest",
         });
     }
     delete() {

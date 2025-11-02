@@ -1,15 +1,15 @@
 import { GLOBAL_ELEMENT_MAP } from "../../index.js";
 import { GeneralUtil } from "../../util/generalUtil.js";
 const hardcoded_source_property_names = [
-    '#null',
-    '#title_text',
-    '#collection_index',
-    '#form_button_length',
-    '#collection_length',
-    '#form_button_texture_file_system',
-    '#form_button_texture',
-    '#form_button_text',
-    '#form_text'
+    "#null",
+    "#title_text",
+    "#collection_index",
+    "#form_button_length",
+    "#collection_length",
+    "#form_button_texture_file_system",
+    "#form_button_texture",
+    "#form_button_text",
+    "#form_text",
 ];
 export function collectSourcePropertyNames() {
     const source_property_names = [...hardcoded_source_property_names];

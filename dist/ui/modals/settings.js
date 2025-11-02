@@ -22,15 +22,15 @@ openBtn.onclick = () => {
         input.type = settingInfo?.type;
         input.name = setting;
         input.id = setting;
-        input.style.outline = 'none';
-        input.style.width = '60px';
-        input.style.height = '15px';
-        input.style.position = 'relative';
-        input.className = 'modalOptionInput';
+        input.style.outline = "none";
+        input.style.width = "60px";
+        input.style.height = "15px";
+        input.style.position = "relative";
+        input.className = "modalOptionInput";
         input.value = settingInfo?.value;
         if (settingInfo?.type === "checkbox") {
             input.checked = settingInfo?.value;
-            input.style.top = '2px';
+            input.style.top = "2px";
             input.oninput = (e) => {
                 Builder.setSettingToggle(setting, e.target.checked);
                 settingInfo.onchange?.(settingInfo?.value);
@@ -48,7 +48,7 @@ openBtn.onclick = () => {
         }
         // Label
         const label = document.createElement("label");
-        label.className = 'modalOptionLabel';
+        label.className = "modalOptionLabel";
         label.innerText = `${settingInfo?.displayName}: `;
         label.htmlFor = setting;
         // Adds the elements

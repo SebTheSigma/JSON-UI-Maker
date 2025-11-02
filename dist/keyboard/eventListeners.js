@@ -4,15 +4,15 @@ import { Builder, selectedElement } from "../index.js";
 import { BindingsArea } from "../scripter/bindings/bindingsArea.js";
 import { triggerArrowMovement } from "./arrowKeyElementMovement.js";
 let inTextArea = false;
-document.addEventListener('focusin', (e) => {
+document.addEventListener("focusin", (e) => {
     const el = e.target;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
         inTextArea = true;
     }
 });
-document.addEventListener('focusout', (e) => {
+document.addEventListener("focusout", (e) => {
     const el = e.target;
-    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
         inTextArea = false;
     }
 });

@@ -5,8 +5,8 @@ export class ScriptGenerator {
     static init() {
         const generateJavaScriptButton = document.getElementById("generate_js_scripter");
         const generateTypeScriptButton = document.getElementById("generate_ts_scripter");
-        generateJavaScriptButton?.addEventListener("click", () => this.generateScript('js'));
-        generateTypeScriptButton?.addEventListener("click", () => this.generateScript('ts'));
+        generateJavaScriptButton?.addEventListener("click", () => this.generateScript("js"));
+        generateTypeScriptButton?.addEventListener("click", () => this.generateScript("ts"));
     }
     /**
      * Generates a script based on the current state of the UI.
@@ -18,15 +18,15 @@ export class ScriptGenerator {
     static generateScript(language) {
         const buttons = document.getElementsByClassName("draggable-button");
         const buttonInfo = Array.from(buttons).map((button) => this.getButtonInfo(button));
-        let txt = '';
-        if (language === 'ts') {
+        let txt = "";
+        if (language === "ts") {
             txt = buttonDataToTypeScript(buttonInfo);
             console.log(txt);
-            new Notification('TS Copied to Clipboard!');
+            new Notification("TS Copied to Clipboard!");
         }
-        else if (language === 'js') {
+        else if (language === "js") {
             txt = buttonDataToJavaScript(buttonInfo);
-            new Notification('JS Copied to Clipboard!');
+            new Notification("JS Copied to Clipboard!");
         }
         navigator.clipboard.writeText(txt);
     }
@@ -38,10 +38,10 @@ export class ScriptGenerator {
      */
     static getButtonInfo(element) {
         const buttonClass = GeneralUtil.elementToClassElement(element);
-        const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
+        const text = buttonClass.displayText?.mirror?.textContent ?? "Label";
         return {
             texture: `textures/${element.dataset.displayImagePath ?? "ui/blank"}`,
-            text: text
+            text: text,
         };
     }
 }

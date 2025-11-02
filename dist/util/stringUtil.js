@@ -33,7 +33,7 @@ export class StringUtil {
      * @returns The filename without its extension.
      */
     static removeFileExtension(filename) {
-        const lastDot = filename.lastIndexOf('.');
+        const lastDot = filename.lastIndexOf(".");
         if (lastDot === -1)
             return filename; // No dot
         return filename.slice(0, lastDot);

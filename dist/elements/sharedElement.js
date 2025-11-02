@@ -207,7 +207,7 @@ export class ElementSharedFuncs {
      * provided, the main HTMLElement of classElement is used.
      */
     static drag(e, classElement, mainElement) {
-        console.warn('drag');
+        console.warn("drag");
         e.stopPropagation();
         if (!classElement.isDragging)
             return;

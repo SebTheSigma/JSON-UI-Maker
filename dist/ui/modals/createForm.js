@@ -8,7 +8,7 @@ const options = [
         required: true,
         default: config.title_flag,
         body: "Will be set as your title flag in scripts<br>Cant start with a number",
-        condition: (value) => /^[^0-9].*$/.test(value) && value !== '' && value
+        condition: (value) => /^[^0-9].*$/.test(value) && value !== "" && value,
     },
 ];
 export async function createFormModal() {
@@ -23,27 +23,27 @@ export async function createFormModal() {
         input.type = option.type;
         input.name = option.name;
         input.style.maxWidth = "100px";
-        input.className = 'modalOptionInput';
-        input.value = option.default ?? '';
+        input.className = "modalOptionInput";
+        input.value = option.default ?? "";
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
-        label.className = 'modalOptionLabel';
+        label.className = "modalOptionLabel";
         // Add the nodes
         form.appendChild(label);
         form.appendChild(input);
         if (option.required) {
             const requiredLabel = document.createElement("label");
-            requiredLabel.textContent = '*';
-            requiredLabel.className = 'modalRequiredLabel';
-            requiredLabel.style.fontSize = '20px';
-            requiredLabel.style.color = 'red';
+            requiredLabel.textContent = "*";
+            requiredLabel.className = "modalRequiredLabel";
+            requiredLabel.style.fontSize = "20px";
+            requiredLabel.style.color = "red";
             form.appendChild(requiredLabel);
         }
         form.appendChild(document.createElement("br"));
         if (option.body) {
             const body = document.createElement("label");
             body.innerHTML = option.body;
-            body.className = 'modalOptionBody';
+            body.className = "modalOptionBody";
             form.appendChild(body);
             form.appendChild(document.createElement("br"));
         }
@@ -53,7 +53,7 @@ export async function createFormModal() {
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Create";
-    submit.className = 'modalSubmitButton';
+    submit.className = "modalSubmitButton";
     // Add submit button
     form.appendChild(submit);
     const fields = {};

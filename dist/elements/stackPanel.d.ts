@@ -1,5 +1,5 @@
 interface StackPanelOptions {
-    orientation?: 'vertical' | 'horizontal';
+    orientation?: "vertical" | "horizontal";
 }
 export declare class DraggableStackPanel {
     container: HTMLElement;

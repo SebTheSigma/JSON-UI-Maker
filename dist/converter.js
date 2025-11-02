@@ -42,7 +42,7 @@ export class Converter {
         else {
             jsonNodes = {};
         }
-        console.log('startNodeTree', startNodeTree);
+        console.log("startNodeTree", startNodeTree);
         for (let node of Array.from(startNodeTree.childNodes)) {
             // Skips the node and goes to its children
             if (node?.dataset?.skip == "true") {
@@ -57,7 +57,7 @@ export class Converter {
             if (!treeData?.instructions)
                 continue;
             if (treeData.instructions.Warning) {
-                new Notification(treeData.instructions.Warning.message, 5000, 'warning');
+                new Notification(treeData.instructions.Warning.message, 5000, "warning");
             }
             const type = classToTagName.get(node.classList?.[0]);
             // Makes the new tree if needed
@@ -108,8 +108,8 @@ export class Converter {
      */
     static convertToJsonUi(node, depth = 0) {
         const tree = Converter.tree(node, depth);
-        tree['config'] = {
-            magicNumbers: config.magicNumbers
+        tree["config"] = {
+            magicNumbers: config.magicNumbers,
         };
         const stringifiedTree = JSON.stringify(tree, null, 2);
         let commentedStringifiedTree = stringifiedTree +

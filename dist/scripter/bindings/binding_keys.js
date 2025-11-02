@@ -6,6 +6,6 @@ export const binding_keys = [
     "source_control_name",
     "resolve_sibling_scope",
     "source_property_name",
-    "target_property_name"
+    "target_property_name",
 ];
 //# sourceMappingURL=binding_keys.js.map

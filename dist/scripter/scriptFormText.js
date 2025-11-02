@@ -17,7 +17,7 @@ function showCustomForm(player) {
     const form = new ActionFormData();
     form.title("${config.title_flag}Example Title");
 
-${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
+${buttons.map((button) => `    form.button("${button.text}", "${button.texture}");`).join("\n")}
 
     form.show(player).then(r => {
         
@@ -52,7 +52,7 @@ function showCustomForm(player: Player) {
     const form = new ActionFormData();
     form.title("${config.title_flag}Example Title");
 
-${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
+${buttons.map((button) => `    form.button("${button.text}", "${button.texture}");`).join("\n")}
 
     form.show(player).then(r => {
         

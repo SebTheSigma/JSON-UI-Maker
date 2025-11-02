@@ -23,16 +23,16 @@ export class FileUploader {
         const fileInput = document.getElementById("ui_textures_importer");
         if (!fileInput?.files)
             return;
-        const firstDir = fileInput?.files[0]?.webkitRelativePath.split('/')[0];
+        const firstDir = fileInput?.files[0]?.webkitRelativePath.split("/")[0];
         console.log(firstDir);
-        if (firstDir !== 'ui') {
+        if (firstDir !== "ui") {
             new Notification(`Selected file is not a ui folder
                 All textures paths will be starting with "${firstDir}".
                 May not work in-game!`, 5000, "warning");
         }
         const files = Array.from(fileInput.files);
         // Debug: list all files
-        files.forEach((file) => console.log('Filename', file.name));
+        files.forEach((file) => console.log("Filename", file.name));
         FileUploader.processFileUpload(files);
     }
     static async processFileUpload(files) {

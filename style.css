@@ -751,6 +751,7 @@ input[type="file"] {
 .chooseImageSearchWrapper {
     display: flex;
     flex-direction: column;
+    margin-top: 10px;
     gap: 10px;
     padding: 12px 16px;
     margin-bottom: 12px;
@@ -762,7 +763,7 @@ input[type="file"] {
 }
 
 .chooseImageSearchInput {
-    width: 100%;
+    width: calc(100% - 32px);
     padding: 12px 16px;
     border-radius: 8px;
     border: 2px solid rgba(153, 0, 255, 0.2);
@@ -794,7 +795,6 @@ input[type="file"] {
     border-radius: 8px;
     border: none;
     background: linear-gradient(165deg, #1e1e1e, #262626);
-    color: #ffffff;
     width: 100%;
     max-height: 220px;
     overflow-y: auto;
@@ -821,9 +821,9 @@ input[type="file"] {
 
 .chooseImageSearchDropdown option {
     background: transparent;
-    color: #ffffff;
     padding: 10px 12px;
     margin: 2px 4px;
+    color: #ffffff;
     border-radius: 4px;
     border: 1px solid transparent;
     transition: all 0.2s ease;

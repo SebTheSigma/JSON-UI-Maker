@@ -127,6 +127,7 @@ export async function chooseImageModal(): Promise<string> {
         searchInput.type = "text";
         searchInput.placeholder = "Search images...";
         searchInput.classList.add("chooseImageSearchInput");
+        searchInput.spellcheck = false;
         searchWrapper.appendChild(searchInput);
 
         const dropdown = document.createElement("select");

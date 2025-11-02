@@ -194,7 +194,8 @@ export const classToJsonUI = new Map([
             const jsonUIElement = {
                 offset: [
                     (offset[0] + config.magicNumbers.fontOffsetX) * ui_scaler,
-                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler + getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
+                    (offset[1] + config.magicNumbers.fontOffsetY) * ui_scaler +
+                        getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
                 ],
                 layer: Number(element.style.zIndex),
                 type: "label",
@@ -231,7 +232,7 @@ export const classToJsonUI = new Map([
             const ui_scaler = config.magicNumbers.UI_SCALAR;
             const right_offset = config.magicNumbers.scrolling_panel_offsets.scrolling_pane_right_offset;
             const jsonUIElement = {
-                offset: [(offset[0] * ui_scaler) + right_offset, offset[1] * ui_scaler],
+                offset: [offset[0] * ui_scaler + right_offset, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 type: "panel",

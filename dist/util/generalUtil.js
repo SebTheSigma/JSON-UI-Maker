@@ -97,10 +97,7 @@ export class GeneralUtil {
     static isOutOfScrollView(el, container) {
         const elRect = el.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
-        return elRect.top < containerRect.top ||
-            elRect.left < containerRect.left ||
-            elRect.bottom > containerRect.bottom ||
-            elRect.right > containerRect.right;
+        return elRect.top < containerRect.top || elRect.left < containerRect.left || elRect.bottom > containerRect.bottom || elRect.right > containerRect.right;
     }
     static tryParseBindings(bindings) {
         try {
@@ -119,11 +116,11 @@ export class GeneralUtil {
         if (input === null || input === undefined) {
             return false;
         }
-        return typeof input[Symbol.iterator] === 'function';
+        return typeof input[Symbol.iterator] === "function";
     }
     static autoResizeInput(input) {
-        input.style.width = '1px'; // reset
-        input.style.width = (input.scrollWidth + 5) + 'px'; // expand to fit text
+        input.style.width = "1px"; // reset
+        input.style.width = input.scrollWidth + 5 + "px"; // expand to fit text
     }
 }
 //# sourceMappingURL=generalUtil.js.map

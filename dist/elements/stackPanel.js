@@ -77,7 +77,7 @@ export class DraggableStackPanel {
         ElementSharedFuncs.unSelect(this);
     }
     startDrag(e) {
-        console.warn('HELLO');
+        console.warn("HELLO");
         if (e.target === this.resizeHandle)
             return;
         ElementSharedFuncs.startDrag(e, this);
