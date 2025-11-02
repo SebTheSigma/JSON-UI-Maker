@@ -2,7 +2,6 @@ import { GLOBAL_FILE_SYSTEM, images, setFileSystem } from "../index.js";
 import { Notification } from "../ui/notifs/noficationMaker.js";
 
 export class FileUploader {
-
     public static addToFileSystem(file: File): void {
         const dir = file.webkitRelativePath || (file as any)._webkitRelativePath;
         const parts = dir.split("/");
@@ -13,7 +12,7 @@ export class FileUploader {
         for (const part of parts) {
             if (part === "") continue;
             if (!current[part]) current[part] = {};
-                
+
             current = current[part];
         }
 
@@ -28,35 +27,40 @@ export class FileUploader {
         const fileInput = document.getElementById("ui_textures_importer") as HTMLInputElement | null;
         if (!fileInput?.files) return;
 
-        const firstDir: string | undefined = fileInput?.files[0]?.webkitRelativePath.split('/')[0];
+        const firstDir: string | undefined = fileInput?.files[0]?.webkitRelativePath.split("/")[0];
         console.log(firstDir);
-        if (firstDir !== 'ui') {
-            new Notification(`Selected file is not a ui folder
+        if (firstDir !== "ui") {
+            new Notification(
+                `Selected file is not a ui folder
                 All textures paths will be starting with "${firstDir}".
-                May not work in-game!`, 5000, "warning");
+                May not work in-game!`,
+                5000,
+                "warning"
+            );
         }
 
         const files = Array.from(fileInput.files);
 
         // Debug: list all files
-        files.forEach((file) => console.log('Filename', file.name));
+        files.forEach((file) => console.log("Filename", file.name));
 
         FileUploader.processFileUpload(files);
     }
 
     public static async processFileUpload(files: File[]): Promise<void> {
-        
         for (const file of files) {
             this.addToFileSystem(file);
         }
-        console.log(GLOBAL_FILE_SYSTEM)
+        console.log(GLOBAL_FILE_SYSTEM);
 
-        const pngFiles = files.filter((file) => file.name.endsWith(".png") || file.name.endsWith(".jpg") || file.name.endsWith(".jpeg") || file.name.endsWith(".webp"));
+        const pngFiles = files.filter(
+            (file) => file.name.endsWith(".png") || file.name.endsWith(".jpg") || file.name.endsWith(".jpeg") || file.name.endsWith(".webp")
+        );
 
         const tasks = pngFiles.map(async (pngFile) => {
             const dir = pngFile.webkitRelativePath || (pngFile as any)._webkitRelativePath;
             const baseName = dir.replace(/\.[^.]*$/, "");
-            console.warn(baseName)
+            console.warn(baseName);
 
             const imageData = await this.readImageAsImageData(pngFile);
             console.warn(imageData);

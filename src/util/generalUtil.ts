@@ -119,10 +119,7 @@ export class GeneralUtil {
         const elRect = el.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
 
-        return elRect.top < containerRect.top ||
-            elRect.left < containerRect.left ||
-            elRect.bottom > containerRect.bottom ||
-            elRect.right > containerRect.right;
+        return elRect.top < containerRect.top || elRect.left < containerRect.left || elRect.bottom > containerRect.bottom || elRect.right > containerRect.right;
     }
 
     public static tryParseBindings(bindings: string): Binding[] | undefined {
@@ -138,16 +135,16 @@ export class GeneralUtil {
      *
      * @returns {Boolean}
      */
-    public static isIterable(input: any): boolean {  
+    public static isIterable(input: any): boolean {
         if (input === null || input === undefined) {
-            return false
+            return false;
         }
 
-        return typeof input[Symbol.iterator] === 'function'
+        return typeof input[Symbol.iterator] === "function";
     }
 
     public static autoResizeInput(input: HTMLInputElement) {
-        input.style.width = '1px'; // reset
-        input.style.width = (input.scrollWidth + 5) + 'px'; // expand to fit text
+        input.style.width = "1px"; // reset
+        input.style.width = input.scrollWidth + 5 + "px"; // expand to fit text
     }
 }

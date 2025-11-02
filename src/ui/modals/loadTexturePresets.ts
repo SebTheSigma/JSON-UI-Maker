@@ -28,7 +28,6 @@ const options = [
     },
 ];
 
-
 export async function loadTexturePresetsModal() {
     modal.style.display = "block";
 
@@ -37,8 +36,8 @@ export async function loadTexturePresetsModal() {
 
     const bodyText = document.createElement("p");
     bodyText.innerHTML = "To get the textures in MC<br>download the files from github";
-    bodyText.className = 'modalOptionInput';
-    bodyText.style.textAlign = 'center';
+    bodyText.className = "modalOptionInput";
+    bodyText.style.textAlign = "center";
 
     form.appendChild(bodyText);
     form.appendChild(document.createElement("br"));
@@ -47,10 +46,10 @@ export async function loadTexturePresetsModal() {
     // Adds the options
     for (let option of options) {
         const input = document.createElement("input");
-        input.type = 'checkbox';
+        input.type = "checkbox";
         input.name = option.name;
         input.style.maxWidth = "100px";
-        input.className = 'modalOptionInput';
+        input.className = "modalOptionInput";
 
         console.log(config.texturePresets);
         input.checked = config.texturePresets![option.name]!;
@@ -61,7 +60,7 @@ export async function loadTexturePresetsModal() {
 
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
-        label.className = 'modalOptionLabel';
+        label.className = "modalOptionLabel";
 
         // Add the nodes
         form.appendChild(label);
@@ -76,24 +75,22 @@ export async function loadTexturePresetsModal() {
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Load Textures";
-    submit.className = 'modalSubmitButton';
+    submit.className = "modalSubmitButton";
 
     // Add submit button
     form.appendChild(submit);
 
-
     new Promise((): void => {
         submit.onclick = () => {
-
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i]!;
                 const checked = element.checked;
 
-                console.log('value', checked);
+                console.log("value", checked);
                 if (!checked) continue;
 
                 if (config.texturePresets![element.name] == true) continue;
-                
+
                 loadPresetTextureSets(element.name);
 
                 config.texturePresets![element.name] = true;

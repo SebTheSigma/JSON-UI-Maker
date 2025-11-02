@@ -60,13 +60,10 @@ export async function addButtonModal(): Promise<ButtonOptions> {
 
                 GeneralUtil.autoResizeInput(input);
             };
-        }
-
-        else {
+        } else {
             input.type = option.type;
         }
 
-        
         input.name = option.name;
         input.className = "modalOptionInput";
 

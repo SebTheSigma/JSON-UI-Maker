@@ -19,7 +19,6 @@ export class MinecraftSlider {
     private handleCanvas: DraggableCanvas | undefined;
 
     constructor(scrollingPanel: DraggableScrollingPanel) {
-
         this.scrollBarWidth = 14;
         this.backgroundBarWidth = 10;
 

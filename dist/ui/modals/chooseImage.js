@@ -3,6 +3,7 @@ import { GLOBAL_FILE_SYSTEM } from "../../index.js";
 const modal = document.getElementById("modalChooseImage");
 const closeBtn = document.getElementById("modalChooseImageClose");
 const form = document.getElementsByClassName("modalChooseImageForm")[0];
+const VALID_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"];
 class ChooseImageFileTree {
     static constructTextElement(text, hasChildren, hasNineslice = false) {
         const div = document.createElement("div");
@@ -70,7 +71,57 @@ class ChooseImageFileTree {
 }
 export async function chooseImageModal() {
     return new Promise((resolve, reject) => {
+        // Clean up any existing search wrapper first
+        const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+        if (existingSearchWrapper) {
+            existingSearchWrapper.remove();
+        }
+        
         form.innerHTML = "";
+        // -------------------- NEW: Search UI --------------------
+        const searchWrapper = document.createElement("div");
+        searchWrapper.classList.add("chooseImageSearchWrapper");
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.placeholder = "Search images...";
+        searchInput.classList.add("chooseImageSearchInput");
+        searchWrapper.appendChild(searchInput);
+        const dropdown = document.createElement("select");
+        dropdown.size = 6;
+        dropdown.classList.add("chooseImageSearchDropdown");
+        dropdown.style.display = "none";
+        searchWrapper.appendChild(dropdown);
+        form.parentElement?.insertBefore(searchWrapper, form);
+        const allImagePaths = collectImagePaths(GLOBAL_FILE_SYSTEM);
+        const updateDropdown = () => {
+            const query = searchInput.value.toLowerCase();
+            dropdown.innerHTML = "";
+            if (!query) {
+                dropdown.style.display = "none";
+                return;
+            }
+            const filtered = allImagePaths.filter((p) => p.toLowerCase().includes(query)).slice(0, 50);
+            if (filtered.length === 0) {
+                dropdown.style.display = "none";
+                return;
+            }
+            for (const path of filtered) {
+                const option = document.createElement("option");
+                option.value = path;
+                option.textContent = path;
+                dropdown.appendChild(option);
+            }
+            dropdown.style.display = "block";
+        };
+        searchInput.addEventListener("input", updateDropdown);
+        dropdown.addEventListener("change", () => {
+            const selected = dropdown.value;
+            if (selected) {
+                cleanup();
+                resolve(selected);
+            }
+        });
+        // -------------------- END Search UI --------------------
         ChooseImageFileTree.tree(GLOBAL_FILE_SYSTEM, form);
         const handleClick = (event) => {
             const element = event.composedPath()[0];
@@ -112,6 +163,11 @@ export async function chooseImageModal() {
             closeBtn.removeEventListener("click", handleClose);
             window.removeEventListener("click", handleWindowClick);
             modal.style.display = "none";
+            // Remove the search wrapper if it exists
+            const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+            if (existingSearchWrapper) {
+                existingSearchWrapper.remove();
+            }
             form.innerHTML = "";
         };
         // Add all listeners
@@ -122,3 +178,18 @@ export async function chooseImageModal() {
     });
 }
 //# sourceMappingURL=chooseImage.js.map
+function collectImagePaths(fsObj, currentPath = "") {
+    const paths = [];
+    for (const key of Object.keys(fsObj)) {
+        const value = fsObj[key];
+        const joinedPath = currentPath ? `${currentPath}/${key}` : key;
+        const ext = key.split(".").pop();
+        if (typeof value === "object" && value !== null && Object.keys(value).length > 0) {
+            paths.push(...collectImagePaths(value, joinedPath));
+        }
+        else if (ext && VALID_IMAGE_EXTENSIONS.includes(ext)) {
+            paths.push(joinedPath.replace(/\.[^/.]+$/, ""));
+        }
+    }
+    return paths;
+}

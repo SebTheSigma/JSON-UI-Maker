@@ -359,7 +359,6 @@ export class DraggableLabel {
     }
 
     public detach(): void {
-
         window.removeEventListener("keydown", (e) => {
             if (this.focussed) this.handleKeyboardInput(e);
         });

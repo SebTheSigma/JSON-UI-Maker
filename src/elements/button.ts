@@ -1,4 +1,4 @@
-import { GLOBAL_ELEMENT_MAP, panelContainer} from "../index.js";
+import { GLOBAL_ELEMENT_MAP, panelContainer } from "../index.js";
 import { config } from "../CONFIG.js";
 import { Nineslice } from "../nineslice.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
@@ -243,9 +243,7 @@ export class DraggableButton {
 
         if (!currentRenderState!.json) {
             newHeight = newWidth / this.aspectRatio;
-        }
-
-        else if (keyboardEvent?.shiftKey) {
+        } else if (keyboardEvent?.shiftKey) {
             if (newHeight > newWidth) {
                 newWidth = newHeight;
             } else {
@@ -255,16 +253,13 @@ export class DraggableButton {
 
         const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
         if (config.settings.boundary_constraints!.value) {
-
             if (!currentRenderState.json) {
                 // Adjust width and height proportionally
                 if (newWidth > maxWidth || newHeight > maxHeight) {
                     if (newWidth / maxWidth > newHeight / maxHeight) {
                         newWidth = maxWidth;
                         newHeight = newWidth / this.aspectRatio;
-                    }
-
-                    else {
+                    } else {
                         newHeight = maxHeight;
                         newWidth = newHeight * this.aspectRatio;
                     }
@@ -314,8 +309,7 @@ export class DraggableButton {
         if (this.isHovering) {
             this.canvas.style.cursor = "pointer";
             this.aspectRatio = this.imageDataDefault.png?.width! / this.imageDataDefault.png?.height!;
-        }
-        else {
+        } else {
             this.canvas.style.cursor = "default";
             this.aspectRatio = this.imageDataHover.png?.width! / this.imageDataHover.png?.height!;
         }
@@ -393,10 +387,15 @@ export class DraggableButton {
             // Draw image scaled into canvas, centered
             ctx.drawImage(
                 offscreen,
-                0, 0, imgW, imgH,        // source rect
-                dx, dy, floorWidth, floorHeight // destination rect
+                0,
+                0,
+                imgW,
+                imgH, // source rect
+                dx,
+                dy,
+                floorWidth,
+                floorHeight // destination rect
             );
-
         }
 
         // **Scale the display size (but keep internal resolution high)**
@@ -461,7 +460,7 @@ export class DraggableButton {
         this.button.dataset.hoverImagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, data);
 
-                ElementSharedFuncs.updateCenterCirclePosition(this);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public setPressedImage(imagePath: string): void {
@@ -476,7 +475,7 @@ export class DraggableButton {
         this.button.dataset.pressedImagePath = imagePath;
         this.drawImage(this.canvas.width, this.canvas.height, data);
 
-                ElementSharedFuncs.updateCenterCirclePosition(this);
+        ElementSharedFuncs.updateCenterCirclePosition(this);
     }
 
     public setDisplayImage(imagePath: string): void {

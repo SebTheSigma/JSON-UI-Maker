@@ -5,11 +5,10 @@ import { GeneralUtil } from "../util/generalUtil.js";
 import { ExplorerController } from "../ui/explorer/explorerController.js";
 
 interface StackPanelOptions {
-    orientation?: 'vertical' | 'horizontal';
+    orientation?: "vertical" | "horizontal";
 }
 
 export class DraggableStackPanel {
-
     // Core elements
     public container: HTMLElement;
     public panel: HTMLElement;
@@ -72,7 +71,7 @@ export class DraggableStackPanel {
         this.gridElement = ElementSharedFuncs.generateGridElement();
 
         this.centerCircle = ElementSharedFuncs.generateCenterPoint();
-        
+
         this.panel.appendChild(this.gridElement);
         this.panel.appendChild(this.centerCircle);
         this.container.appendChild(this.panel);
@@ -103,7 +102,7 @@ export class DraggableStackPanel {
     }
 
     public startDrag(e: MouseEvent): void {
-        console.warn('HELLO')
+        console.warn("HELLO");
         if (e.target === this.resizeHandle) return;
         ElementSharedFuncs.startDrag(e, this);
         this.centerCircle!.style.display = "block";

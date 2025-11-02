@@ -3,7 +3,7 @@ import { GeneralUtil } from "../util/generalUtil.js";
 export class TextPrompt {
     public promptBox: HTMLElement;
     public textarea: HTMLInputElement | HTMLTextAreaElement;
-    
+
     public attached: boolean = false;
     public offset: [number, number] = [0, -5];
     public hovered: boolean = false;
@@ -67,8 +67,7 @@ export class TextPrompt {
             if (i === this.highlightedIndex) {
                 optionElement.classList.add("textPromptOptionHighlighted");
                 highlightedElement = optionElement;
-            }
-            else optionElement.classList.add("textPromptOption");
+            } else optionElement.classList.add("textPromptOption");
 
             optionElement.onclick = () => {
                 this.detach();
@@ -85,7 +84,7 @@ export class TextPrompt {
         highlightedElement.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
-            inline: "nearest"
+            inline: "nearest",
         });
     }
 
@@ -117,7 +116,6 @@ export class TextPrompt {
     }
 
     public autoCorrectHighlightedText(): void {
-
         // Loops around when it goes to the top or bottom
         const index = GeneralUtil.loopClamp(this.highlightedIndex, this.textOptions.length);
 
@@ -147,9 +145,8 @@ export class TextPrompt {
         newHighlighted.scrollIntoView({
             behavior: "smooth",
             block: "nearest",
-            inline: "nearest"
+            inline: "nearest",
         });
-
     }
 
     public delete(): void {

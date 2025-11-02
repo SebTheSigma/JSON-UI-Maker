@@ -215,7 +215,6 @@ export class ElementSharedFuncs {
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement)!;
         if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) {
             parentClassElement.grid(config.settings.show_grid.value);
-            
         }
 
         const mainElement = classElement.getMainHTMLElement();
@@ -241,7 +240,7 @@ export class ElementSharedFuncs {
      * provided, the main HTMLElement of classElement is used.
      */
     public static drag(e: MouseEvent, classElement: GlobalElementMapValue, mainElement?: HTMLElement): void {
-        console.warn('drag');
+        console.warn("drag");
         e.stopPropagation();
         if (!classElement.isDragging) return;
 
@@ -370,7 +369,6 @@ export class ElementSharedFuncs {
     }
 
     public static grid(showGrid: boolean, classElement: GridableElements): void {
-
         if (!showGrid) {
             classElement.gridElement!.style.removeProperty("--grid-cols");
             classElement.gridElement!.style.removeProperty("--grid-rows");

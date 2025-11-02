@@ -223,8 +223,8 @@ export const pasteConversionMap: Map<string, (copiedElement: CopiedElementData, 
 
             panel.panel.style.width = `${copiedElement.width}px`;
             panel.panel.style.height = `${copiedElement.height}px`;
-            panel.basePanel.style.width = panel.panel.style.width
-            panel.basePanel.style.height = panel.panel.style.height
+            panel.basePanel.style.width = panel.panel.style.width;
+            panel.basePanel.style.height = panel.panel.style.height;
 
             if (isChild) {
                 panel.basePanel.style.left = `${copiedElement.left}px`;

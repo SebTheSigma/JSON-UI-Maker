@@ -13,16 +13,12 @@ export class Nineslice {
         newHeight: number
     ): Uint8ClampedArray<ArrayBuffer> {
         const scale = config.magicNumbers.UI_SCALAR;
-        console.warn(scale, 'UI_SCALAR');
+        console.warn(scale, "UI_SCALAR");
 
         // Normalize inputs
-        const [left, top, right, bottom] = Array.isArray(nineslice_size)
-            ? nineslice_size
-            : [nineslice_size, nineslice_size, nineslice_size, nineslice_size];
+        const [left, top, right, bottom] = Array.isArray(nineslice_size) ? nineslice_size : [nineslice_size, nineslice_size, nineslice_size, nineslice_size];
 
-        const [baseWidth, baseHeight] = Array.isArray(base_size)
-            ? base_size
-            : [base_size, base_size];
+        const [baseWidth, baseHeight] = Array.isArray(base_size) ? base_size : [base_size, base_size];
 
         const output = new Uint8ClampedArray(newWidth * newHeight * 4);
 
@@ -30,12 +26,7 @@ export class Nineslice {
             x = Math.max(0, Math.min(baseWidth - 1, Math.floor(x)));
             y = Math.max(0, Math.min(baseHeight - 1, Math.floor(y)));
             const idx = (y * baseWidth + x) * 4;
-            return [
-                pixelArray[idx] ?? 0,
-                pixelArray[idx + 1] ?? 0,
-                pixelArray[idx + 2] ?? 0,
-                pixelArray[idx + 3] ?? 255,
-            ];
+            return [pixelArray[idx] ?? 0, pixelArray[idx + 1] ?? 0, pixelArray[idx + 2] ?? 0, pixelArray[idx + 3] ?? 255];
         }
 
         function setPixel(x: number, y: number, rgba: [number, number, number, number]): void {
@@ -46,10 +37,7 @@ export class Nineslice {
             for (let i = 0; i < 4; i++) output[idx + i] = rgba[i]!;
         }
 
-        function stretch(
-            srcX: number, srcY: number, srcW: number, srcH: number,
-            destX: number, destY: number, destW: number, destH: number
-        ): void {
+        function stretch(srcX: number, srcY: number, srcW: number, srcH: number, destX: number, destY: number, destW: number, destH: number): void {
             destX = Math.round(destX);
             destY = Math.round(destY);
             destW = Math.max(0, Math.round(destW));

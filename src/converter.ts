@@ -13,7 +13,7 @@ export interface TreeInstructions {
     };
     Warning?: {
         message: string;
-    }
+    };
 }
 
 export interface TreeData {
@@ -67,10 +67,9 @@ export class Converter {
             jsonNodes = {};
         }
 
-        console.log('startNodeTree', startNodeTree);
+        console.log("startNodeTree", startNodeTree);
 
         for (let node of Array.from(startNodeTree.childNodes) as HTMLElement[]) {
-
             // Skips the node and goes to its children
             if ((node as HTMLElement)?.dataset?.skip == "true") {
                 const nextNodes: StringObjectMap = Converter.tree(node, depth + 1, nameSpace, _baseJsonUiNode);
@@ -86,7 +85,7 @@ export class Converter {
             if (!treeData?.instructions) continue;
 
             if (treeData.instructions.Warning) {
-                new Notification(treeData.instructions.Warning.message, 5000, 'warning');
+                new Notification(treeData.instructions.Warning.message, 5000, "warning");
             }
 
             const type: string = classToTagName.get(node.classList?.[0]!)!;
@@ -150,9 +149,9 @@ export class Converter {
     public static convertToJsonUi(node: Node, depth: number = 0): string {
         const tree: StringObjectMap = Converter.tree(node, depth);
 
-        tree['config'] = {
-            magicNumbers: config.magicNumbers
-        }
+        tree["config"] = {
+            magicNumbers: config.magicNumbers,
+        };
 
         const stringifiedTree: string = JSON.stringify(tree, null, 2);
         let commentedStringifiedTree =

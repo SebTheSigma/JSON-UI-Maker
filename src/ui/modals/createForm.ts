@@ -10,7 +10,7 @@ const options = [
         required: true,
         default: config.title_flag,
         body: "Will be set as your title flag in scripts<br>Cant start with a number",
-        condition: (value: string) => /^[^0-9].*$/.test(value) && value !== '' && value
+        condition: (value: string) => /^[^0-9].*$/.test(value) && value !== "" && value,
     },
 ];
 
@@ -18,7 +18,6 @@ interface CreateFormOptions {
     title?: string;
     [key: string]: any;
 }
-
 
 export async function createFormModal(): Promise<CreateFormOptions> {
     modal.style.display = "block";
@@ -35,14 +34,12 @@ export async function createFormModal(): Promise<CreateFormOptions> {
         input.type = option.type;
         input.name = option.name;
         input.style.maxWidth = "100px";
-        input.className = 'modalOptionInput';
-        input.value = option.default ?? '';
+        input.className = "modalOptionInput";
+        input.value = option.default ?? "";
 
         const label = document.createElement("label");
         label.textContent = `${option.displayName}: `;
-        label.className = 'modalOptionLabel';
-
-        
+        label.className = "modalOptionLabel";
 
         // Add the nodes
         form.appendChild(label);
@@ -50,10 +47,10 @@ export async function createFormModal(): Promise<CreateFormOptions> {
 
         if (option.required) {
             const requiredLabel = document.createElement("label");
-            requiredLabel.textContent = '*';
-            requiredLabel.className = 'modalRequiredLabel';
-            requiredLabel.style.fontSize = '20px';
-            requiredLabel.style.color = 'red';
+            requiredLabel.textContent = "*";
+            requiredLabel.className = "modalRequiredLabel";
+            requiredLabel.style.fontSize = "20px";
+            requiredLabel.style.color = "red";
             form.appendChild(requiredLabel);
         }
 
@@ -62,7 +59,7 @@ export async function createFormModal(): Promise<CreateFormOptions> {
         if (option.body) {
             const body = document.createElement("label");
             body.innerHTML = option.body;
-            body.className = 'modalOptionBody';
+            body.className = "modalOptionBody";
             form.appendChild(body);
             form.appendChild(document.createElement("br"));
         }
@@ -74,7 +71,7 @@ export async function createFormModal(): Promise<CreateFormOptions> {
     const submit = document.createElement("input");
     submit.type = "submit";
     submit.value = "Create";
-    submit.className = 'modalSubmitButton';
+    submit.className = "modalSubmitButton";
 
     // Add submit button
     form.appendChild(submit);
@@ -83,7 +80,6 @@ export async function createFormModal(): Promise<CreateFormOptions> {
 
     return new Promise((resolve: (textures: CreateFormOptions) => void): void => {
         submit.onclick = () => {
-
             for (let i = 0; i < elements.length; i++) {
                 const element = elements[i]!;
                 const value = element.value;

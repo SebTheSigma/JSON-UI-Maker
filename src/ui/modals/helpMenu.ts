@@ -1,7 +1,5 @@
-
 const modal: HTMLElement = document.getElementById("modalHelpMenu")!;
 const closeBtn: HTMLElement = document.getElementById("modalHelpMenuClose") as HTMLElement;
-
 
 export async function helpModal() {
     modal.style.display = "block";
@@ -23,4 +21,3 @@ window.addEventListener("click", (event) => {
         modal.style.display = "none";
     }
 });
-

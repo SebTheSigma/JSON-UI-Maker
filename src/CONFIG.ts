@@ -99,12 +99,12 @@ const configSettings = {
         editable: true,
         value: false,
         displayName: "Selected Element Children Get Copied",
-    }
+    },
 };
 
 const configMagicNumbers = {
     scrolling_panel_offsets: {
-        scrolling_pane_right_offset: 2
+        scrolling_pane_right_offset: 2,
     },
     textEditor: {
         indentation: 4,
@@ -119,13 +119,13 @@ const configMagicNumbers = {
     fontOffsetX: 6,
     fontOffsetY: 6,
     getFontScaledOffsetY: (fontSize: number, fontType: string): number => {
-        const doubleFontSize = (2 * fontSize);
+        const doubleFontSize = 2 * fontSize;
 
         console.log(doubleFontSize, fontType, fontSize);
-        
+
         if (fontType == "MinecraftRegular") return doubleFontSize - 3;
         else if (fontType == "MinecraftTen") return -1;
-        else return doubleFontSize - 3
+        else return doubleFontSize - 3;
     },
     UI_SCALAR: 0.36,
     buttonImageOffsetX: 2,
@@ -176,7 +176,7 @@ const configMagicNumbers = {
 };
 
 const texturePresets = {
-    'turquoise_ore-ui_style': false
+    "turquoise_ore-ui_style": false,
 };
 
 interface Config {

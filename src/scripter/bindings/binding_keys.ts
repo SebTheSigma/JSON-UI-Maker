@@ -1,4 +1,4 @@
-import { Binding } from "./types"
+import { Binding } from "./types";
 
 export const binding_keys = [
     "binding_name",
@@ -8,5 +8,5 @@ export const binding_keys = [
     "source_control_name",
     "resolve_sibling_scope",
     "source_property_name",
-    "target_property_name"
+    "target_property_name",
 ] as const satisfies (keyof Binding)[];

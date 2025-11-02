@@ -268,7 +268,8 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const jsonUIElement: JsonUISimpleElement = {
                 offset: [
                     (offset[0] + (config.magicNumbers.fontOffsetX as number)) * ui_scaler,
-                    (offset[1] + (config.magicNumbers.fontOffsetY as number)) * ui_scaler + getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
+                    (offset[1] + (config.magicNumbers.fontOffsetY as number)) * ui_scaler +
+                        getFontScaledOffsetY(parseFloat(element.style.fontSize), element.style.fontFamily ?? "MinecraftRegular"),
                 ],
                 layer: Number(element.style.zIndex),
                 type: "label",
@@ -315,7 +316,7 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
             const right_offset = config.magicNumbers.scrolling_panel_offsets.scrolling_pane_right_offset as number;
 
             const jsonUIElement: JsonUISimpleElement = {
-                offset: [(offset[0] * ui_scaler) + right_offset, offset[1] * ui_scaler],
+                offset: [offset[0] * ui_scaler + right_offset, offset[1] * ui_scaler],
                 size: [processedWidth * ui_scaler, processedHeight * ui_scaler],
                 layer: Number(element.style.zIndex),
                 type: "panel",
@@ -370,7 +371,6 @@ export const classToJsonUI: Map<string, (element: HTMLElement, nameSpace: string
     ],
 ]);
 
-
 export const classToTagName: Map<string, string> = new Map([
     ["draggable-panel", "panel"],
     ["draggable-canvas", "image"],
@@ -379,4 +379,3 @@ export const classToTagName: Map<string, string> = new Map([
     ["draggable-label", "label"],
     ["draggable-scrolling_panel", "scrolling_panel"],
 ]);
-

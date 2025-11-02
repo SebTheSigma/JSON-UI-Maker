@@ -63,10 +63,10 @@ function constructMainPanel(): { id: string; mainPanel: DraggablePanel } {
     const id = StringUtil.generateRandomString(15);
     const mainPanel = new DraggablePanel(id, panelContainer, false);
     mainPanel.deleteable = false;
-    
+
     const parent = mainPanel.panel.parentElement!;
     const parentRect = parent.getBoundingClientRect();
-    
+
     mainPanel.panel.style.width = `${parentRect.width + 3}px`;
     mainPanel.panel.style.height = `${parentRect.height + 3}px`;
 
@@ -391,7 +391,7 @@ export class Builder {
     public static async openAddImageMenu(): Promise<void> {
         const filePath: string = await chooseImageModal();
 
-        console.warn(filePath, images)
+        console.warn(filePath, images);
         const imageInfo: ImageDataState = images.get(filePath)!;
 
         this.addCanvas(imageInfo.png!, filePath, imageInfo.json!);

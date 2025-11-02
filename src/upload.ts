@@ -72,7 +72,6 @@ export class FormUploader {
     }
 
     public static uploadForm(form: string) {
-
         if (FormUploader.isValid(form)) {
             const parsed = FormUploader.parseJsonWithComments(form);
             const namespace = parsed.namespace as string;
@@ -113,7 +112,6 @@ export class FormUploader {
             }
 
             const createClassElement = tagNameToCreateClassElementFunc.get(childType)!;
-
 
             const newParent: { element: GlobalElementMapValue; instructions: UploadTreeInstructions } | undefined = createClassElement(
                 childJson!,
@@ -265,7 +263,7 @@ export const tagNameToCreateClassElementFunc: Map<
         ): { element: GlobalElementMapValue; instructions: UploadTreeInstructions } | undefined => {
             const UI_SCALAR = usedConfig!.magicNumbers!.UI_SCALAR as number;
             let texturePath = json.texture as string;
-            console.warn(texturePath)
+            console.warn(texturePath);
             texturePath = texturePath.replace(/^textures\//, "");
 
             if (!FileUploader.isFileUploaded(texturePath)) {
@@ -359,7 +357,6 @@ export const tagNameToCreateClassElementFunc: Map<
             // Iterate twice to get to the from the current node to the node ahead
             const controls1 = FormUploader.getJsonControlsAndType(nextNodes!);
             const scrollingLinkerPanel = FormUploader.getJsonControlsAndType(controls1[0]?.control!)[0]?.control!;
-
 
             const size = json.size as [number, number];
             const offset = scrollingLinkerPanel.$scrolling_pane_offset as [number, number];

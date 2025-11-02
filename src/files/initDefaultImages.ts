@@ -1,19 +1,17 @@
 import { FileUploader } from "./openFiles.js";
 
-
-
 export async function initDefaultImages() {
-    const placeholderImage = await FileUploader.getAssetAsFile('assets/placeholder.webp', 'placeholder.webp');
-    (placeholderImage as any)._webkitRelativePath = 'assets/placeholder.webp';
+    const placeholderImage = await FileUploader.getAssetAsFile("assets/placeholder.webp", "placeholder.webp");
+    (placeholderImage as any)._webkitRelativePath = "assets/placeholder.webp";
 
-    const placeholderJson = await FileUploader.getAssetAsFile('assets/placeholder.json', 'placeholder.json');
-    (placeholderJson as any)._webkitRelativePath = 'assets/placeholder.json';
+    const placeholderJson = await FileUploader.getAssetAsFile("assets/placeholder.json", "placeholder.json");
+    (placeholderJson as any)._webkitRelativePath = "assets/placeholder.json";
 
-    const scrollHandleImage = await FileUploader.getAssetAsFile('assets/sliders/ScrollHandle.webp', 'ScrollHandle.webp');
-    (scrollHandleImage as any)._webkitRelativePath = 'assets/sliders/ScrollHandle.webp';
+    const scrollHandleImage = await FileUploader.getAssetAsFile("assets/sliders/ScrollHandle.webp", "ScrollHandle.webp");
+    (scrollHandleImage as any)._webkitRelativePath = "assets/sliders/ScrollHandle.webp";
 
-    const scrollHandleJson = await FileUploader.getAssetAsFile('assets/sliders/ScrollHandle.json', 'ScrollHandle.json');
-    (scrollHandleJson as any)._webkitRelativePath = 'assets/sliders/ScrollHandle.json';
+    const scrollHandleJson = await FileUploader.getAssetAsFile("assets/sliders/ScrollHandle.json", "ScrollHandle.json");
+    (scrollHandleJson as any)._webkitRelativePath = "assets/sliders/ScrollHandle.json";
 
     await FileUploader.processFileUpload([placeholderImage, placeholderJson, scrollHandleImage, scrollHandleJson]);
 }
@@ -24,11 +22,10 @@ export async function loadPresetTextureSets(textureSet: string) {
 
     const mapJson = await FileUploader.readJsonFile(mapFile);
 
-    console.log('mapJson', mapJson);
+    console.log("mapJson", mapJson);
 
     for (let imageInfo of mapJson.data) {
-
-        console.log('imageInfo', imageInfo); 
+        console.log("imageInfo", imageInfo);
         const image = imageInfo.image;
         const isNineslice = imageInfo.nineslice;
 
@@ -40,10 +37,7 @@ export async function loadPresetTextureSets(textureSet: string) {
             (imageJson as any)._webkitRelativePath = `ui/presets/${textureSet}/${image}.json`;
 
             await FileUploader.processFileUpload([imageFile, imageJson]);
-
-        }
-
-        else {
+        } else {
             await FileUploader.processFileUpload([imageFile]);
         }
     }

@@ -87,9 +87,95 @@ class ChooseImageFileTree {
     }
 }
 
+// Valid image extensions used in multiple places
+const VALID_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "webp"] as const;
+
+// Recursively collect all image paths (without extension) from the virtual file system
+function collectImagePaths(fsObj: any, currentPath: string = ""): string[] {
+    const paths: string[] = [];
+    for (const key of Object.keys(fsObj)) {
+        const value = fsObj[key];
+        const joinedPath = currentPath ? `${currentPath}/${key}` : key;
+        const ext = key.split(".").pop();
+        // If we have children this is a directory
+        if (typeof value === "object" && value !== null && Object.keys(value).length > 0) {
+            paths.push(...collectImagePaths(value, joinedPath));
+        } else if (ext && (VALID_IMAGE_EXTENSIONS as readonly string[]).includes(ext)) {
+            // Strip extension to stay consistent with existing behaviour
+            paths.push(joinedPath.replace(/\.[^/.]+$/, ""));
+        }
+    }
+    return paths;
+}
+
 export async function chooseImageModal(): Promise<string> {
     return new Promise((resolve, reject) => {
+        // Clean up any existing search wrapper first
+        const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+        if (existingSearchWrapper) {
+            existingSearchWrapper.remove();
+        }
+
+        // Clear previous content
         form.innerHTML = "";
+
+        // -------------------- NEW: Search UI --------------------
+        const searchWrapper = document.createElement("div");
+        searchWrapper.classList.add("chooseImageSearchWrapper");
+
+        const searchInput = document.createElement("input");
+        searchInput.type = "text";
+        searchInput.placeholder = "Search images...";
+        searchInput.classList.add("chooseImageSearchInput");
+        searchWrapper.appendChild(searchInput);
+
+        const dropdown = document.createElement("select");
+        dropdown.size = 6; // show few results at once
+        dropdown.classList.add("chooseImageSearchDropdown");
+        dropdown.style.display = "none"; // hidden until there is query
+        searchWrapper.appendChild(dropdown);
+
+        // Insert search UI before the tree container (form)
+        form.parentElement?.insertBefore(searchWrapper, form);
+
+        // Prepare list of all image paths (without extension) once
+        const allImagePaths = collectImagePaths(GLOBAL_FILE_SYSTEM);
+
+        const updateDropdown = () => {
+            const query = searchInput.value.toLowerCase();
+            // Clear previous options
+            dropdown.innerHTML = "";
+            if (!query) {
+                dropdown.style.display = "none";
+                return;
+            }
+            const filtered = allImagePaths.filter((p) => p.toLowerCase().includes(query)).slice(0, 50); // limit 50 results
+            if (filtered.length === 0) {
+                dropdown.style.display = "none";
+                return;
+            }
+            for (const path of filtered) {
+                const option = document.createElement("option");
+                option.value = path;
+                option.textContent = path;
+                dropdown.appendChild(option);
+            }
+            dropdown.style.display = "block";
+        };
+
+        searchInput.addEventListener("input", updateDropdown);
+
+        dropdown.addEventListener("change", () => {
+            const selected = dropdown.value;
+            if (selected) {
+                cleanup();
+                resolve(selected);
+            }
+        });
+
+        // -------------------- END Search UI --------------------
+
+        // Build tree view as before
         ChooseImageFileTree.tree(GLOBAL_FILE_SYSTEM, form);
 
         const handleClick = (event: MouseEvent) => {
@@ -113,7 +199,10 @@ export async function chooseImageModal(): Promise<string> {
                 current = current.parentElement;
             }
 
-            const filePath = parents.reverse().join("/").replace(/\.[^/.]+$/, "");
+            const filePath = parents
+                .reverse()
+                .join("/")
+                .replace(/\.[^/.]+$/, "");
             console.log(`File Path: ${filePath}`);
 
             cleanup();
@@ -137,6 +226,11 @@ export async function chooseImageModal(): Promise<string> {
             closeBtn.removeEventListener("click", handleClose);
             window.removeEventListener("click", handleWindowClick);
             modal.style.display = "none";
+            // Remove the search wrapper if it exists
+            const existingSearchWrapper = form.parentElement?.querySelector(".chooseImageSearchWrapper");
+            if (existingSearchWrapper) {
+                existingSearchWrapper.remove();
+            }
             form.innerHTML = "";
         };
 

@@ -127,7 +127,6 @@ export class DraggableCanvas {
     }
 
     public initEvents(): void {
-
         // Using the grid element as a drag target, i cant seem
         // to get the canvas to accept input through the grid so this is a workaround
         this.gridElement.addEventListener("mousedown", (e) => this.startDrag(e));
@@ -205,9 +204,7 @@ export class DraggableCanvas {
         // only if the image is a 9-slice
         if (!this.nineSlice) {
             newHeight = newWidth / this.aspectRatio;
-        }
-
-        else if (keyboardEvent?.shiftKey) {
+        } else if (keyboardEvent?.shiftKey) {
             if (newHeight > newWidth) {
                 newWidth = newHeight;
             } else {
@@ -217,16 +214,13 @@ export class DraggableCanvas {
 
         const outlineWidth = StringUtil.cssDimToNumber(this.outlineDiv.style.outlineWidth);
         if (config.settings.boundary_constraints!.value) {
-
             if (!this.nineSlice) {
                 // Adjust width and height proportionally
                 if (newWidth > maxWidth || newHeight > maxHeight) {
                     if (newWidth / maxWidth > newHeight / maxHeight) {
                         newWidth = maxWidth;
                         newHeight = newWidth / this.aspectRatio;
-                    }
-
-                    else {
+                    } else {
                         newHeight = maxHeight;
                         newWidth = newHeight * this.aspectRatio;
                     }

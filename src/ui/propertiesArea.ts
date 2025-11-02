@@ -73,12 +73,12 @@ export const propertiesMap = new Map([
 
                     element.style.width = parent.style.width;
                     element.style.height = parent.style.height;
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element) as DraggablePanel);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -179,26 +179,21 @@ export const propertiesMap = new Map([
                     if (classElement.nineSlice) {
                         classElement.drawImage(width, height);
                     } else {
-
                         if (adjustedHeight > width) {
-
                             console.log(width, adjustedWidth, 1);
                             classElement.drawImage(width, adjustedWidth);
-                        }
-
-                        else {
-
+                        } else {
                             console.log(adjustedHeight, height, 2);
                             classElement.drawImage(adjustedHeight, height);
                         }
                     }
-                    
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -329,26 +324,21 @@ export const propertiesMap = new Map([
                     if (classElement.getCurrentlyRenderedState().json) {
                         classElement.drawImage(width, height);
                     } else {
-
                         if (adjustedHeight > width) {
-
                             console.log(width, adjustedWidth, 1);
                             classElement.drawImage(width, adjustedWidth);
-                        }
-
-                        else {
-
+                        } else {
                             console.log(adjustedHeight, height, 2);
                             classElement.drawImage(adjustedHeight, height);
                         }
                     }
-                    
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(classElement);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -418,12 +408,12 @@ export const propertiesMap = new Map([
                     if (parent.dataset.id == config.rootElement!.dataset.id) return;
                     element.style.width = parent.style.width;
                     element.style.height = parent.style.height;
-                    element.style.left = '0px';
-                    element.style.top = '0px';
+                    element.style.left = "0px";
+                    element.style.top = "0px";
                     ElementSharedFuncs.updateCenterCirclePosition(GeneralUtil.elementToClassElement(element) as DraggableCollectionPanel);
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
     [
@@ -486,7 +476,7 @@ export const propertiesMap = new Map([
                 set: (element: HTMLElement, value: string) => {
                     const elementClass = GeneralUtil.elementToClassElement(element) as DraggableLabel;
 
-                    console.log(value)
+                    console.log(value);
                     elementClass.lastAttemptedScaleFactor = value;
 
                     element.style.fontSize = `${value}em`;
@@ -616,13 +606,13 @@ export const propertiesMap = new Map([
                     classElement.basePanel.style.width = parent.style.width;
                     classElement.basePanel.style.height = parent.style.height;
 
-                    classElement.basePanel.style.left = '0px';
-                    classElement.basePanel.style.top = '0px';
+                    classElement.basePanel.style.left = "0px";
+                    classElement.basePanel.style.top = "0px";
 
                     classElement.slider.updateHandle();
                     updatePropertiesArea();
                 },
-            }
+            },
         ],
     ],
 ]);
@@ -663,7 +653,7 @@ export function updatePropertiesArea(): void {
             input.className = "propertyInputButton";
             input.onclick = function () {
                 property.set(selectedElement!, value as string);
-            }
+            };
 
             currentInputs.push(input);
             propertiesArea.appendChild(input);
@@ -676,8 +666,7 @@ export function updatePropertiesArea(): void {
         else if (property.type === "text") {
             input.value = value as string;
             input.spellcheck = false;
-        }
-        else if (property.type === "number") input.value = value as string;
+        } else if (property.type === "number") input.value = value as string;
 
         if (property.type === "texture") {
             input.type = "text";
@@ -704,10 +693,9 @@ export function updatePropertiesArea(): void {
 
                     property.set(selectedElement!, filePath);
 
-                    GeneralUtil.autoResizeInput(input)
+                    GeneralUtil.autoResizeInput(input);
                 };
-            }
-            else {
+            } else {
                 input.oninput = function () {
                     property.set(selectedElement!, input.value);
                 };

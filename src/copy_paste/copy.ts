@@ -190,7 +190,6 @@ export const conversionMap: Map<string, (elementClass: GlobalElementMapValue) =>
 
 export class Copier {
     public static copyElement(id: string): void {
-
         const elementClass: GlobalElementMapValue = GeneralUtil.idToClassElement(id)!;
         if (!elementClass) return;
 

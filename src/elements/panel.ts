@@ -5,7 +5,6 @@ import { GeneralUtil } from "../util/generalUtil.js";
 import { ExplorerController } from "../ui/explorer/explorerController.js";
 
 export class DraggablePanel {
-
     // Core elements
     public container: HTMLElement;
     public panel: HTMLElement;
@@ -70,7 +69,7 @@ export class DraggablePanel {
         this.gridElement = ElementSharedFuncs.generateGridElement();
 
         this.centerCircle = ElementSharedFuncs.generateCenterPoint();
-        
+
         this.panel.appendChild(this.gridElement);
         this.panel.appendChild(this.centerCircle);
         this.container.appendChild(this.panel);
@@ -101,7 +100,7 @@ export class DraggablePanel {
     }
 
     public startDrag(e: MouseEvent): void {
-        console.warn('HELLO')
+        console.warn("HELLO");
         if (e.target === this.resizeHandle) return;
         ElementSharedFuncs.startDrag(e, this);
         this.centerCircle!.style.display = "block";

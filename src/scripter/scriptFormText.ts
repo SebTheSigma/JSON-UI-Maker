@@ -11,7 +11,6 @@ import { FormButtonData } from "./generator.js";
  * @returns {string} The script as a string.
  */
 export function buttonDataToJavaScript(buttons: FormButtonData[]): string {
-
     return `
 import { system, world } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
@@ -20,7 +19,7 @@ function showCustomForm(player) {
     const form = new ActionFormData();
     form.title("${config.title_flag}Example Title");
 
-${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
+${buttons.map((button) => `    form.button("${button.text}", "${button.texture}");`).join("\n")}
 
     form.show(player).then(r => {
         
@@ -38,7 +37,6 @@ world.beforeEvents.itemUse.subscribe(ev => {
     }
 })
 `;
-
 }
 
 /**
@@ -49,7 +47,6 @@ world.beforeEvents.itemUse.subscribe(ev => {
  * @returns A string representing the generated script.
  */
 export function buttonDataToTypeScript(buttons: FormButtonData[]): string {
-
     return `
 import { system, world, Player } from '@minecraft/server';
 import { ActionFormData } from '@minecraft/server-ui';
@@ -58,7 +55,7 @@ function showCustomForm(player: Player) {
     const form = new ActionFormData();
     form.title("${config.title_flag}Example Title");
 
-${buttons.map(button => `    form.button("${button.text}", "${button.texture}");`).join('\n')}
+${buttons.map((button) => `    form.button("${button.text}", "${button.texture}");`).join("\n")}
 
     form.show(player).then(r => {
         
@@ -76,5 +73,4 @@ world.beforeEvents.itemUse.subscribe(ev => {
     }
 })
 `;
-
 }

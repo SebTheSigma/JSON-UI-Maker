@@ -8,7 +8,6 @@ const textElementIdMap: Map<string, HTMLDivElement> = new Map<string, HTMLDivEle
 const explorerBaseElement = document.getElementById("explorer")!;
 
 export class ExplorerController {
-
     static constructTextElement(text: string, hasChildren: boolean): HTMLDivElement {
         const div = document.createElement("div");
         div.classList.add("explorerDiv");
@@ -66,7 +65,6 @@ export class ExplorerController {
         const filteredChildrenHTML: HTMLElement[] = [];
 
         for (const child of childrenHTML) {
-
             // Skips to nect element is needed
             const target = child.dataset.skip === "true" ? (child.firstChild as HTMLElement | null) : child;
 

@@ -5,20 +5,19 @@ import { BindingsArea } from "../scripter/bindings/bindingsArea.js";
 import { triggerArrowMovement } from "./arrowKeyElementMovement.js";
 
 let inTextArea = false;
-document.addEventListener('focusin', (e) => {
-  const el: HTMLElement = e.target as HTMLElement;
-  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-    inTextArea = true;
-  }
+document.addEventListener("focusin", (e) => {
+    const el: HTMLElement = e.target as HTMLElement;
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        inTextArea = true;
+    }
 });
 
-document.addEventListener('focusout', (e) => {
-  const el: HTMLElement = e.target as HTMLElement;
-  if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-    inTextArea = false;
-  }
+document.addEventListener("focusout", (e) => {
+    const el: HTMLElement = e.target as HTMLElement;
+    if (el.tagName === "INPUT" || el.tagName === "TEXTAREA") {
+        inTextArea = false;
+    }
 });
-
 
 /**
  * @type {KeyboardEvent}

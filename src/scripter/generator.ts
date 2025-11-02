@@ -4,18 +4,16 @@ import { GeneralUtil } from "../util/generalUtil.js";
 import { Notification } from "../ui/notifs/noficationMaker.js";
 
 export interface FormButtonData {
-    texture: string,
-    text: string,
+    texture: string;
+    text: string;
 }
 
-
 export class ScriptGenerator {
-
     public static init(): void {
         const generateJavaScriptButton: HTMLTextAreaElement = document.getElementById("generate_js_scripter") as HTMLTextAreaElement;
         const generateTypeScriptButton: HTMLTextAreaElement = document.getElementById("generate_ts_scripter") as HTMLTextAreaElement;
-        generateJavaScriptButton?.addEventListener("click", () => this.generateScript('js'));
-        generateTypeScriptButton?.addEventListener("click", () => this.generateScript('ts'));
+        generateJavaScriptButton?.addEventListener("click", () => this.generateScript("js"));
+        generateTypeScriptButton?.addEventListener("click", () => this.generateScript("ts"));
     }
 
     /**
@@ -25,39 +23,37 @@ export class ScriptGenerator {
      * The logged data is in the following format: { texture: string, text: string }
      * This function is intended to be called by the "Generate Scripter" button.
      */
-    static generateScript(language: 'ts' | 'js'): void {
+    static generateScript(language: "ts" | "js"): void {
         const buttons = document.getElementsByClassName("draggable-button");
         const buttonInfo = Array.from(buttons).map((button) => this.getButtonInfo(button as HTMLElement));
 
-        let txt: string = '';
-        if (language === 'ts') {
+        let txt: string = "";
+        if (language === "ts") {
             txt = buttonDataToTypeScript(buttonInfo);
             console.log(txt);
-            new Notification('TS Copied to Clipboard!');
-        }
-
-        else if (language === 'js') {
+            new Notification("TS Copied to Clipboard!");
+        } else if (language === "js") {
             txt = buttonDataToJavaScript(buttonInfo);
-            new Notification('JS Copied to Clipboard!');
+            new Notification("JS Copied to Clipboard!");
         }
 
         navigator.clipboard.writeText(txt);
     }
-    
+
     /**
      * Retrieves the button information from a given HTML element.
-     * 
+     *
      * @param element - The HTML element representing the button.
      * @returns An object containing the texture path and text for the button.
      */
     static getButtonInfo(element: HTMLElement): FormButtonData {
         const buttonClass = GeneralUtil.elementToClassElement(element) as DraggableButton;
 
-        const text = buttonClass.displayText?.mirror?.textContent ?? 'Label';
+        const text = buttonClass.displayText?.mirror?.textContent ?? "Label";
 
         return {
             texture: `textures/${element.dataset.displayImagePath ?? "ui/blank"}`,
-            text: text
-        }
+            text: text,
+        };
     }
 }
