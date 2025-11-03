@@ -4,6 +4,7 @@ import { selectedElement } from "../index.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { StringUtil } from "../util/stringUtil.js";
 import { chooseImageModal } from "./modals/chooseImage.js";
+import { undoRedoManager } from "../keyboard/undoRedo.js";
 export const propertiesMap = new Map([
     [
         "draggable-panel",
@@ -446,7 +447,8 @@ export const propertiesMap = new Map([
                     elementClass.shadowLabel.style.fontFamily = value;
                     elementClass.mirror.style.fontFamily = value;
                     elementClass.label.style.fontFamily = value;
-                    elementClass.updateSize(false);
+                    // Don't call updateSize here as it causes the font validation issue
+                    // elementClass.updateSize(false);
                     elementClass.label.dispatchEvent(new Event("input"));
                 },
             },
@@ -596,15 +598,98 @@ export function updatePropertiesArea() {
             input.contentEditable = "true";
             if (property.type === "texture") {
                 input.onclick = async function () {
+                    const oldValue = input.value;
                     const filePath = await chooseImageModal();
                     input.value = filePath;
+                    // Record property change for undo/redo
+                    const newState = {};
+                    const oldState = {};
+                    newState[property.displayName.toLowerCase().replace(' ', '_')] = filePath;
+                    oldState[property.displayName.toLowerCase().replace(' ', '_')] = oldValue;
+                    undoRedoManager.push({
+                        type: 'modify',
+                        elementId: selectedElement.dataset.id,
+                        previousState: oldState,
+                        newState: newState
+                    });
                     property.set(selectedElement, filePath);
                     GeneralUtil.autoResizeInput(input);
                 };
             }
             else {
-                input.oninput = function () {
-                    property.set(selectedElement, input.value);
+                let initialValue = input.value;
+                let hasUnsavedChanges = false;
+                // Special handling for Font Family to avoid validation issues
+                if (property.displayName === "Font Family") {
+                    input.oninput = function () {
+                        hasUnsavedChanges = true;
+                        // Only set the font family directly without triggering updateSize
+                        selectedElement.style.fontFamily = input.value;
+                        const elementClass = GeneralUtil.elementToClassElement(selectedElement);
+                        if (elementClass && elementClass.shadowLabel) {
+                            elementClass.shadowLabel.style.fontFamily = input.value;
+                        }
+                        if (elementClass && elementClass.mirror) {
+                            elementClass.mirror.style.fontFamily = input.value;
+                        }
+                    };
+                }
+                else {
+                    // Delay the property.set call to avoid interrupting typing
+                    let timeoutId = null;
+                    input.oninput = function () {
+                        hasUnsavedChanges = true;
+                        if (timeoutId)
+                            clearTimeout(timeoutId);
+                        timeoutId = window.setTimeout(() => {
+                            property.set(selectedElement, input.value);
+                        }, 100); // Small delay to avoid interrupting typing
+                    };
+                }
+                input.onfocus = function () {
+                    initialValue = input.value;
+                    hasUnsavedChanges = false;
+                };
+                input.onblur = function () {
+                    if (hasUnsavedChanges && initialValue !== input.value) {
+                        // Record property change for undo/redo only when focus leaves and value changed
+                        const newState = {};
+                        const oldState = {};
+                        newState[property.displayName.toLowerCase().replace(' ', '_')] = input.value;
+                        oldState[property.displayName.toLowerCase().replace(' ', '_')] = initialValue;
+                        undoRedoManager.push({
+                            type: 'modify',
+                            elementId: selectedElement.dataset.id,
+                            previousState: oldState,
+                            newState: newState
+                        });
+                        hasUnsavedChanges = false;
+                        // For font family, call the property setter after recording undo
+                        if (property.displayName === "Font Family") {
+                            property.set(selectedElement, input.value);
+                        }
+                    }
+                };
+                input.onkeydown = function (e) {
+                    if (e.key === 'Enter' && hasUnsavedChanges) {
+                        // Record property change for undo/redo on Enter key
+                        const newState = {};
+                        const oldState = {};
+                        newState[property.displayName.toLowerCase().replace(' ', '_')] = input.value;
+                        oldState[property.displayName.toLowerCase().replace(' ', '_')] = initialValue;
+                        undoRedoManager.push({
+                            type: 'modify',
+                            elementId: selectedElement.dataset.id,
+                            previousState: oldState,
+                            newState: newState
+                        });
+                        initialValue = input.value;
+                        hasUnsavedChanges = false;
+                        // For font family, call the property setter after recording undo
+                        if (property.displayName === "Font Family") {
+                            property.set(selectedElement, input.value);
+                        }
+                    }
                 };
             }
         }

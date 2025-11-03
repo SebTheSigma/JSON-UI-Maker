@@ -24,8 +24,16 @@ import { loadTexturePresetsModal } from "./ui/modals/loadTexturePresets.js";
 import { helpModal } from "./ui/modals/helpMenu.js";
 import { chooseImageModal } from "./ui/modals/chooseImage.js";
 import "./ui/modals/settings.js";
+import { authModal } from "./ui/modals/authModal.js";
+import { uploadPresetModal } from "./ui/modals/uploadPresetModal.js";
+import { presetManagementModal } from "./ui/modals/presetManagementModal.js";
+import { authManager } from "./auth.js";
+import { presetManager } from "./presetManager.js";
+import { loadSqlJs } from "./database.js";
+import { dbManager } from "./database.js";
 import "./elements/groupedEventlisteners.js";
 import "./ui/scale.js";
+import { undoRedoManager } from "./keyboard/undoRedo.js";
 console.log("Script Loaded");
 initDefaultImages();
 console.log("Image-Files Loaded");
@@ -34,13 +42,113 @@ console.log("Bindings-Area Loaded");
 ScriptGenerator.init();
 console.log("Script Generator Loaded");
 document.addEventListener("DOMContentLoaded", async (e) => {
+    // Initialize database and auth
+    try {
+        await loadSqlJs();
+        await dbManager.init();
+        authManager.init();
+        // Make managers globally available
+        window.dbManager = dbManager;
+        window.authManager = authManager;
+        window.presetManager = presetManager;
+        console.log("Database and Auth initialized");
+    }
+    catch (error) {
+        console.error("Failed to initialize database:", error);
+    }
+    // Initialize modals
+    authModal.init();
+    uploadPresetModal.init();
+    presetManagementModal.init();
     const createFormOptions = await createFormModal();
     const title_flag = createFormOptions.title_flag;
     config.title_flag = title_flag;
     config.nameSpace = `${StringUtil.generateRandomString(6)}namespace`;
     const mainPanelInfo = constructMainPanel();
     config.rootElement = mainPanelInfo.mainPanel.getMainHTMLElement();
+    // Update auth UI after everything is loaded
+    setTimeout(() => {
+        Builder.updateAuthUI();
+    }, 100);
+    // Make images map globally available
+    window.images = images;
+    // Load any saved assets from localStorage
+    await loadSavedAssets();
 });
+/**
+ * Loads assets that were saved to localStorage (from preset uploads, etc.)
+ */
+async function loadSavedAssets() {
+    try {
+        console.log('Loading saved assets from localStorage...');
+        const assetKeys = Object.keys(localStorage).filter(key => key.startsWith('asset_') && (key.endsWith('_png') || key.endsWith('_json')));
+        const loadedAssets = {};
+        for (const key of assetKeys) {
+            const assetName = key.replace('asset_', '').replace(/_png|_json$/, '');
+            const isPng = key.endsWith('_png');
+            const isJson = key.endsWith('_json');
+            if (!loadedAssets[assetName]) {
+                loadedAssets[assetName] = {};
+            }
+            try {
+                const storedData = JSON.parse(localStorage.getItem(key) || '{}');
+                if (isPng && storedData.base64) {
+                    // Create ImageData from base64
+                    const imageData = await createImageDataFromBase64(storedData.base64);
+                    loadedAssets[assetName].png = imageData;
+                    console.log(`Loaded PNG asset: ${assetName}`);
+                }
+                else if (isJson && storedData.jsonContent) {
+                    loadedAssets[assetName].json = storedData.jsonContent;
+                    console.log(`Loaded JSON asset: ${assetName}`);
+                }
+            }
+            catch (error) {
+                console.error(`Error loading asset ${key}:`, error);
+            }
+        }
+        // Add all loaded assets to the images map
+        let loadedCount = 0;
+        for (const [assetName, data] of Object.entries(loadedAssets)) {
+            if (data.png || data.json) {
+                images.set(assetName, data);
+                loadedCount++;
+            }
+        }
+        console.log(`Successfully loaded ${loadedCount} saved assets`);
+        // Refresh the UI if needed
+        if (window.Builder) {
+            window.Builder.updateExplorer();
+        }
+    }
+    catch (error) {
+        console.error('Error loading saved assets:', error);
+    }
+}
+/**
+ * Helper function to create ImageData from base64
+ */
+async function createImageDataFromBase64(base64Data) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imageData = ctx.getImageData(0, 0, img.width, img.height);
+            resolve(imageData);
+        };
+        img.onerror = reject;
+        // Ensure the data has proper data URL format
+        let imageSrc = base64Data;
+        if (!base64Data.startsWith('data:image/')) {
+            imageSrc = `data:image/png;base64,${base64Data}`;
+        }
+        img.src = imageSrc;
+    });
+}
 /**
  * Constructs the main panel, which is a non-interactive draggable panel.
  * The panel is added to the global element map.
@@ -111,6 +219,7 @@ export class Builder {
             const text = event.target?.result;
             FormUploader.uploadForm(text);
             Builder.updateExplorer();
+            undoRedoManager.clear(); // Clear undo/redo when loading new form
             input.value = "";
         };
         reader.readAsText(file);
@@ -188,6 +297,20 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
         const label = new DraggableLabel(id, selectedElement ?? config.rootElement, { text: "Label", includeTextPrompt: true });
         GLOBAL_ELEMENT_MAP.set(id, label);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-label',
+                id: id,
+                text: "Label",
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 30
+            }
+        });
     }
     static addPanel() {
         if (selectedElement) {
@@ -199,6 +322,19 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
         const panel = new DraggablePanel(id, selectedElement ?? config.rootElement);
         GLOBAL_ELEMENT_MAP.set(id, panel);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-panel',
+                id: id,
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100
+            }
+        });
     }
     static addCollectionPanel() {
         if (selectedElement) {
@@ -210,6 +346,19 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
         const collectionPanel = new DraggableCollectionPanel(id, selectedElement ?? config.rootElement);
         GLOBAL_ELEMENT_MAP.set(id, collectionPanel);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-collection_panel',
+                id: id,
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100
+            }
+        });
     }
     static addCanvas(imageData, imagePath, nineSlice) {
         if (selectedElement) {
@@ -221,6 +370,20 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
         const canvas = new DraggableCanvas(id, selectedElement ?? config.rootElement, imageData, imagePath, nineSlice);
         GLOBAL_ELEMENT_MAP.set(id, canvas);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-canvas',
+                id: id,
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100,
+                imagePath: imagePath
+            }
+        });
     }
     static async addButton() {
         if (selectedElement) {
@@ -250,6 +413,23 @@ export class Builder {
             collectionIndex: formFields.collectionIndex,
         });
         GLOBAL_ELEMENT_MAP.set(id, button);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-button',
+                id: id,
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 30,
+                defaultTexture: formFields.defaultTexture,
+                hoverTexture: formFields.hoverTexture,
+                pressedTexture: formFields.pressedTexture,
+                collectionIndex: formFields.collectionIndex
+            }
+        });
     }
     static addScrollingPanel() {
         if (selectedElement) {
@@ -261,6 +441,19 @@ export class Builder {
         const id = StringUtil.generateRandomString(15);
         const panel = new DraggableScrollingPanel(id, selectedElement ?? config.rootElement);
         GLOBAL_ELEMENT_MAP.set(id, panel);
+        // Record add operation for undo/redo
+        undoRedoManager.push({
+            type: 'add',
+            elementId: id,
+            elementData: {
+                type: 'draggable-scrolling_panel',
+                id: id,
+                left: 0,
+                top: 0,
+                width: 100,
+                height: 100
+            }
+        });
     }
     static reset() {
         const elements = Array.from(GLOBAL_ELEMENT_MAP.values());
@@ -288,6 +481,8 @@ export class Builder {
         config.rootElement = mainPanelInfo.mainPanel.getMainHTMLElement();
         updatePropertiesArea();
         Builder.updateExplorer();
+        // Clear undo/redo history on reset
+        undoRedoManager.clear();
     }
     static deleteSelected() {
         if (!selectedElement)
@@ -298,6 +493,22 @@ export class Builder {
         const element = GeneralUtil.idToClassElement(id);
         if (!element || !element.deleteable)
             return;
+        // Record delete operation for undo/redo
+        const mainElement = element.getMainHTMLElement();
+        const elementData = {
+            type: mainElement.classList[0],
+            id: id,
+            left: StringUtil.cssDimToNumber(mainElement.style.left),
+            top: StringUtil.cssDimToNumber(mainElement.style.top),
+            width: StringUtil.cssDimToNumber(mainElement.style.width),
+            height: StringUtil.cssDimToNumber(mainElement.style.height),
+            // Add more properties based on element type as needed
+        };
+        undoRedoManager.push({
+            type: 'delete',
+            elementId: id,
+            elementData: elementData
+        });
         element.delete();
         GLOBAL_ELEMENT_MAP.delete(id);
         updatePropertiesArea();
@@ -315,11 +526,118 @@ export class Builder {
     static openHelpMenu() {
         helpModal();
     }
+    static openAuthModal(signup = false) {
+        authModal.show(signup);
+    }
+    static openUploadPresetModal() {
+        const user = authManager.getCurrentUser();
+        if (!user) {
+            new Notification("You must be signed in to upload presets", 3000, "warning");
+            authModal.show(false);
+            return;
+        }
+        uploadPresetModal.show();
+    }
+    static openPresetManagementModal() {
+        const user = authManager.getCurrentUser();
+        if (!user) {
+            new Notification("You must be signed in to manage presets", 3000, "warning");
+            authModal.show(false);
+            return;
+        }
+        presetManagementModal.show();
+    }
+    static updateAuthUI() {
+        // Update UI elements based on auth state
+        const user = authManager.getCurrentUser();
+        const authUserDisplay = document.getElementById('authUserDisplay');
+        const authSignInBtn = document.getElementById('authSignInBtn');
+        const authSignUpBtn = document.getElementById('authSignUpBtn');
+        const authLogoutBtn = document.getElementById('authLogoutBtn');
+        const presetUploadBtn = document.getElementById('presetUploadBtn');
+        const presetManagementBtn = document.getElementById('presetManagementBtn');
+        if (user) {
+            authUserDisplay.textContent = `Signed in as: ${user.username}`;
+            authSignInBtn.style.display = 'none';
+            authSignUpBtn.style.display = 'none';
+            authLogoutBtn.style.display = 'inline-block';
+            if (presetUploadBtn) {
+                presetUploadBtn.style.display = 'block';
+            }
+            if (presetManagementBtn) {
+                presetManagementBtn.style.display = 'block';
+            }
+        }
+        else {
+            authUserDisplay.textContent = 'Not signed in';
+            authSignInBtn.style.display = 'inline-block';
+            authSignUpBtn.style.display = 'inline-block';
+            authLogoutBtn.style.display = 'none';
+            if (presetUploadBtn) {
+                presetUploadBtn.style.display = 'none';
+            }
+            if (presetManagementBtn) {
+                presetManagementBtn.style.display = 'none';
+            }
+        }
+    }
+    static refreshPresetTextures() {
+        // Refresh the texture presets modal with user presets
+        const modal = document.getElementById('modalLoadTexturePresets');
+        if (modal && modal.style.display === 'block') {
+            // If the modal is open, close and reopen it to refresh the content
+            modal.style.display = 'none';
+            setTimeout(() => {
+                modal.style.display = 'block';
+            }, 100);
+        }
+        // Also refresh the preset management modal if it's open
+        if (window.presetManagementModal) {
+            window.presetManagementModal.refreshPresets();
+        }
+    }
+    static logout() {
+        authManager.logout();
+        this.updateAuthUI();
+        new Notification("Signed out successfully", 2000, "notif");
+    }
     static async openAddImageMenu() {
         const filePath = await chooseImageModal();
         console.warn(filePath, images);
         const imageInfo = images.get(filePath);
-        this.addCanvas(imageInfo.png, filePath, imageInfo.json);
+        if (imageInfo) {
+            // Handle both PNG and JSON only images
+            if (imageInfo.png) {
+                this.addCanvas(imageInfo.png, filePath, imageInfo.json);
+            }
+            else if (imageInfo.json) {
+                // JSON only - create a basic canvas with just the nineslice data
+                // For now, we'll create a small transparent canvas
+                const canvas = document.createElement('canvas');
+                canvas.width = 32;
+                canvas.height = 32;
+                const ctx = canvas.getContext('2d');
+                const imageData = ctx.createImageData(32, 32);
+                // Fill with transparent
+                for (let i = 0; i < imageData.data.length; i += 4) {
+                    imageData.data[i] = 0; // R
+                    imageData.data[i + 1] = 0; // G
+                    imageData.data[i + 2] = 0; // B
+                    imageData.data[i + 3] = 0; // A
+                }
+                this.addCanvas(imageData, filePath, imageInfo.json);
+            }
+        }
+        else {
+            console.log('Image not found in images map:', filePath);
+            console.log('Available images:', Array.from(images.keys()));
+        }
+    }
+    static undo() {
+        undoRedoManager.undo();
+    }
+    static redo() {
+        undoRedoManager.redo();
     }
 }
 export var images = new Map();

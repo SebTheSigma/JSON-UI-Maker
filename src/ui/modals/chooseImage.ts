@@ -127,7 +127,6 @@ export async function chooseImageModal(): Promise<string> {
         searchInput.type = "text";
         searchInput.placeholder = "Search images...";
         searchInput.classList.add("chooseImageSearchInput");
-        searchInput.spellcheck = false;
         searchWrapper.appendChild(searchInput);
 
         const dropdown = document.createElement("select");
@@ -139,8 +138,13 @@ export async function chooseImageModal(): Promise<string> {
         // Insert search UI before the tree container (form)
         form.parentElement?.insertBefore(searchWrapper, form);
 
+        // Prepare enhanced file system with user uploaded presets
+        const enhancedFileSystem = enhanceFileSystemWithUserPresets();
+        
         // Prepare list of all image paths (without extension) once
-        const allImagePaths = collectImagePaths(GLOBAL_FILE_SYSTEM);
+        const allImagePaths = collectImagePaths(enhancedFileSystem);
+
+        console.log('All available images:', allImagePaths);
 
         const updateDropdown = () => {
             const query = searchInput.value.toLowerCase();
@@ -176,8 +180,8 @@ export async function chooseImageModal(): Promise<string> {
 
         // -------------------- END Search UI --------------------
 
-        // Build tree view as before
-        ChooseImageFileTree.tree(GLOBAL_FILE_SYSTEM, form);
+        // Build tree view with enhanced file system
+        ChooseImageFileTree.tree(enhancedFileSystem, form);
 
         const handleClick = (event: MouseEvent) => {
             const element = event.composedPath()[0] as HTMLElement | undefined;
@@ -186,11 +190,18 @@ export async function chooseImageModal(): Promise<string> {
             const fileName = element.textContent?.trim();
             if (!fileName) return;
 
+            // Handle both file system paths and direct image names (from user presets)
             const validExtensions = ["png", "jpg", "jpeg", "webp"];
             const isImage = validExtensions.some((ext) => fileName.endsWith(`.${ext}`));
-            if (!isImage) return;
+            
+            // If it's a direct image name (user preset), return it directly
+            if (!isImage) {
+                cleanup();
+                resolve(fileName);
+                return;
+            }
 
-            // Build directory chain
+            // Build directory chain for file system images
             const parents: string[] = [];
             let current = element.parentElement;
 
@@ -239,4 +250,92 @@ export async function chooseImageModal(): Promise<string> {
 
         modal.style.display = "block";
     });
+}
+
+/**
+ * Enhances the file system by merging user uploaded presets into the main structure
+ */
+function enhanceFileSystemWithUserPresets(): any {
+    // Clone the original file system
+    const enhanced = JSON.parse(JSON.stringify(GLOBAL_FILE_SYSTEM));
+    
+    // Add user uploaded presets to the root level
+    const userImages = (window as any).images;
+    if (userImages && userImages.size > 0) {
+        console.log('Integrating user presets into main file system');
+        
+        for (const [key, value] of userImages) {
+            if (value && (value.png || value.json)) {
+                console.log('Adding user preset to file system:', key);
+                
+                // Add the image file
+                enhanced[`${key}.png`] = {};
+                
+                // Add nineslice indicator if JSON exists
+                if (value.json) {
+                    enhanced[`${key}.json`] = {};
+                }
+            }
+        }
+    }
+    
+    return enhanced;
+}
+
+/**
+ * Shows a preview of the selected image with NineSlice information if available
+ */
+function showImagePreview(imageName: string, imageData: any): void {
+    // Create a preview modal or notification
+    const preview = document.createElement("div");
+    preview.className = "image-preview";
+    preview.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0,0,0,0.9);
+        padding: 20px;
+        border-radius: 8px;
+        color: white;
+        z-index: 10000;
+        max-width: 400px;
+        text-align: center;
+    `;
+    
+    let previewContent = `<h3>Selected: ${imageName}</h3>`;
+    
+    if (imageData.png) {
+        previewContent += `<p>✅ PNG texture loaded</p>`;
+    }
+    
+    if (imageData.json) {
+        previewContent += `<p>✅ NineSlice configuration found</p>`;
+        if (imageData.json.nineslice_size) {
+            previewContent += `<p>Size: [${imageData.json.nineslice_size.join(', ')}]</p>`;
+        }
+        if (imageData.json.base_size) {
+            previewContent += `<p>Base Size: [${imageData.json.base_size.join(', ')}]</p>`;
+        }
+    }
+    
+    previewContent += `<button onclick="this.parentElement.remove()" style="
+        margin-top: 10px;
+        padding: 8px 16px;
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    ">Close Preview</button>`;
+    
+    preview.innerHTML = previewContent;
+    document.body.appendChild(preview);
+    
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        if (preview.parentNode) {
+            preview.remove();
+        }
+    }, 3000);
 }

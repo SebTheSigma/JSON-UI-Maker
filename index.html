@@ -10,35 +10,60 @@
 
 <body>
 
-    <div class="importers">
-        <label class="ui_textures_importer">
-            <input title="Import Textures" type="file" id="ui_textures_importer"
-                onchange="Builder.handleUiTexturesUpload()" webkitdirectory directory multiple />
-            Import Textures
-        </label>
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar">
+        <div class="navbar-left">
+            <div class="importers">
+                <label class="ui_textures_importer">
+                    <input title="Import Textures" type="file" id="ui_textures_importer"
+                        onchange="Builder.handleUiTexturesUpload()" webkitdirectory directory multiple />
+                    Import Textures
+                </label>
 
-        <label class="form_importer">
-            <input title="Upload Form" type="file" id="form_importer" onchange="Builder.uploadForm()" accept=".json" />
-            Upload Form
-        </label>
+                <label class="form_importer">
+                    <input title="Upload Form" type="file" id="form_importer" onchange="Builder.uploadForm()" accept=".json" />
+                    Upload Form
+                </label>
+            </div>
+        </div>
+
+        <div class="navbar-center">
+            <!-- Authentication UI -->
+            <div id="authStatus" class="auth-status-inline">
+                <span id="authUserDisplay">Not signed in</span>
+                <button id="authSignInBtn" onclick="Builder.openAuthModal(false)">Sign In</button>
+                <button id="authSignUpBtn" onclick="Builder.openAuthModal(true)">Sign Up</button>
+                <button id="authLogoutBtn" onclick="Builder.logout()" style="display: none;">Logout</button>
+            </div>
+
+            <!-- Preset buttons -->
+            <button id="presetUploadBtn" onclick="Builder.openUploadPresetModal()" style="display: none;" class="navbar-preset-btn primary">Upload Preset</button>
+            <button id="presetManagementBtn" onclick="Builder.openPresetManagementModal()" style="display: none;" class="navbar-preset-btn secondary">Manage Presets</button>
+            <button class="navbar-preset-btn tertiary" onclick="Builder.texturePresetsModal()">Preset Textures</button>
+
+            <div class="navbar-divider"></div>
+
+            <button class="modalSettingsBtn" id="modalSettingsBtn">
+                <span class="settings_label">Settings</span>
+                <img class="settings_img" src="icons/settings_cog.webp" alt="Settings">
+            </button>
+
+            <div class="scale-control">
+                <label for="ui_scale_slider" style="color: white; font-size: 12px; margin-right: 5px;">Scale:</label>
+                <input id="ui_scale_slider" type="range" min="10" max="100">
+            </div>
+
+            <button id="undo-btn" onclick="Builder.undo()" disabled title="Undo (Ctrl+Z)">↶ Undo</button>
+            <button id="redo-btn" onclick="Builder.redo()" disabled title="Redo (Ctrl+Y)">↷ Redo</button>
+        </div>
+
+        <div class="navbar-right">
+            <img src="icons/help.webp" class="help_button" onclick="Builder.openHelpMenu()" alt="Help">
+            <a href="https://discord.gg/zqfNbYCcA9" class="discord_link" target="_blank">
+                <img src="icons/discord.webp" class="discord_icon" alt="Discord">
+            </a>
+        </div>
     </div>
-
-    <img src="icons/help.webp" class="help_button" onclick="Builder.openHelpMenu()"></img>
-
-    <a href="https://discord.gg/zqfNbYCcA9" class="discord_link"><img src="icons/discord.webp" class="discord_icon"></a>
-
-    <div class="presetTextures" onclick="Builder.texturePresetsModal()">Preset Textures</div>
-
-
-    <button class="modalSettingsBtn" id="modalSettingsBtn">
-        <label class="settings_label">
-            Settings
-        </label>
-
-        <img class="settings_img" src="icons/settings_cog.webp"></img>
-    </button>
-
-    <input style="margin-left: 20px;" id="ui_scale_slider" type="range" min="10" max="100">
 
     <!-- The Settings Modal -->
     <div id="modalSettings" class="modal">
@@ -126,7 +151,7 @@
         <div class="modal-content">
             <span id="modalChooseImageClose" class="modalClose">&times;</span>
             <h2 class="modalHeader">Choose Image</h2>
-            <img src="icons/nineslice.webp" style="width: 20px; position: relative; top: 5px; left: 5px;">
+            <img src="icons/nineslice.webp" style="width: 20px; position: relative; top: 5px; left: 5px;" alt="Nineslice">
             <label style="font-weight: 500; color: rgb(255, 255, 255);">: Nineslice Image</label>
             <div class="modalChooseImageForm">
 
@@ -140,7 +165,6 @@
             <div class="addElements">
                 Elements:
                 <button type="button" onclick="Builder.addPanel()">Add panel</button>
-
                 <button type="button" onclick="Builder.openAddImageMenu()">Add image</button>
                 <button type="button" onclick="Builder.addButton()">Add button</button>
                 <button type="button" onclick="Builder.addCollectionPanel()">Add Collection Panel</button>
@@ -153,31 +177,31 @@
             <div class="utilElements">
                 <button class="utilElement" type="button" onclick="Builder.reset()">Reset <img
                         style="width: 17px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/reset.webp"> </button>
+                        src="icons/reset.webp" alt="Reset"> </button>
                 <button class="utilElement" type="button" onclick="Builder.deleteSelected()">Delete Selected <img
                         style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/bin.webp"> </button>
+                        src="icons/bin.webp" alt="Delete"> </button>
 
                 <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                     <div class="utilElement" style="width: 100%;">Form</div>
 
                     <img class="utilElement" title="Copy" onclick="Builder.generateAndCopyJsonUI('copy')"
-                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/clipboard.webp">
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000); cursor: pointer;"
+                        src="icons/clipboard.webp" alt="Copy">
                     <img class="utilElement" title="Download" onclick="Builder.generateAndCopyJsonUI('download')"
-                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        tooltip="Download" src="icons/download.webp">
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000); cursor: pointer;"
+                        src="icons/download.webp" alt="Download">
                 </div>
 
                 <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                     <div class="utilElement" style="width: 100%;">Server-Form</div>
 
                     <img class="utilElement" title="Copy" onclick="Builder.downloadServerForm('copy')"
-                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/clipboard.webp">
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000); cursor: pointer;"
+                        src="icons/clipboard.webp" alt="Copy">
                     <img class="utilElement" title="Download" onclick="Builder.downloadServerForm('download')"
-                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        tooltip="Download" src="icons/download.webp">
+                        style="width: 20px; position: relative; filter: drop-shadow(0px 0px 5px #000000); cursor: pointer;"
+                        src="icons/download.webp" alt="Download">
                 </div>
 
             </div>
@@ -190,9 +214,7 @@
 
         <div class="main_window_outline">
             <div class="main_window" id="main_window">
-                <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image">
-
-                </img>
+                <img title="Background" src="background.png" width="100%" height="100%" class="bg_image" id="bg_image" alt="Background">
             </div>
         </div>
 
@@ -203,10 +225,10 @@
             <div class="scripter_buttons">
                 <button class="generate_js_scripter" id="generate_js_scripter">Copy <img
                         style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/js.webp"> To Clipboard</button>
+                        src="icons/js.webp" alt="JavaScript"> To Clipboard</button>
                 <button class="generate_ts_scripter" id="generate_ts_scripter">Copy <img
                         style="width: 18px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/ts.webp"> To Clipboard</button>
+                        src="icons/ts.webp" alt="TypeScript"> To Clipboard</button>
             </div>
 
             <br><br><br>
@@ -219,16 +241,13 @@
 
             <div style="display:flex; flex-direction: row; justify-content: center; align-items: center">
                 <div style="font-size: 20px; color: rgb(39, 165, 255);">TAB</div>&nbsp To indent
-                <div onclick="Builder.formatBindingsArea()" style="position: relative; margin-left: 15px;"
+                <div onclick="Builder.formatBindingsArea()" style="position: relative; margin-left: 15px; cursor: pointer;"
                     class="utilElement">Format <img
                         style="width: 20px; top: 3px; position: relative; filter: drop-shadow(0px 0px 5px #000000);"
-                        src="icons/curly_brackets.webp"></div>
+                        src="icons/curly_brackets.webp" alt="Format"></div>
             </div>
         </div>
     </div>
-
-
-
 
     <div id="properties" class="properties"></div>
 
@@ -237,6 +256,248 @@
     <div id="mainWarningMessage"></div>
 
     <script src="./dist/index.js" type="module"></script>
+
+    <style>
+        /* Top Navigation Bar */
+        .top-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            min-height: 60px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.95));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            z-index: 999;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .navbar-left,
+        .navbar-center,
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .navbar-center {
+            flex: 1;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .navbar-divider {
+            width: 1px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 5px;
+        }
+
+        .navbar-right {
+            gap: 15px;
+        }
+
+        .scale-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .importers {
+            display: flex;
+            gap: 10px;
+        }
+
+        #undo-btn,
+        #redo-btn {
+            font-size: 13px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, #444, #333);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #undo-btn:hover:not(:disabled),
+        #redo-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #555, #444);
+            transform: translateY(-1px);
+        }
+
+        #undo-btn:disabled,
+        #redo-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .help_button,
+        .discord_icon {
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            transition: transform 0.3s ease, filter 0.3s ease;
+            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
+        }
+
+        .help_button:hover,
+        .discord_icon:hover {
+            transform: scale(1.1);
+            filter: drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.3));
+        }
+
+        .discord_link {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Authentication Status - Inline in navbar */
+        .auth-status-inline {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(20, 20, 20, 0.6));
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .auth-status-inline span {
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .auth-status-inline button {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        #authSignInBtn,
+        #authSignUpBtn {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        #authSignInBtn:hover,
+        #authSignUpBtn:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+        }
+
+        #authLogoutBtn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        #authLogoutBtn:hover {
+            background: linear-gradient(135deg, #c82333, #bd2130);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Preset buttons in navbar */
+        .navbar-preset-btn {
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .navbar-preset-btn.primary {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+        }
+
+        .navbar-preset-btn.primary:hover {
+            background: linear-gradient(135deg, #218838, #1e7e34);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .navbar-preset-btn.secondary {
+            background: linear-gradient(135deg, #17a2b8, #138496);
+            color: white;
+        }
+
+        .navbar-preset-btn.secondary:hover {
+            background: linear-gradient(135deg, #138496, #117a8b);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
+        }
+
+        .navbar-preset-btn.tertiary {
+            background: linear-gradient(135deg, #6f42c1, #5a32a3);
+            color: white;
+        }
+
+        .navbar-preset-btn.tertiary:hover {
+            background: linear-gradient(135deg, #5a32a3, #4c2a8a);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+        }
+
+        /* Adjust main content to account for navbar */
+        .main {
+            margin-top: 70px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 1600px) {
+            .navbar-center {
+                max-width: none;
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .auth-status-inline span {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .top-navbar {
+                flex-direction: column;
+                padding: 10px;
+            }
+
+            .navbar-left,
+            .navbar-center,
+            .navbar-right {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .navbar-divider {
+                display: none;
+            }
+
+            .main {
+                margin-top: 160px;
+            }
+        }
+    </style>
 </body>
 
 </html>

@@ -3,6 +3,7 @@ import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { undoRedoManager } from "../keyboard/undoRedo.js";
 import { DraggableButton } from "./button.js";
 import { DraggableCanvas } from "./canvas.js";
 import { DraggableCollectionPanel } from "./collectionPanel.js";
@@ -53,6 +54,8 @@ export class ElementSharedFuncs {
         if (preventDefault)
             e.preventDefault();
         setResizedElement(classElement);
+        // Record resize start for undo/redo
+        undoRedoManager.recordResizeStart(panel.dataset.id);
     }
     /**
      * Handles the resize event for the given element. The element is resized according to the user's mouse movement. The element's size is updated in real time.
@@ -124,6 +127,8 @@ export class ElementSharedFuncs {
         if (isInMainWindow)
             updatePropertiesArea();
         setResizedElement(undefined);
+        // Record resize end for undo/redo
+        undoRedoManager.recordResizeEnd();
     }
     /**
      * Handles the selection of an element. If the element is already selected, it is deselected.
@@ -195,6 +200,8 @@ export class ElementSharedFuncs {
         classElement.offsetY = e.clientY - panelRect.top;
         mainElement.style.cursor = "grabbing";
         setDraggedElement(classElement);
+        // Record drag start for undo/redo
+        undoRedoManager.recordDragStart(mainElement.dataset.id);
     }
     /**
      * Handles the dragging of an element. The element is moved to the desired
@@ -303,6 +310,8 @@ export class ElementSharedFuncs {
         if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id)
             parentClassElement.grid(false);
         setDraggedElement(undefined);
+        // Record drag end for undo/redo
+        undoRedoManager.recordDragEnd();
     }
     /**
      * Generates a new grid element. A grid element is a special element which

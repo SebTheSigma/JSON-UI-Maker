@@ -162,10 +162,61 @@ const configMagicNumbers = {
                     return [offsetX, offsetY];
                 },
             ],
+            [
+                "MinecraftBold",
+                (element) => {
+                    const fontSize = parseFloat(element.style.fontSize ?? "1");
+                    let offsetX = fontSize * 1.5;
+                    let offsetY = offsetX;
+                    if (element.style.textAlign == "center") {
+                        offsetX -= 5;
+                    }
+                    else if (element.style.textAlign == "right") {
+                        offsetX -= 10;
+                    }
+                    return [offsetX, offsetY];
+                },
+            ],
+            [
+                "MinecraftBoldItalic",
+                (element) => {
+                    const fontSize = parseFloat(element.style.fontSize ?? "1");
+                    let offsetX = fontSize * 1.5;
+                    let offsetY = offsetX;
+                    if (element.style.textAlign == "center") {
+                        offsetX -= 5;
+                    }
+                    else if (element.style.textAlign == "right") {
+                        offsetX -= 10;
+                    }
+                    return [offsetX, offsetY];
+                },
+            ],
+            [
+                "MinecraftItalic",
+                (element) => {
+                    const fontSize = parseFloat(element.style.fontSize ?? "1");
+                    let offsetX = fontSize * 1.5;
+                    let offsetY = offsetX;
+                    if (element.style.textAlign == "center") {
+                        offsetX -= 5;
+                    }
+                    else if (element.style.textAlign == "right") {
+                        offsetX -= 10;
+                    }
+                    return [offsetX, offsetY];
+                },
+            ],
         ]);
-        const func = fontToScalingFuncMap.get(label.style.fontFamily ?? "MinecraftRegular");
-        if (!func)
-            throw new Error(`Font fontSizeToOffset function not found for ${label.style.fontFamily ?? "MinecraftRegular"}`);
+        const fontFamily = label.style.fontFamily ?? "MinecraftRegular";
+        // Only use the font family if it's a complete, valid Minecraft font name
+        const validMinecraftFonts = ["MinecraftRegular", "MinecraftTen", "MinecraftBold", "MinecraftBoldItalic", "MinecraftItalic"];
+        const normalizedFontFamily = validMinecraftFonts.includes(fontFamily) ? fontFamily : 'MinecraftRegular';
+        const func = fontToScalingFuncMap.get(normalizedFontFamily);
+        if (!func) {
+            // This should not happen since we validate against the list, but fallback just in case
+            return [6, 6];
+        }
         const offset = func(label);
         return offset;
     },

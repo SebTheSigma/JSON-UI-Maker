@@ -7,6 +7,7 @@ import { collectSourcePropertyNames } from "../scripter/bindings/source_property
 import { GeneralUtil } from "../util/generalUtil.js";
 import { ElementSharedFuncs } from "./sharedElement.js";
 import { ExplorerController } from "../ui/explorer/explorerController.js";
+import { undoRedoManager } from "../keyboard/undoRedo.js";
 export class DraggableLabel {
     // Core elements
     container;
@@ -132,7 +133,11 @@ export class DraggableLabel {
         const mirrorRect = this.mirror.getBoundingClientRect();
         this.label.style.width = `${mirrorRect.width}px`;
         this.label.style.height = `${mirrorRect.height}px`;
-        const offset = config.magicNumbers.labelToOffset(this.label);
+        // Only calculate offset if font family is valid to avoid interrupting typing
+        const validMinecraftFonts = ["MinecraftRegular", "MinecraftTen", "MinecraftBold", "MinecraftBoldItalic", "MinecraftItalic"];
+        const fontFamily = this.label.style.fontFamily;
+        const offset = validMinecraftFonts.includes(fontFamily) ?
+            config.magicNumbers.labelToOffset(this.label) : [6, 6];
         const labelRect = this.label.getBoundingClientRect();
         this.shadowLabel.style.width = `${labelRect.width}px`;
         this.shadowLabel.style.height = `${labelRect.height}px`;
@@ -146,8 +151,52 @@ export class DraggableLabel {
         this.label.addEventListener("dblclick", (e) => this.select(e));
         // Initial size
         this.updateSize();
-        // Auto-resize on input
-        this.label.addEventListener("input", () => this.updateSize());
+        // Auto-resize on input - but don't call updateSize immediately to avoid font validation issues
+        let resizeTimeout = null;
+        this.label.addEventListener("input", () => {
+            this.handleTextChange();
+            // Delay the updateSize call to avoid interrupting typing
+            if (resizeTimeout)
+                clearTimeout(resizeTimeout);
+            resizeTimeout = window.setTimeout(() => {
+                this.updateSize();
+            }, 200); // Longer delay for text input
+        });
+        // Track text changes for undo/redo
+        let lastTextValue = this.label.value;
+        let hasUnsavedTextChanges = false;
+        this.label.addEventListener("focus", () => {
+            lastTextValue = this.label.value;
+            hasUnsavedTextChanges = false;
+        });
+        this.label.addEventListener("input", () => {
+            hasUnsavedTextChanges = true;
+        });
+        this.label.addEventListener("blur", () => {
+            if (hasUnsavedTextChanges && lastTextValue !== this.label.value) {
+                // Record text change only when focus leaves and text actually changed
+                undoRedoManager.push({
+                    type: 'modify',
+                    elementId: this.label.dataset.id,
+                    previousState: { text: lastTextValue },
+                    newState: { text: this.label.value }
+                });
+                hasUnsavedTextChanges = false;
+            }
+        });
+        // Handle Enter key for labels (treat as "commit" action)
+        this.label.addEventListener("keydown", (e) => {
+            if (e.key === 'Enter' && hasUnsavedTextChanges) {
+                undoRedoManager.push({
+                    type: 'modify',
+                    elementId: this.label.dataset.id,
+                    previousState: { text: lastTextValue },
+                    newState: { text: this.label.value }
+                });
+                lastTextValue = this.label.value;
+                hasUnsavedTextChanges = false;
+            }
+        });
         if (this.bindingsTextPrompt) {
             this.label.addEventListener("focus", () => {
                 this.focussed = true;
@@ -162,6 +211,9 @@ export class DraggableLabel {
                     this.handleKeyboardInput(e);
             });
         }
+    }
+    handleTextChange() {
+        // This method can be used for additional text change handling if needed
     }
     handleKeyboardInput(e) {
         const tp = this.bindingsTextPrompt;

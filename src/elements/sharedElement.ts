@@ -3,6 +3,7 @@ import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
 import { StringUtil } from "../util/stringUtil.js";
+import { undoRedoManager } from "../keyboard/undoRedo.js";
 import { DraggableButton } from "./button.js";
 import { DraggableCanvas } from "./canvas.js";
 import { DraggableCollectionPanel } from "./collectionPanel.js";
@@ -64,6 +65,9 @@ export class ElementSharedFuncs {
 
         if (preventDefault) e.preventDefault();
         setResizedElement(classElement);
+
+        // Record resize start for undo/redo
+        undoRedoManager.recordResizeStart(panel.dataset.id!);
     }
 
     /**
@@ -141,6 +145,9 @@ export class ElementSharedFuncs {
         classElement.isResizing = false;
         if (isInMainWindow) updatePropertiesArea();
         setResizedElement(undefined);
+
+        // Record resize end for undo/redo
+        undoRedoManager.recordResizeEnd();
     }
 
     /**
@@ -227,6 +234,9 @@ export class ElementSharedFuncs {
 
         mainElement.style.cursor = "grabbing";
         setDraggedElement(classElement);
+
+        // Record drag start for undo/redo
+        undoRedoManager.recordDragStart(mainElement.dataset.id!);
     }
 
     /**
@@ -351,6 +361,9 @@ export class ElementSharedFuncs {
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement)!;
         if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) parentClassElement.grid(false);
         setDraggedElement(undefined);
+
+        // Record drag end for undo/redo
+        undoRedoManager.recordDragEnd();
     }
 
     /**

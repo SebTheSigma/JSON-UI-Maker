@@ -30,6 +30,7 @@ export declare class DraggableLabel {
     constructor(ID: string, container: HTMLElement, labelOptions?: LabelOptions);
     updateSize(updateProperties?: boolean): void;
     initEvents(): void;
+    handleTextChange(): void;
     handleKeyboardInput(e: KeyboardEvent): void;
     filterSourcePropertyNames(): void;
     /**

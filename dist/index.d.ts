@@ -46,7 +46,15 @@ export declare class Builder {
     static updateExplorer(): void;
     static texturePresetsModal(): void;
     static openHelpMenu(): void;
+    static openAuthModal(signup?: boolean): void;
+    static openUploadPresetModal(): void;
+    static openPresetManagementModal(): void;
+    static updateAuthUI(): void;
+    static refreshPresetTextures(): void;
+    static logout(): void;
     static openAddImageMenu(): Promise<void>;
+    static undo(): void;
+    static redo(): void;
 }
 export interface ImageDataState {
     png?: ImageData;
