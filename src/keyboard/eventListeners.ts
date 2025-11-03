@@ -3,6 +3,7 @@ import { Paster } from "../copy_paste/paste.js";
 import { Builder, isInMainWindow, selectedElement } from "../index.js";
 import { BindingsArea } from "../scripter/bindings/bindingsArea.js";
 import { triggerArrowMovement } from "./arrowKeyElementMovement.js";
+import { undoRedoManager } from "./undoRedo.js";
 
 let inTextArea = false;
 document.addEventListener("focusin", (e) => {
@@ -38,6 +39,14 @@ window.addEventListener("keydown", (e) => {
         if (e?.ctrlKey && e?.key === "x" && selectedElement) {
             Copier.copyElement(selectedElement.dataset.id!);
             Builder.deleteSelected();
+        }
+        if (e?.ctrlKey && e?.key === "z") {
+            e.preventDefault();
+            undoRedoManager.undo();
+        }
+        if (e?.ctrlKey && e?.key === "y") {
+            e.preventDefault();
+            undoRedoManager.redo();
         }
     }
 });
