@@ -697,14 +697,14 @@ export function updatePropertiesArea(): void {
                     // Record property change for undo/redo
                     const newState: any = {};
                     const oldState: any = {};
-                    newState[property.displayName.toLowerCase().replace(' ', '_')] = filePath;
-                    oldState[property.displayName.toLowerCase().replace(' ', '_')] = oldValue;
+                    newState[property.displayName.toLowerCase().replace(" ", "_")] = filePath;
+                    oldState[property.displayName.toLowerCase().replace(" ", "_")] = oldValue;
 
                     undoRedoManager.push({
-                        type: 'modify',
+                        type: "modify",
                         elementId: selectedElement!.dataset.id,
                         previousState: oldState,
-                        newState: newState
+                        newState: newState,
                     });
 
                     property.set(selectedElement!, filePath);
@@ -733,7 +733,23 @@ export function updatePropertiesArea(): void {
                     // Delay the property.set call to avoid interrupting typing
                     let timeoutId: number | null = null;
                     input.oninput = function () {
-                        hasUnsavedChanges = true;
+                        if (property.type === "checkbox") {
+                            console.log("HELLO");
+                            const newState: any = {};
+                            const oldState: any = {};
+                            newState[property.displayName.toLowerCase().replace(" ", "_")] = input.value;
+                            oldState[property.displayName.toLowerCase().replace(" ", "_")] = initialValue;
+
+                            undoRedoManager.push({
+                                type: "modify",
+                                elementId: selectedElement!.dataset.id,
+                                previousState: oldState,
+                                newState: newState,
+                            });
+
+                            hasUnsavedChanges = false;
+                        } else hasUnsavedChanges = true;
+
                         if (timeoutId) clearTimeout(timeoutId);
                         timeoutId = window.setTimeout(() => {
                             property.set(selectedElement!, input.value);
@@ -741,24 +757,25 @@ export function updatePropertiesArea(): void {
                     };
                 }
 
-                input.onfocus = function() {
+                input.onfocus = function () {
                     initialValue = input.value;
                     hasUnsavedChanges = false;
                 };
 
-                input.onblur = function() {
+                input.onblur = function () {
                     if (hasUnsavedChanges && initialValue !== input.value) {
+                        console.warn("HELLO");
                         // Record property change for undo/redo only when focus leaves and value changed
                         const newState: any = {};
                         const oldState: any = {};
-                        newState[property.displayName.toLowerCase().replace(' ', '_')] = input.value;
-                        oldState[property.displayName.toLowerCase().replace(' ', '_')] = initialValue;
+                        newState[property.displayName.toLowerCase().replace(" ", "_")] = input.value;
+                        oldState[property.displayName.toLowerCase().replace(" ", "_")] = initialValue;
 
                         undoRedoManager.push({
-                            type: 'modify',
+                            type: "modify",
                             elementId: selectedElement!.dataset.id,
                             previousState: oldState,
-                            newState: newState
+                            newState: newState,
                         });
 
                         hasUnsavedChanges = false;
@@ -769,19 +786,19 @@ export function updatePropertiesArea(): void {
                     }
                 };
 
-                input.onkeydown = function(e) {
-                    if (e.key === 'Enter' && hasUnsavedChanges) {
+                input.onkeydown = function (e) {
+                    if (e.key === "Enter" && hasUnsavedChanges) {
                         // Record property change for undo/redo on Enter key
                         const newState: any = {};
                         const oldState: any = {};
-                        newState[property.displayName.toLowerCase().replace(' ', '_')] = input.value;
-                        oldState[property.displayName.toLowerCase().replace(' ', '_')] = initialValue;
+                        newState[property.displayName.toLowerCase().replace(" ", "_")] = input.value;
+                        oldState[property.displayName.toLowerCase().replace(" ", "_")] = initialValue;
 
                         undoRedoManager.push({
-                            type: 'modify',
+                            type: "modify",
                             elementId: selectedElement!.dataset.id,
                             previousState: oldState,
-                            newState: newState
+                            newState: newState,
                         });
 
                         initialValue = input.value;

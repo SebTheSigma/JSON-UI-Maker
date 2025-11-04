@@ -1,3 +1,4 @@
+import { DraggableLabel } from "../elements/label.js";
 import { GLOBAL_ELEMENT_MAP, Builder } from "../index.js";
 import { Notification } from "../ui/notifs/noficationMaker.js";
 import { StringUtil } from "../util/stringUtil.js";
@@ -36,6 +37,7 @@ export class UndoRedoManager {
     }
 
     public undo(): void {
+        console.log(this.undoStack, this.redoStack);
         const operation = this.undoStack.pop();
         if (!operation) {
             new Notification("No operations to undo", 2000, "warning");
@@ -50,6 +52,7 @@ export class UndoRedoManager {
     }
 
     public redo(): void {
+        console.log(this.undoStack, this.redoStack);
         const operation = this.redoStack.shift(); // Take from beginning of redo stack
         if (!operation) {
             new Notification("No operations to redo", 2000, "warning");
@@ -161,6 +164,7 @@ export class UndoRedoManager {
 
         // Handle other property types - these are stored as snake_case keys
         for (const key in state) {
+            console.warn(key);
             if (key === 'left' || key === 'top' || key === 'width' || key === 'height') continue;
 
             const value = state[key];
@@ -182,38 +186,45 @@ export class UndoRedoManager {
     }
 
     private applyLabelProperty(labelElement: HTMLElement, propertyKey: string, value: any): void {
-        const labelClass = GLOBAL_ELEMENT_MAP.get(labelElement.dataset.id!);
-        if (!labelClass || !(labelClass as any).label) return;
+        const labelClass = GLOBAL_ELEMENT_MAP.get(labelElement.dataset.id!) as DraggableLabel;
+        if (!labelClass || !labelClass.label) return;
 
-        const label = (labelClass as any).label;
-        const mirror = (labelClass as any).mirror;
-        const shadowLabel = (labelClass as any).shadowLabel;
+        const label = labelClass.label;
+        const mirror = labelClass.mirror;
+        const shadowLabel = labelClass.shadowLabel;
+
+        console.log(propertyKey, value);
 
         switch (propertyKey) {
             case 'text':
                 label.value = value;
                 mirror.textContent = value;
                 shadowLabel.textContent = value;
-                (labelClass as any).updateSize(false);
+                labelClass.updateSize(false);
                 break;
             case 'font_scale':
                 label.style.fontSize = `${value}em`;
                 mirror.style.fontSize = `${value}em`;
                 shadowLabel.style.fontSize = `${value}em`;
-                (labelClass as any).lastAttemptedScaleFactor = value;
-                (labelClass as any).updateSize(false);
+                labelClass.lastAttemptedScaleFactor = value;
+                labelClass.updateSize(false);
                 break;
             case 'text_align':
                 label.style.textAlign = value;
                 mirror.style.textAlign = value;
                 shadowLabel.style.textAlign = value;
-                (labelClass as any).updateSize(false);
+                labelClass.updateSize(false);
                 break;
             case 'font_family':
                 label.style.fontFamily = value;
                 mirror.style.fontFamily = value;
                 shadowLabel.style.fontFamily = value;
-                (labelClass as any).updateSize(false);
+                labelClass.updateSize(false);
+                break;
+            case 'shadow':
+                labelClass.shadow(!labelClass.hasShadow);
+                labelClass.updateSize(false);
+
                 break;
         }
     }
