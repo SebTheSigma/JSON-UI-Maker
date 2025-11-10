@@ -1,4 +1,4 @@
-import { isInMainWindow, selectedElement, setDraggedElement, setResizedElement, setSelectedElement } from "../index.js";
+import { isInMainWindow, selectedElement, setDraggedElement, setResizedElement, setSelectedElement, } from "../index.js";
 import { config } from "../CONFIG.js";
 import { keyboardEvent } from "../keyboard/eventListeners.js";
 import { updatePropertiesArea } from "../ui/propertiesArea.js";
@@ -13,6 +13,7 @@ import { DraggableLabel } from "./label.js";
 import { AllJsonUIElements } from "./elements.js";
 import { GeneralUtil } from "../util/generalUtil.js";
 import { MathUtil } from "../util/mathUtil.js";
+import { SmartAligner } from "../util/smartAlign.js";
 export function isSelectableElement(el) {
     return (el instanceof DraggableButton ||
         el instanceof DraggablePanel ||
@@ -29,7 +30,10 @@ export function isResizeableElement(el) {
         el instanceof DraggableScrollingPanel);
 }
 export function isGridableElement(el) {
-    return el instanceof DraggableButton || el instanceof DraggablePanel || el instanceof DraggableCanvas || el instanceof DraggableCollectionPanel;
+    return (el instanceof DraggableButton ||
+        el instanceof DraggablePanel ||
+        el instanceof DraggableCanvas ||
+        el instanceof DraggableCollectionPanel);
 }
 export class ElementSharedFuncs {
     /**
@@ -38,12 +42,12 @@ export class ElementSharedFuncs {
      * @param e The mouse event that triggered the resize process.
      * @param classElement The element to start resizing.
      * @param stopPropagation Whether to stop the event from bubbling to the parent element.
-     * @param preventDefault Whether to prevent the default action of the event. This is useful if you want to prevent the browser from selecting the element when the user clicks on it.
+     * @param preventDefault Whether to prevent the default action of the event.
      */
     static startResize(e, classElement, stopPropagation = true, preventDefault = true) {
         const panel = classElement.getMainHTMLElement();
         if (stopPropagation)
-            e.stopPropagation(); // Prevent event from bubbling to parent
+            e.stopPropagation(); // Prevent parent handlers
         classElement.isResizing = true;
         classElement.resizeStartWidth = parseFloat(panel.style.width);
         classElement.resizeStartHeight = parseFloat(panel.style.height);
@@ -79,12 +83,10 @@ export class ElementSharedFuncs {
             newLeft = classElement.resizeStartLeft - widthChange;
             newTop = classElement.resizeStartTop - heightChange;
             newWidth += widthChange;
-            console.log(newWidth);
             if (newWidth < 0) {
                 newWidth = 0;
                 updateLeft = false;
             }
-            console.log(newHeight);
             newHeight += heightChange;
             if (newHeight < 0) {
                 newHeight = 0;
@@ -138,10 +140,9 @@ export class ElementSharedFuncs {
      * @param classElement The element to select.
      */
     static select(e, classElement) {
-        e.stopPropagation(); // Prevent the event from bubbling up to the parent
+        e.stopPropagation(); // Prevent bubbling
         const element = classElement.getMainHTMLElement();
         if (classElement.selected) {
-            console.log("Deselecting", classElement.getMainHTMLElement().dataset.id);
             classElement.unSelect(e);
             return;
         }
@@ -173,10 +174,7 @@ export class ElementSharedFuncs {
         updatePropertiesArea();
     }
     /**
-     * Starts the drag process for the given element. Prevents the event from bubbling
-     * up to the parent and sets the element's isDragging property to true. Calculates
-     * the offset of the mouse from the top-left corner of the element and sets the
-     * element's cursor to "grabbing".
+     * Starts the drag process for the given element.
      * @param e The mouse event that triggered the drag.
      * @param classElement The element to drag.
      */
@@ -190,7 +188,8 @@ export class ElementSharedFuncs {
         classElement.isDragging = true;
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement);
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id) {
+        if (isGridableElement(parentClassElement) &&
+            parentElement.dataset.id !== config.rootElement?.dataset.id) {
             parentClassElement.grid(config.settings.show_grid.value);
         }
         const mainElement = classElement.getMainHTMLElement();
@@ -205,16 +204,13 @@ export class ElementSharedFuncs {
     }
     /**
      * Handles the dragging of an element. The element is moved to the desired
-     * position based on the given mouse event. If the element is resizeable, it
-     * is not moved. The element is also constrained to the bounds of its
-     * container if the boundary_constraints setting is enabled.
+     * position based on the given mouse event.
      * @param e The mouse event that triggered the drag.
      * @param classElement The element to drag.
      * @param mainElement The main HTMLElement of the element to drag. If not
      * provided, the main HTMLElement of classElement is used.
      */
     static drag(e, classElement, mainElement) {
-        console.warn("drag");
         e.stopPropagation();
         if (!classElement.isDragging)
             return;
@@ -235,7 +231,10 @@ export class ElementSharedFuncs {
         if (config.settings.grid_lock.value) {
             const gridCellWidth = containerRect.width / gridWidth;
             const gridCellHeight = containerRect.height / gridHeight;
-            const centerPoint = [newLeft + rect.width / 2, newTop + rect.height / 2];
+            const centerPoint = [
+                newLeft + rect.width / 2,
+                newTop + rect.height / 2,
+            ];
             // ---- Closest point snapping ----
             const nearestGridX = Math.round(centerPoint[0] / gridCellWidth) * gridCellWidth;
             const nearestGridY = Math.round(centerPoint[1] / gridCellHeight) * gridCellHeight;
@@ -260,6 +259,18 @@ export class ElementSharedFuncs {
                 }
             }
         }
+        // Smart alignment snap to siblings and parent guides
+        const snap = SmartAligner.computeSnap({
+            container: classElement.container,
+            movingEl: mainElement,
+            proposedLeft: newLeft,
+            proposedTop: newTop,
+        });
+        if (snap.snappedX || snap.snappedY) {
+            newLeft = snap.left;
+            newTop = snap.top;
+        }
+        SmartAligner.showGuides(classElement.container, snap.guides);
         if (config.settings.boundary_constraints.value) {
             // Constrain to container bounds
             newLeft = Math.max(0, Math.min(newLeft, containerRect.width - mainElement.offsetWidth));
@@ -280,24 +291,22 @@ export class ElementSharedFuncs {
         return circle;
     }
     /**
-     * Updates the position of the center point circle of the given element. The circle is
-     * positioned in the center of the element's panel.
+     * Updates the position of the center point circle of the given element.
      * @param classElement The element for which to update the center point circle.
      */
     static updateCenterCirclePosition(classElement) {
-        const rect = classElement.getMainHTMLElement().getBoundingClientRect();
+        const rect = classElement
+            .getMainHTMLElement()
+            .getBoundingClientRect();
         const centerRect = [
             StringUtil.cssDimToNumber(classElement.centerCircle.style.width),
             StringUtil.cssDimToNumber(classElement.centerCircle.style.height),
         ];
-        console.log("centerRect", centerRect, rect);
         classElement.centerCircle.style.left = `${(rect.width - centerRect[0]) / 2 - 1}px`;
         classElement.centerCircle.style.top = `${(rect.height - centerRect[1]) / 2 - 1}px`;
     }
     /**
-     * Stops the drag process for the given element. The element's isDragging
-     * property is set to false and its cursor is reset to "grab". If the element
-     * is in the main window, the properties area is updated.
+     * Stops the drag process for the given element.
      * @param classElement The element to stop dragging.
      */
     static stopDrag(classElement) {
@@ -307,19 +316,17 @@ export class ElementSharedFuncs {
             updatePropertiesArea();
         const parentElement = classElement.container;
         const parentClassElement = GeneralUtil.elementToClassElement(parentElement);
-        if (isGridableElement(parentClassElement) && parentElement.dataset.id !== config.rootElement?.dataset.id)
+        if (isGridableElement(parentClassElement) &&
+            parentElement.dataset.id !== config.rootElement?.dataset.id)
             parentClassElement.grid(false);
+        // Clear alignment guides on drag end
+        SmartAligner.clearGuides(parentElement);
         setDraggedElement(undefined);
         // Record drag end for undo/redo
         undoRedoManager.recordDragEnd();
     }
     /**
-     * Generates a new grid element. A grid element is a special element which
-     * is used to create the grid in the main window. It is marked with the
-     * class "gridable" and has a property "skip" that is set to "true". This
-     * method is used by classes that implement the GridableElements interface
-     * to create the grid element which is used to position the element.
-     * @returns The newly created grid element.
+     * Generates a new grid element for overlay rendering.
      */
     static generateGridElement() {
         const gridElement = document.createElement("div");
@@ -338,11 +345,9 @@ export class ElementSharedFuncs {
         }
     }
     static hide(classElement) {
-        console.log("hide");
         classElement.getMainHTMLElement().style.visibility = "hidden";
     }
     static show(classElement) {
-        console.log("show");
         classElement.getMainHTMLElement().style.visibility = "visible";
     }
 }
