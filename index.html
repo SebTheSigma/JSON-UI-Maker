@@ -278,8 +278,7 @@
             left: 0;
             right: 0;
             min-height: 60px;
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.95));
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: linear-gradient(135deg, rgb(58, 58, 58, 0.95), rgb(0, 0, 0, 0.95));
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
             z-index: 999;
@@ -322,11 +321,6 @@
             align-items: center;
         }
 
-        .importers {
-            display: flex;
-            gap: 10px;
-        }
-
         #undo-btn,
         #redo-btn {
             font-size: 13px;
@@ -350,26 +344,6 @@
         #redo-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        .help_button,
-        .discord_icon {
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            transition: transform 0.3s ease, filter 0.3s ease;
-            filter: drop-shadow(0px 0px 5px rgba(0, 0, 0, 0.5));
-        }
-
-        .help_button:hover,
-        .discord_icon:hover {
-            transform: scale(1.1);
-            filter: drop-shadow(0px 0px 8px rgba(255, 255, 255, 0.3));
-        }
-
-        .discord_link {
-            display: flex;
-            align-items: center;
         }
 
         /* Authentication Status - Inline in navbar */

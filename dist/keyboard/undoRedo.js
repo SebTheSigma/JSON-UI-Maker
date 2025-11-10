@@ -15,6 +15,7 @@ export class UndoRedoManager {
         this.updateUI();
     }
     undo() {
+        console.log(this.undoStack, this.redoStack);
         const operation = this.undoStack.pop();
         if (!operation) {
             new Notification("No operations to undo", 2000, "warning");
@@ -26,6 +27,7 @@ export class UndoRedoManager {
         new Notification("Undid last change", 2000, "notif");
     }
     redo() {
+        console.log(this.undoStack, this.redoStack);
         const operation = this.redoStack.shift(); // Take from beginning of redo stack
         if (!operation) {
             new Notification("No operations to redo", 2000, "warning");
@@ -132,6 +134,7 @@ export class UndoRedoManager {
             mainElement.style.height = `${state.height}px`;
         // Handle other property types - these are stored as snake_case keys
         for (const key in state) {
+            console.warn(key);
             if (key === 'left' || key === 'top' || key === 'width' || key === 'height')
                 continue;
             const value = state[key];
@@ -156,6 +159,7 @@ export class UndoRedoManager {
         const label = labelClass.label;
         const mirror = labelClass.mirror;
         const shadowLabel = labelClass.shadowLabel;
+        console.log(propertyKey, value);
         switch (propertyKey) {
             case 'text':
                 label.value = value;
@@ -180,6 +184,10 @@ export class UndoRedoManager {
                 label.style.fontFamily = value;
                 mirror.style.fontFamily = value;
                 shadowLabel.style.fontFamily = value;
+                labelClass.updateSize(false);
+                break;
+            case 'shadow':
+                labelClass.shadow(!labelClass.hasShadow);
                 labelClass.updateSize(false);
                 break;
         }

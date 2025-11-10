@@ -45,43 +45,20 @@ input[type="file"] {
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.presetTextures {
-    position: absolute;
-    display: inline-block;
-    cursor: pointer;
-    padding: 10px;
-    margin-right: 12px; /* 👈 add spacing between buttons */
-    background: linear-gradient(45deg, rgb(227, 0, 114), rgb(115, 0, 255));
-    color: white;
-    border-radius: 4px;
-    font-family: sans-serif;
-    font-size: 20px;
-    text-align: center;
-    transition: background-color 0.3s ease, transform 0.3s ease;
-    left: calc(100% - 175px);
-    width: 140px;
-}
-
-.presetTextures:hover {
-    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
-    transform: scale(1.05); /* 120% */
-}
-
 .discord_link {
     position: absolute; /* or fixed, or relative depending on context */
-    left: calc(100% - 225px);
+    left: calc(100% - 70px);
     top: 10px;
     transition: all 0.3s ease;
 }
 
 .discord_link:hover {
     box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
-    transform: scale(1.1) rotate(5deg);
+    transform: scale(1.1) rotate(3deg);
 }
 
 .discord_icon {
-    width: 40px;
-    height: 40px;
+    width: 60px;
 }
 
 .settings_img {
@@ -709,16 +686,15 @@ input[type="file"] {
 
 .help_button {
     position: absolute;
-    top: 10px;
-    left: calc(100% - 270px);
-    width: 40px;
-    height: 40px;
+    top: 15px;
+    left: calc(100% - 130px);
+    width: 50px;
+    height: 50px;
     transition: all 0.3s ease;
 }
 
 .help_button:hover {
-    transform: scale(1.1) rotate(5deg);
-    box-shadow: 6px 5px 31px -7px rgba(0, 0, 0, 0.75);
+    transform: scale(1.1);
 }
 
 .modalChooseImageForm {

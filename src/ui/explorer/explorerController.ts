@@ -35,13 +35,11 @@ export class ExplorerController {
 
     static updateExplorer() {
         if (!config.rootElement) return;
-        console.log("updateExplorer");
 
         ExplorerController.reset();
         textElementIdMap.clear();
 
         const rootClassElement = GeneralUtil.elementToClassElement(config.rootElement!)!;
-        console.log(rootClassElement);
         ExplorerController.tree(rootClassElement, explorerBaseElement as HTMLDivElement);
 
         ExplorerController.selectedElementUpdate();
@@ -54,8 +52,6 @@ export class ExplorerController {
     }
 
     static tree(classElement: GlobalElementMapValue, lastTextElement: HTMLDivElement, depth: number = 0): void {
-        console.log("Explorer Tree", depth, typeof classElement);
-
         const mainElement = classElement.getMainHTMLElement();
 
         const isRootClassElement = mainElement.dataset.id == config.rootElement?.dataset.id;
@@ -71,8 +67,6 @@ export class ExplorerController {
             // Adds the element to the filteredChildrenHTML
             if (target && target.dataset.id) filteredChildrenHTML.push(target);
         }
-
-        console.log(filteredChildrenHTML);
 
         const type: string = classToTagName.get(mainElement.classList[0]!)!;
 
@@ -180,7 +174,6 @@ export class ExplorerController {
                 const siblings = Array.from(parentElement.parentElement!.children) as HTMLElement[];
 
                 for (const child of siblings) {
-                    console.log(child, 50);
                     if (child.classList.contains("explorerDiv")) {
                         child.style.display = "block";
 

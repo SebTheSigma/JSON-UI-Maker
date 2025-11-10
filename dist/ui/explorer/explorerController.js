@@ -29,11 +29,9 @@ export class ExplorerController {
     static updateExplorer() {
         if (!config.rootElement)
             return;
-        console.log("updateExplorer");
         ExplorerController.reset();
         textElementIdMap.clear();
         const rootClassElement = GeneralUtil.elementToClassElement(config.rootElement);
-        console.log(rootClassElement);
         ExplorerController.tree(rootClassElement, explorerBaseElement);
         ExplorerController.selectedElementUpdate();
     }
@@ -42,7 +40,6 @@ export class ExplorerController {
         explorer.innerHTML = "";
     }
     static tree(classElement, lastTextElement, depth = 0) {
-        console.log("Explorer Tree", depth, typeof classElement);
         const mainElement = classElement.getMainHTMLElement();
         const isRootClassElement = mainElement.dataset.id == config.rootElement?.dataset.id;
         const childrenHTML = Array.from(mainElement.children);
@@ -54,7 +51,6 @@ export class ExplorerController {
             if (target && target.dataset.id)
                 filteredChildrenHTML.push(target);
         }
-        console.log(filteredChildrenHTML);
         const type = classToTagName.get(mainElement.classList[0]);
         // example: hello_person to Hello Person
         const formattedType = type.replace(/^([a-z])/, (_, c) => c.toUpperCase()).replace(/_([a-z])/g, (_, c) => " " + c.toUpperCase());
@@ -139,7 +135,6 @@ export class ExplorerController {
             while (parentElement?.className !== "explorer") {
                 const siblings = Array.from(parentElement.parentElement.children);
                 for (const child of siblings) {
-                    console.log(child, 50);
                     if (child.classList.contains("explorerDiv")) {
                         child.style.display = "block";
                         const childTextArrowElement = Array.from(parentElement.children).filter((child) => child.classList.contains("explorerArrow"))[0];
