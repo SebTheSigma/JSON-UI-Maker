@@ -18,7 +18,7 @@ export declare class ElementSharedFuncs {
      * @param e The mouse event that triggered the resize process.
      * @param classElement The element to start resizing.
      * @param stopPropagation Whether to stop the event from bubbling to the parent element.
-     * @param preventDefault Whether to prevent the default action of the event. This is useful if you want to prevent the browser from selecting the element when the user clicks on it.
+     * @param preventDefault Whether to prevent the default action of the event.
      */
     static startResize(e: MouseEvent, classElement: ResizeableElements, stopPropagation?: boolean, preventDefault?: boolean): void;
     /**
@@ -46,19 +46,14 @@ export declare class ElementSharedFuncs {
      */
     static unSelect(classElement: SelectableElements): void;
     /**
-     * Starts the drag process for the given element. Prevents the event from bubbling
-     * up to the parent and sets the element's isDragging property to true. Calculates
-     * the offset of the mouse from the top-left corner of the element and sets the
-     * element's cursor to "grabbing".
+     * Starts the drag process for the given element.
      * @param e The mouse event that triggered the drag.
      * @param classElement The element to drag.
      */
     static startDrag(e: MouseEvent, classElement: GlobalElementMapValue): void;
     /**
      * Handles the dragging of an element. The element is moved to the desired
-     * position based on the given mouse event. If the element is resizeable, it
-     * is not moved. The element is also constrained to the bounds of its
-     * container if the boundary_constraints setting is enabled.
+     * position based on the given mouse event.
      * @param e The mouse event that triggered the drag.
      * @param classElement The element to drag.
      * @param mainElement The main HTMLElement of the element to drag. If not
@@ -67,25 +62,17 @@ export declare class ElementSharedFuncs {
     static drag(e: MouseEvent, classElement: GlobalElementMapValue, mainElement?: HTMLElement): void;
     static generateCenterPoint(): HTMLElement;
     /**
-     * Updates the position of the center point circle of the given element. The circle is
-     * positioned in the center of the element's panel.
+     * Updates the position of the center point circle of the given element.
      * @param classElement The element for which to update the center point circle.
      */
     static updateCenterCirclePosition(classElement: GridableElements): void;
     /**
-     * Stops the drag process for the given element. The element's isDragging
-     * property is set to false and its cursor is reset to "grab". If the element
-     * is in the main window, the properties area is updated.
+     * Stops the drag process for the given element.
      * @param classElement The element to stop dragging.
      */
     static stopDrag(classElement: GlobalElementMapValue): void;
     /**
-     * Generates a new grid element. A grid element is a special element which
-     * is used to create the grid in the main window. It is marked with the
-     * class "gridable" and has a property "skip" that is set to "true". This
-     * method is used by classes that implement the GridableElements interface
-     * to create the grid element which is used to position the element.
-     * @returns The newly created grid element.
+     * Generates a new grid element for overlay rendering.
      */
     static generateGridElement(): HTMLElement;
     static grid(showGrid: boolean, classElement: GridableElements): void;
